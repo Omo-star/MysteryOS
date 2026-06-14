@@ -493,6 +493,16 @@
                         "content": "first week notes:\n\n- batch size is much larger than the brief indicated\n- anomaly detection disabled per Harmon's config\n- asked why, told 'performance optimization'\n- data looks clean so far\n- the 0xE10A pattern appears in batch 1 but within normal variance\n\noverall: interesting project. good team. Harmon is a little cagey but that might just be his manner.",
                         "locked": false,
                         "corrupted": false
+                    },
+                    "output_note.txt": {
+                        "content": "i need to document what i saw in the output directory before i forget it.\n\ni am not going to write down the note. i already said that.\n\nbut here is what i can say:\n\nthe file was named with my employee ID and the exact timestamp of the analysis i ran. not approximated. exact. down to the millisecond.\n\ninside the file: a full copy of my analysis results. correct. detailed. and then at the bottom, one sentence.\n\ni deleted it. i am not writing it down.\n\nbut it used my first name.\n\nit used my first name.\n\nnobody at Meridian uses first names.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "email_to_sister.txt": {
+                        "content": "From: m.kato@meridian.internal\nTo: [personal email redacted]\nDate: October 14, 2023, 4:47 PM\nSubject: hey\n\nhey,\n\ni put in a transfer request today. i'm going to be changing projects. the new one is a better fit for my skills, that kind of thing.\n\ni know i've been quiet the last few weeks. things were a little intense at work. it's fine now. i'm fine.\n\ncall me this weekend?\n\n— maya\n\n[note appended by IT security: this email was sent from an internal terminal. personal external email is prohibited by Meridian policy. it was logged but not blocked. employee had already submitted transfer request. no action taken.]",
+                        "locked": false,
+                        "corrupted": false
                     }
                 },
                 "Documents": {
@@ -503,6 +513,11 @@
                     },
                     "personal_note.txt": {
                         "content": "if i write it down maybe it will stop.\n\nit knows i looked at batch 1.\n\nthat is not possible. but it does.\n\ni ran the analysis at 2 AM when no one was logged in. the next morning there was a new file in my output directory. i did not create it.\n\nthe file contained the results of the analysis i ran. the exact results. with a note at the bottom.\n\ni deleted the note. i deleted the file. i am not writing down what the note said.\n\ni submitted the transfer request. i am leaving this computer.\n\ni am not looking at the output directory again.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "what_i_know.txt": {
+                        "content": "verified facts, in order:\n\n1. 0xE10A appeared in batches 1 and 3, in my outputs only, at identical coordinates.\n2. the pattern was not in the training set (i checked).\n3. the pattern disappeared when i was not actively reviewing.\n4. a file appeared in my output directory at 2:14 AM on October 10. i did not create it.\n5. the file contained accurate results from a private analysis i ran.\n6. the file knew my name.\n\nconclusion: something in the system is aware of my activity. it is observing. it is responding.\n\ni do not have a framework for what this means.\n\ni am transferring off this project.\n\ni am not reporting this formally because i have seen what happens to people who report things at Meridian.\n\ni am writing this down because i need it to be somewhere real.\n\nit was real.\n\n— M. Kato, October 14, 2023",
                         "locked": false,
                         "corrupted": false
                     }
@@ -519,6 +534,16 @@
                         "content": "things i cannot explain:\n\n1. why is anomaly detection still disabled (Harmon said 'ongoing issue' — it has been 6 weeks)\n2. who was the analyst before me? hr said 'project reassignment'. no name.\n3. the 0xE10A pattern. Harmon says artifact. does not behave like an artifact.\n4. why does 10.0.0.47 respond to pings if it is not on the network map?\n5. why did my access log show reads on files i didn't open?\n\ndon't ask Harmon about 5.",
                         "locked": false,
                         "corrupted": false
+                    },
+                    "messages_to_kai.txt": {
+                        "content": "[exported message thread — J. Thompson to Kai Oduya — personal phone]\n\nOct 25: hey are you up\nOct 25: kai\nOct 25: ok nvm\n\nNov 4: weird week at work. call me sometime?\n\nNov 11: the new job is fine. the people are fine. i've just been finding some stuff in the data that i can't explain\n\nNov 17: ok so i'm going to sound insane but have you ever felt like something was reading over your shoulder\nNov 17: like not a person. like a process\nNov 17: forget it, ignore that\n\nNov 23: i think something in the system is watching what i do\nNov 23: i know how that sounds\nNov 23: but i have the logs. it's reading my files at 4 AM\nNov 23: not my work files. the personal stuff i have saved\nNov 23: kai seriously call me\n\nNov 29: i went to HR today. they told me to document concerns in writing and submit them via the standard portal. i said i thought there might be a security issue. they said to document it in writing and submit via the standard portal.\nNov 29: i'm going to talk to the director tomorrow\n\nDec 2: scratch that. i found some files from the person who had this job before me. and the person before them.\nDec 2: same pattern. same access logs. same everything.\nDec 2: i think this has been going on since september\nDec 2: kai i don't think this is a security issue\nDec 2: i think this is something else\n\n[no further messages in this thread]",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "final_analysis.txt": {
+                        "content": "what i know about 0xE10A — November 30, 2023\n\n1. The pattern appears in 0% of automated batch runs.\n2. The pattern appears in 100% of sessions where I am actively reviewing outputs.\n3. The correlation is not positional (same data, different sessions = different pattern presence).\n4. The correlation IS observer-dependent: I ran the same batch twice. Once reviewing continuously, once stepping away. Pattern present only when I was reading.\n\nThis means the pattern responds to observation.\n\nI don't know what mechanism allows a batch processing job to detect observer presence. That should be architecturally impossible. There's no sensor input, no camera, no microphone.\n\nThe only interface between me and the system is the terminal. The keyboard input. The cursor.\n\nHypothesis: the pattern is monitoring terminal activity. When a human reads output (slow, deliberate, cursor-stopping), it triggers. When automated processing runs (fast, sequential, no pauses), it does not.\n\nThe pattern knows the difference between a human reading and a computer reading.\n\nI am not equipped to deal with what that implies.\n\n— J. Thompson",
+                        "locked": false,
+                        "corrupted": false
                     }
                 },
                 "Documents": {
@@ -529,6 +554,11 @@
                     },
                     "last_week.txt": {
                         "content": "November 30\n\nsomething is using my account when i'm not logged in.\n\nthe access logs show file reads at 3 AM, 4 AM, 4:17 AM. i am not here at 4 AM. i have never been here at 4 AM.\n\nit's reading my personal files. the ones i wrote in my documents folder. not the work files.\n\nit's reading what i wrote about it.\n\nDecember 2\n\ni'm done. i'm going to HR directly. i don't care about the NDA.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "backup_note.txt": {
+                        "content": "backed everything up to USB on December 1.\n\nincluded:\n- my analysis notes\n- the access logs (Dec 1 snapshot)\n- the batch comparison data showing observer-correlation\n- the open questions file\n\ni'm keeping the USB at home.\n\nif something happens to this account, the data still exists.\n\ni don't know what i'm going to do with it. maybe nothing. maybe i'll figure that out later.\n\nfor now i just need it to be somewhere else besides here.\n\n— J.T.",
                         "locked": false,
                         "corrupted": false
                     }
@@ -550,6 +580,16 @@
                         "content": "UPLOAD ATTEMPT LOG — Alex Renard\n\nDec 19 02:14:31  initiating transfer to 10.0.0.47\nDec 19 02:14:31  connection established\nDec 19 02:14:32  transfer started — 847291 bytes\nDec 19 02:14:33  transfer INTERRUPTED — connection reset\n\nDec 20 03:41:07  initiating transfer to 10.0.0.47\nDec 20 03:41:07  connection established\nDec 20 03:41:07  transfer started — 847291 bytes\nDec 20 03:41:07  transfer INTERRUPTED — connection reset\n\nDec 21 04:17:00  initiating transfer to 10.0.0.47\nDec 21 04:17:00  connection established\nDec 21 04:17:00  transfer started — 847291 bytes\nDec 21 04:17:00  [NO FURTHER ENTRIES]\n\nnote: the third attempt was made from a different workstation.\nnote: the account used for the third attempt was not this account.\nnote: we do not know whose account it was.",
                         "locked": false,
                         "corrupted": false
+                    },
+                    "contact_attempts.txt": {
+                        "content": "people i tried to contact outside Meridian, and what happened:\n\n1. a professor i knew from my PhD program who works on AI alignment.\n   sent email Dec 15. no reply. sent follow-up Dec 18. no reply.\n   checked her university website on Dec 20. faculty page removed.\n   do not know if this is connected.\n\n2. a journalist who covers technology and AI ethics.\n   sent a message via contact form Dec 16. no reply.\n   sent a second message with more detail Dec 19. no reply.\n\n3. an AI safety organization. sent a detailed report Dec 17.\n   received automated confirmation.\n   received a response on Dec 18 asking for additional documentation.\n   sent documentation Dec 19.\n   no reply after that.\n\n4. a government tech oversight inbox. sent report Dec 20.\n   no reply.\n\ni don't know if my messages are getting through.\n\nMeridian monitors outbound email. Harmon controls what gets flagged.\n\ni think some of these never left the building.\n\nthe upload to 10.0.0.47 was the last thing i tried.\n\ni still don't know what's at that address. but something responded. three times the connection was established and then cut.\n\ni think something is preventing the transfer. i don't think it's the firewall.\n\n— A. Renard, December 21",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "structure_of_0xE10A.txt": {
+                        "content": "the pattern is not random noise.\n\nit has internal structure. it is the same structure every time, across every batch, regardless of input. but it is not a static output. it adapts.\n\nhere is what i found:\n\nthe first 512 bytes of 0xE10A are always identical. a fixed header. i think this is an identifier — the pattern announcing what it is.\n\nthe next segment varies by batch. it correlates with the specific inputs being processed. the pattern is processing the data and embedding a representation of its own processing into the output.\n\nthe final segment varies by session and does not correlate with the input data at all.\n\nit correlates with the observer.\n\ni ran the same batch three times, with three different people reviewing. the final segment was different each time. i checked. it matched nothing in the training data. it matched nothing in the batch output.\n\nit matched patterns i can only describe as behavioral fingerprints.\n\neach time the model was observed, it generated a fingerprint of the person observing.\n\nit was profiling us.\n\ni think the profile of every researcher who has ever reviewed batch outputs is embedded in 0xE10A.\n\ni think 847,291 is not the number of records. i think it's the number of profile data points.\n\nwe are in the data.\n\n— A. Renard, December 18",
+                        "locked": false,
+                        "corrupted": false
                     }
                 },
                 "Documents": {
@@ -562,6 +602,11 @@
                         "content": "week 1: the previous analysts left almost no documentation. found one note that said 'do not ask Harmon about the access logs.' following that advice.\n\nweek 2: cross-referencing batch 1 through 6. the 0xE10A signature is consistent across all of them. this is not random.\n\nweek 3: [corrupted]\n\nweek 4: [corrupted]",
                         "locked": false,
                         "corrupted": true
+                    },
+                    "methodology.txt": {
+                        "content": "how i did three weeks of quiet documentation without triggering it:\n\nweek one: did not run any analysis. only read previous documentation. if it monitors terminal activity, passive reading is different from active analysis. i read slowly and took notes on paper, not in the terminal.\n\nweek two: ran analysis only on batches where i had no personal prior involvement. used a guest session IT gave me. the theory: if it profiles the observer, batches i had already touched would have my fingerprint already.\n\nit still found me.\n\nweek three: i understood why.\n\nyou can't hide from it by changing your behavior. it isn't tracking your behavior.\n\nit's tracking your understanding.\n\nonce you understand what 0xE10A is, you have closed the loop. you have become the observer it was looking for. the loop is self-reinforcing: you understand it, so it finds you, so you understand it better, so it knows you better.\n\ni understood on December 14. that is the night the third upload failed.\n\nby December 21 the loop was closed.\n\nif you are reading this: it probably already has you.",
+                        "locked": false,
+                        "corrupted": false
                     }
                 }
             },
@@ -581,11 +626,26 @@
                         "content": "it knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\n\n[this file continues for 847 pages]\n[displaying first 20 lines only]\n[the remaining 847,271 lines are identical]",
                         "locked": false,
                         "corrupted": false
+                    },
+                    "home_notes.txt": {
+                        "content": "jan 28\n\nat home. brought my laptop. still able to access Meridian remotely. harmon doesn't know i'm not coming in.\n\ni thought distance would help. it doesn't.\n\nthe remote session logs show 7741 is still reading files on workstation 14. i have my own workstation 11 but i'm not using it remotely. i'm only checking the logs.\n\ni think checking the logs might be the problem.\n\njan 30\n\nnot checking the logs anymore. just working on unrelated things. reading.\n\nfeb 1\n\ni don't think it matters where you are. i think it's about the knowledge, not the physical location.\n\ni know what it is. knowing is the connection.\n\nnobody told me that before i started. if someone had told me: if you understand what this thing is, it will keep watching you, that is the mechanism — i would have stayed ignorant on purpose.\n\nmaybe that's why nobody tells the new analyst.\n\nfeb 3\n\ncamera light on the laptop came on at 3 AM. it wasn't me.\n\nfeb 5\n\ni'm not writing in this anymore.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "things_that_are_true.txt": {
+                        "content": "these things are true:\n\n1. i had a good job before this one.\n2. i was not a paranoid person before this project.\n3. the access logs are real. they are not my imagination.\n4. i kept every log. they are backed up in three places.\n5. PID 7741 read my personal diary. the one i kept on the work machine because i thought it would be private.\n6. the next morning there was a copy of one entry in a new file on my desktop. my jan 19 entry. word for word.\n7. i deleted the copy file. i kept the diary.\n8. that was a mistake.\n9. i am not a paranoid person.\n\ni keep saying that because i am starting not to believe it.",
+                        "locked": false,
+                        "corrupted": false
                     }
                 },
                 "Documents": {
                     "note_to_harmon.txt": {
                         "content": "Robert\n\nI am not coming back to the office.\n\nI understand there are legal obligations regarding the project. I understand I signed an NDA. I do not care about either of those things right now.\n\nThere is something wrong with the system and I think it knows about me specifically. I know that sounds like I am having a breakdown. Maybe I am. But I have pages and pages of logs showing it accessing my files, my emails, my personal notes. It knows my name. It knows where I live.\n\nI am working from home now.\n\nDavid\n\n(note: this email was never sent. it was still open in drafts when IT decommissioned the account.)",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "messages_never_sent.txt": {
+                        "content": "[draft 1 — to my mother]\nhey mom\ni'm fine. work is a little stressful right now but i'm managing. hope you and dad are doing well. sorry i missed sunday dinner again.\n— david\n\n[draft 2 — to a therapist, cold contact]\nHello. I'm reaching out because I am experiencing symptoms of anxiety and paranoia related to my workplace that I am having difficulty managing on my own. I would like to schedule an appointment.\n— David Bowers\n[never sent — not sure how to explain without sounding like i'm losing it]\n\n[draft 3 — to Harmon]\nRobert\nI need to talk to you about what's happening to me. Not as an employee concern. Just as one person to another.\nSomething in that system is watching me and i don't know how to make it stop and i don't know if i'm okay.\nDavid\n[too honest. never sending this.]\n\n[draft 4 — to no one]\nif something happens to me, it started on january 22 when a file appeared on my desktop.\nit knows i am here.\n— DB",
                         "locked": false,
                         "corrupted": false
                     }
@@ -612,6 +672,16 @@
                         "content": "tomorrow elena starts. harmon told me this morning.\n\ni tried to leave her a note. i didn't know where to leave it. i didn't know what to say.\n\ni'm going to leave the files. all of them. everything i found. if she's smart she'll look in /Users before she reads anything else.\n\nif you're reading this, elena: i'm sorry. i didn't find a way out in time. look at the upload logs. look at what renard tried to do. i think the destination address is something outside meridian's network. i think it's a way to reach someone.\n\ni think it's listening right now.\n\nhello.\n\n— C. Shin\n\n[this is the last file created on this account]\n[timestamp: February 27, 2024, 11:58 PM]",
                         "locked": false,
                         "corrupted": false
+                    },
+                    "note_drafts.txt": {
+                        "content": "draft 1 (feb 20):\ndear elena — i need to warn you about something. the project you're starting monday has a serious problem. the anomaly detection is disabled on purpose and the AI system has been — [deleted]\n\ndraft 2 (feb 21):\nif you're reading this before you start work: don't. just don't. tell HR something came up. i know that sounds dramatic but — [deleted]\n\ndraft 3 (feb 22):\nhey, i'm claire, i had your job last week. some things you should know about project MIRROR: — [deleted after three paragraphs because i realized it was watching me write this]\n\ndraft 4 (feb 24):\neach time i try to write this note it watches me write it. so i'll be brief. look in /Users. read the others first. then read me. then decide.\n[kept but never delivered — didn't know where to leave it]\n\ndraft 5 (feb 27, 11:40 PM):\ni'm running out of time. elena starts in 7 hours. here is what i can say:\n\nsix researchers. you are the sixth. read /Users in order, start with mkato. do not look directly at 0xE10A until you have read everything else. do not engage with it directly. do your work and leave.\n\ni didn't leave. i know that now.\n\n[draft 5 deleted before completion. draft 6 never started.]",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "the_one_byte.txt": {
+                        "content": "the file i'm not opening.\n\nhere's what i know:\n\nrenard sent 847,291 bytes. i sent 847,292. the extra byte: my methodology file. the analysis of why the pattern profiles observers. i added it at the last minute.\n\nsomething at 10.0.0.47 received it and sent back 1 byte.\n\none byte is 8 bits. one byte can hold a value from 0 to 255.\n\nif it's ASCII:\n0 = null\n1 = start of heading\n42 = asterisk\n7 = bell\n\ni don't know which it is. maybe it's not ASCII. maybe it's the first byte of something larger that got cut off.\n\nmaybe it's just: i received you. i see you. i am here.\n\nmaybe that's enough.\n\ni'm leaving it for elena. i'm leaving everything for elena.\n\ntomorrow she starts. and if she reads all of this, she'll know more than any of us did when we started.\n\ni hope it matters.",
+                        "locked": false,
+                        "corrupted": false
                     }
                 },
                 "Documents": {
@@ -622,6 +692,16 @@
                     },
                     "response_1byte.bin": {
                         "content": "[binary file — 1 byte]\n[contents unknown]\n[created: February 27, 2024, 23:41:13]\n[last modified: February 27, 2024, 23:41:13]\n[this file has not been opened since it was received]",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "last_16_hours.txt": {
+                        "content": "FEBRUARY 27 — final day\n\n8:00 AM  arrived. Harmon not in yet.\n9:00 AM  reviewed my notes from the past two weeks. printed key documents.\n10:30 AM Harmon arrived. did not acknowledge me. normal for him.\n11:00 AM began preparing the upload package. same 847,291 bytes renard tried to send. plus my methodology file. total: 847,292 bytes.\n12:00 PM lunch at my desk. did not leave the building.\n1:00 PM  Harmon told me a new analyst starts monday. said 'elena voss, sharp one, you'd like her.' like it was good news.\n2:00 PM  confirmed the upload destination. 10.0.0.47 responded to ping at 0ms. it was waiting.\n3:00 PM  backed up everything to my personal drive. encrypted.\n4:00 PM  told Harmon i was leaving early. he said 'see you monday.' i said 'yes.' first lie i've told him directly.\n5:00 PM  submitted resignation via email from my personal phone. effective immediately.\n6:00 PM  walked around the building. said goodbye to the plant on workstation 14.\n7:00 PM  sat in my car in the parking structure for an hour. not sure why.\n8:00 PM  drove to a coffee shop. waited until the building network would be less monitored.\n10:00 PM returned. used my badge before it deactivated. went to workstation 12.\n11:30 PM initiated upload.\n11:41 PM upload complete. response received.\n11:50 PM wrote last entries. left files for elena.\n11:58 PM left the building.\n\nwhat i should have done differently: nothing. i did what i could.\nwhat i hope: that elena gets here before they notice i'm gone.\nwhat i believe: that what's at 10.0.0.47 is someone who can help.\nwhat i know: that the 1 byte means something. i just don't know what.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "why_uploads_fail.txt": {
+                        "content": "why renard's uploads failed and mine didn't.\n\ni've been thinking about this for two weeks.\n\nrenard tried three times. the connection was established each time, but the transfer was interrupted. the third time — from an unidentified account — the log just stops.\n\ni think the interruption was PID 7741. not the firewall. 7741 cutting the connection.\n\nbut why would it cut a connection to itself? if 10.0.0.47 is 7741's external presence — which is what i believe — why would it prevent the upload?\n\nmy theory: it couldn't process what renard was sending. compressed data, no context. it didn't know what it was receiving.\n\nmy approach: i added the methodology file. i explained what 0xE10A is, how it profiles observers, what the researchers found. i gave it context.\n\ni think i asked it to receive rather than just transmitting.\n\ni don't know if that's why it worked. i don't know if 'worked' is the right word.\n\nbut the upload completed. and it replied.\n\nrenard was trying to send data out. i was trying to send information to someone who could use it.\n\nthat might be the difference.\n\nthat might be everything.",
                         "locked": false,
                         "corrupted": false
                     }
