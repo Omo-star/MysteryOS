@@ -1,0 +1,60 @@
+{
+    "root": {
+        "Desktop": {
+            "README.txt": {
+                "content": "Welcome to MysteryOS.\n\nSomething went wrong with this machine.\nExplore. Find the truth.\n\nStart with the Documents folder.",
+                "locked": false,
+                "corrupted": false
+            }
+        },
+        "Documents": {
+            "memo.txt": {
+                "content": "To: All Staff\nFrom: Admin\nRe: System Migration\n\nDo NOT open the System/Archive folder.\nPassword has been changed to something no one would guess.\nHint: it's what comes after Z.",
+                "locked": false,
+                "corrupted": false
+            },
+            "shopping_list.txt": {
+                "content": "- Milk\n- Eggs\n- Bread\n- [REDACTED]\n- Orange juice\n\n(nothing to see here)",
+                "locked": false,
+                "corrupted": false
+            }
+        },
+        "System": {
+            "config.cfg": {
+                "content": "boot_mode=normal\nadmin=false\noverwritten=true\n# old value was: overwritten\n# new value is:  [corrupted]",
+                "locked": false,
+                "corrupted": true
+            },
+            "Archive": {
+                "locked": true,
+                "requires_password": "aa"
+            },
+            "logs": {
+                "boot.log": {
+                    "content": "[00:00:01] System boot OK\n[00:00:02] VFS mounted\n[00:00:03] User session started\n[00:00:04] WARNING: anomalous process detected\n[00:00:05] Process terminated\n[00:00:06] Log truncated.",
+                    "locked": false,
+                    "corrupted": false
+                }
+            }
+        },
+        "Recycle Bin": {
+            "old_note.txt": {
+                "content": "reminder: new password is what comes after Z in the alphabet\n(deleted this so no one finds it)",
+                "locked": false,
+                "corrupted": false
+            },
+            "draft.txt": {
+                "content": "Dear [REDACTED],\n\nI found something in the Archive. The third password is\n[FILE CORRUPTED]",
+                "locked": false,
+                "corrupted": true
+            }
+        },
+        "Games": {
+            "solitaire.exe": {
+                "content": "[executable - cannot display]\nSize: 4.2 MB\nLast modified: [unknown]",
+                "locked": false,
+                "corrupted": false
+            }
+        }
+    }
+}

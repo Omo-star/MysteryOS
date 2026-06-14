@@ -35,7 +35,7 @@ if(EMSCRIPTEN)
         -sUSE_WEBGL2=1
         -sFULL_ES3=1
         -sALLOW_MEMORY_GROWTH=1
-        "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/data@/data"
+        "SHELL:--embed-file ${CMAKE_SOURCE_DIR}/data@/data"
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/docs/shell.html"
     )
 else()

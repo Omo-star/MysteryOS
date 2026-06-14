@@ -42,7 +42,9 @@ int main(){
     ImGui::CreateContext();
     ImGui_ImplSDL2_InitForOpenGL(g_state.window, g_state.gl);
     ImGui_ImplOpenGL3_Init("#version 300 es");
-    g_kernel.init();
+    if (!g_kernel.init()) {
+        emscripten_run_script("console.error('MysteryOS: kernel init failed — data files not found')");
+    }
     emscripten_set_main_loop(loop, 0, true);
     return 0;
 }

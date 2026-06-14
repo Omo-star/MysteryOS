@@ -1,0 +1,64 @@
+[
+    {
+        "stage": 1,
+        "password": "aa",
+        "unlock_paths": ["/System/Archive"],
+        "unlock_apps": [],
+        "glitch_level": 1,
+        "inject_files": [
+            {
+                "path": "/System/Archive/classified.txt",
+                "content": "OPERATION: DEEP_LOOK\nStatus: COMPROMISED\n\nThe anomalous process from the boot log was not terminated.\nIt is still here.\n\nTo proceed: find what was 'overwritten' in the config file.",
+                "corrupted": false
+            },
+            {
+                "path": "/System/Archive/key_fragment_1.txt",
+                "content": "Fragment 1 of 3: MYST",
+                "corrupted": false
+            }
+        ]
+    },
+    {
+        "stage": 2,
+        "password": "overwritten",
+        "unlock_paths": [],
+        "unlock_apps": [],
+        "glitch_level": 3,
+        "inject_files": [
+            {
+                "path": "/System/Archive/key_fragment_2.txt",
+                "content": "Fragment 2 of 3: ERY",
+                "corrupted": false
+            },
+            {
+                "path": "/System/TRACE.log",
+                "content": "TR4CE > en1ry p0int f0und\nTR4CE > h0st: l0calh0st\nTR4CE > pr0c3ss: unkn0wn\nTR4CE > payload: [3 fragm3nts r3quired]\nTR4CE > awaiting fr4gm3nt 3",
+                "corrupted": true
+            },
+            {
+                "path": "/Documents/urgent.txt",
+                "content": "To whoever finds this:\n\nThe third fragment is hidden in the Games folder.\nIt doesn't look like a fragment. Look at the file size.",
+                "corrupted": false
+            }
+        ]
+    },
+    {
+        "stage": 3,
+        "password": "42mb",
+        "unlock_paths": [],
+        "unlock_apps": [],
+        "glitch_level": 5,
+        "inject_files": [
+            {
+                "path": "/System/Archive/key_fragment_3.txt",
+                "content": "Fragment 3 of 3: OS\n\nCombined key: MYSTERYOS\n\nYou found it. But now you know what it is.\nDo you understand what you've done?\n\n...\n\nCongratulations. You've reached the end.\nOr the beginning.",
+                "corrupted": false
+            },
+            {
+                "path": "/TRUTH.txt",
+                "content": "There is no anomalous process.\nThere never was.\n\nYou were the anomaly all along.\n\n[ MysteryOS v1.0 - You Win ]",
+                "corrupted": false
+            }
+        ]
+    }
+]
