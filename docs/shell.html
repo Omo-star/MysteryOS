@@ -25,6 +25,13 @@
                 }
             };
         </script>
+        <script>
+            document.addEventListener('click', function() {
+                if (window._mysteryOsc && window._mysteryOsc.ctx.state === 'suspended') {
+                    window._mysteryOsc.ctx.resume();
+                }
+            }, { once: true });
+        </script>
         {{{ SCRIPT }}}
     </body>
 </html>
