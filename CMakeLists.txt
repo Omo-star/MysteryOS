@@ -36,7 +36,7 @@ if(EMSCRIPTEN)
         -sFULL_ES3=1
         -sALLOW_MEMORY_GROWTH=1
         "SHELL:--preload-file ${CMAKE_SOURCE_DIR}/data@/data"
-        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/web/shell.html"
+        "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/docs/shell.html"
     )
 else()
     add_executable(test_logic
