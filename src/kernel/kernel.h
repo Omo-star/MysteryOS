@@ -26,6 +26,10 @@ class Kernel{
         PuzzleState puzzle_;
         vector<WinEntry> windows_;
         vector<pair<string,string>> pending_launches_;
+        bool booting_ = true;
+        float boot_timer_ = 0.0f;
+        int boot_line_ = 0;
+        void render_boot();
         int next_id_ = 0;
         void render_taskbar();
         unique_ptr<App> make_app(const string& name, const string& arg);

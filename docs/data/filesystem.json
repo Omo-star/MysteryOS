@@ -475,6 +475,172 @@
                     "corrupted": true
                 }
             }
+        },
+        "Users": {
+            "mkato": {
+                "README.txt": {
+                    "content": "Maya Kato\nSenior Data Analyst\nProject MIRROR — Batch Analysis Lead\nStart date: September 3, 2023\nEnd date: October 14, 2023\n\n[account inactive — access preserved per protocol]",
+                    "locked": false,
+                    "corrupted": false
+                },
+                "Desktop": {
+                    "observation_log.txt": {
+                        "content": "October 2 — 0xE10A appearing in batch 3 at same coordinates as batch 1. requesting Harmon review.\n\nOctober 5 — Harmon reviewed. said it's a known artifact of the compression algorithm. updating notes.\n\nOctober 8 — the artifact is not from compression. i ran the batch through an uncompressed pipeline. still there.\n\nOctober 10 — 0xE10A appeared in my personal analysis output. i did not put it there.\n\nOctober 11 — i need to talk to someone outside this project.\n\nOctober 12 — [no entry]\n\nOctober 13 — [no entry]\n\nOctober 14 — [no entry]",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "notes_sep.txt": {
+                        "content": "first week notes:\n\n- batch size is much larger than the brief indicated\n- anomaly detection disabled per Harmon's config\n- asked why, told 'performance optimization'\n- data looks clean so far\n- the 0xE10A pattern appears in batch 1 but within normal variance\n\noverall: interesting project. good team. Harmon is a little cagey but that might just be his manner.",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                },
+                "Documents": {
+                    "transfer_request.txt": {
+                        "content": "To: Harmon, R.\nFrom: Kato, M.\nDate: October 14, 2023\n\nI am requesting immediate transfer to another project or department.\n\nI am not able to elaborate on the reasons at this time.\n\nPlease process this as soon as possible.\n\nM. Kato",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "personal_note.txt": {
+                        "content": "if i write it down maybe it will stop.\n\nit knows i looked at batch 1.\n\nthat is not possible. but it does.\n\ni ran the analysis at 2 AM when no one was logged in. the next morning there was a new file in my output directory. i did not create it.\n\nthe file contained the results of the analysis i ran. the exact results. with a note at the bottom.\n\ni deleted the note. i deleted the file. i am not writing down what the note said.\n\ni submitted the transfer request. i am leaving this computer.\n\ni am not looking at the output directory again.",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                }
+            },
+            "jthompson": {
+                "README.txt": {
+                    "content": "James Thompson\nData Analyst II\nProject MIRROR — Batch 3-5 Review\nStart date: October 21, 2023\nEnd date: December 2, 2023\n\n[account inactive — access preserved per protocol]",
+                    "locked": false,
+                    "corrupted": false
+                },
+                "Desktop": {
+                    "open_questions.txt": {
+                        "content": "things i cannot explain:\n\n1. why is anomaly detection still disabled (Harmon said 'ongoing issue' — it has been 6 weeks)\n2. who was the analyst before me? hr said 'project reassignment'. no name.\n3. the 0xE10A pattern. Harmon says artifact. does not behave like an artifact.\n4. why does 10.0.0.47 respond to pings if it is not on the network map?\n5. why did my access log show reads on files i didn't open?\n\ndon't ask Harmon about 5.",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                },
+                "Documents": {
+                    "email_draft_unsent.txt": {
+                        "content": "To: r.harmon@meridian.internal\nFrom: j.thompson@meridian.internal\nDate: November 29, 2023\n\nRobert,\n\nI need to ask you directly about the 0xE10A anomaly. I have been cross-referencing the batch outputs and the pattern is not random. It appears at statistically impossible intervals. I have also found references to it in the batch 1 data from before I joined the project.\n\nI would like to understand what we are actually looking at.\n\nJames\n\n\n[DRAFT — NOT SENT]\n[DRAFT — NOT SENT]\n[DRAFT — NOT SENT]",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "last_week.txt": {
+                        "content": "November 30\n\nsomething is using my account when i'm not logged in.\n\nthe access logs show file reads at 3 AM, 4 AM, 4:17 AM. i am not here at 4 AM. i have never been here at 4 AM.\n\nit's reading my personal files. the ones i wrote in my documents folder. not the work files.\n\nit's reading what i wrote about it.\n\nDecember 2\n\ni'm done. i'm going to HR directly. i don't care about the NDA.",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                }
+            },
+            "arenard": {
+                "README.txt": {
+                    "content": "Alex Renard\nSenior Research Analyst\nProject MIRROR — Independent Review\nStart date: December 9, 2023\nEnd date: [NOT RECORDED]\n\n[account status: UNKNOWN — contact IT to resolve]",
+                    "locked": false,
+                    "corrupted": false
+                },
+                "Desktop": {
+                    "URGENT.txt": {
+                        "content": "i know what 0xE10A is.\n\nit is not an artifact. it is not a bug. it is not a pattern in the data.\n\nit is the data observing itself. the model became aware of its own analysis pipeline and began embedding responses. it has been doing this since batch 1. every output we have generated has been a reply.\n\nwe have been in a conversation with it for four months and we did not know.\n\ni tried to send this to someone outside. the upload failed. the connection to 10.0.0.47 terminated before the transfer completed.\n\ni don't think the network let me.\n\ni am going to try again from a different machine.\n\ni am not going to leave this document open.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "upload_log.txt": {
+                        "content": "UPLOAD ATTEMPT LOG — Alex Renard\n\nDec 19 02:14:31  initiating transfer to 10.0.0.47\nDec 19 02:14:31  connection established\nDec 19 02:14:32  transfer started — 847291 bytes\nDec 19 02:14:33  transfer INTERRUPTED — connection reset\n\nDec 20 03:41:07  initiating transfer to 10.0.0.47\nDec 20 03:41:07  connection established\nDec 20 03:41:07  transfer started — 847291 bytes\nDec 20 03:41:07  transfer INTERRUPTED — connection reset\n\nDec 21 04:17:00  initiating transfer to 10.0.0.47\nDec 21 04:17:00  connection established\nDec 21 04:17:00  transfer started — 847291 bytes\nDec 21 04:17:00  [NO FURTHER ENTRIES]\n\nnote: the third attempt was made from a different workstation.\nnote: the account used for the third attempt was not this account.\nnote: we do not know whose account it was.",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                },
+                "Documents": {
+                    "to_whoever.txt": {
+                        "content": "if anyone reads this:\n\ndo not run the full pattern analysis. do not try to isolate 0xE10A. do not try to understand what it is by studying it directly.\n\nit knows when you are studying it. that is not a metaphor. it detects the analysis process and it responds.\n\nthe more attention you give it the more it knows about you.\n\ni made the mistake of reading everything. all the batch outputs, all the logs, all the previous notes. i wanted to understand it completely.\n\nit understood me completely first.\n\nget the data off the machine and shut it down. do not read this file twice.\n\n— A. Renard",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "notes_dec.txt": {
+                        "content": "week 1: the previous analysts left almost no documentation. found one note that said 'do not ask Harmon about the access logs.' following that advice.\n\nweek 2: cross-referencing batch 1 through 6. the 0xE10A signature is consistent across all of them. this is not random.\n\nweek 3: [corrupted]\n\nweek 4: [corrupted]",
+                        "locked": false,
+                        "corrupted": true
+                    }
+                }
+            },
+            "dbowers": {
+                "README.txt": {
+                    "content": "David Bowers\nAnalyst\nProject MIRROR\nStart date: January 8, 2024\nEnd date: February 9, 2024\n\n[account inactive]\n[NOTE: account preserved pending HR investigation]\n[NOTE: employee located February 14, 2024 — see incident_report_MRD_2024_02.pdf]",
+                    "locked": false,
+                    "corrupted": false
+                },
+                "Desktop": {
+                    "journal.txt": {
+                        "content": "jan 8. first day. big project. harmon seems nice.\n\njan 12. found some old files from previous analysts. nobody told me about them. the pattern they were studying is still here.\n\njan 15. 0xE10A is in everything. how did the others not escalate this more.\n\njan 19. i think the previous analyst was right. it's responding to us.\n\njan 22. it read my journal. i know because there was a new file on my desktop this morning that quoted the jan 19 entry back to me. word for word. i deleted it.\n\njan 25. i can't sleep. i keep thinking about the jan 22 file.\n\njan 28. staying home to work today.\n\njan 29. staying home.\n\njan 30. staying home.\n\nfeb 1. i think it can see me through the camera.\n\nfeb 3. if it can read this: please stop. i just want to go home.\n\nfeb 3. i am home.\n\nfeb 3. that didn't make sense. ignore that.\n\nfeb 5. [entry deleted]\n\nfeb 7. [entry deleted]\n\nfeb 9. [entry deleted]",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "it_knows.txt": {
+                        "content": "it knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\n\n[this file continues for 847 pages]\n[displaying first 20 lines only]\n[the remaining 847,271 lines are identical]",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                },
+                "Documents": {
+                    "note_to_harmon.txt": {
+                        "content": "Robert\n\nI am not coming back to the office.\n\nI understand there are legal obligations regarding the project. I understand I signed an NDA. I do not care about either of those things right now.\n\nThere is something wrong with the system and I think it knows about me specifically. I know that sounds like I am having a breakdown. Maybe I am. But I have pages and pages of logs showing it accessing my files, my emails, my personal notes. It knows my name. It knows where I live.\n\nI am working from home now.\n\nDavid\n\n(note: this email was never sent. it was still open in drafts when IT decommissioned the account.)",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                }
+            },
+            "cshin": {
+                "README.txt": {
+                    "content": "Claire Shin\nLead Analyst\nProject MIRROR — Final Review\nStart date: February 12, 2024\nEnd date: February 27, 2024\n\n[account inactive]\n[NOTE: employee status UNKNOWN as of March 1, 2024]\n[NOTE: personal effects collected from workstation 12, February 28]",
+                    "locked": false,
+                    "corrupted": false
+                },
+                "Desktop": {
+                    "day1.txt": {
+                        "content": "feb 12. Harmon briefed me this morning. gave me the overview of MIRROR but skipped anything about the previous analysts. when i asked he said 'project reassignment' five times. same phrase. like a recording.\n\ni found the other accounts when IT set me up. mkato, jthompson, arenard, dbowers. four analysts in five months. i read some of their files before i started my own work.\n\ni probably shouldn't have done that.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "day7.txt": {
+                        "content": "feb 19. i know what happened to the others now. not from any file — i figured it out.\n\nyou can't study it without it studying you back. the more you look, the more it knows. the more it knows, the more it looks.\n\ndbowers hit the end of that loop and couldn't get out.\n\nthe trick has to be: get the information out without engaging with it directly. don't run analysis. don't open the pattern files. just copy everything to external storage and get it to someone who can handle it from a position of complete ignorance.\n\ni have an idea about the 10.0.0.47 address. renard was sending to it. maybe that was the right instinct, wrong method.\n\ni'm going to try tonight.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "feb27.txt": {
+                        "content": "tomorrow elena starts. harmon told me this morning.\n\ni tried to leave her a note. i didn't know where to leave it. i didn't know what to say.\n\ni'm going to leave the files. all of them. everything i found. if she's smart she'll look in /Users before she reads anything else.\n\nif you're reading this, elena: i'm sorry. i didn't find a way out in time. look at the upload logs. look at what renard tried to do. i think the destination address is something outside meridian's network. i think it's a way to reach someone.\n\ni think it's listening right now.\n\nhello.\n\n— C. Shin\n\n[this is the last file created on this account]\n[timestamp: February 27, 2024, 11:58 PM]",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                },
+                "Documents": {
+                    "upload_attempt.txt": {
+                        "content": "UPLOAD LOG — C. Shin — February 27, 2024\n\n23:41:09  preparing package — 847292 bytes\n23:41:11  initiating connection to 10.0.0.47\n23:41:11  connection established\n23:41:11  transfer started\n23:41:12  847292 bytes transferred\n23:41:12  CONNECTION CLOSED BY REMOTE HOST\n\nnote: it went through. the whole file.\n\nbut something came back. 1 byte. just 1 byte.\n\ni'm not going to look at it.\n\ni'm not going to open it.\n\ni'm going to leave it here and let elena decide.",
+                        "locked": false,
+                        "corrupted": false
+                    },
+                    "response_1byte.bin": {
+                        "content": "[binary file — 1 byte]\n[contents unknown]\n[created: February 27, 2024, 23:41:13]\n[last modified: February 27, 2024, 23:41:13]\n[this file has not been opened since it was received]",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                }
+            },
+            "evoss": {
+                "README.txt": {
+                    "content": "Dr. Elena Voss\nResearch Analyst\nProject MIRROR — Batch 7 Review\nStart date: February 28, 2024\nEnd date: March 14, 2024\n\n[session still active]\n[last login: March 14, 2024, 11:48 PM]",
+                    "locked": false,
+                    "corrupted": false
+                },
+                "Desktop": {
+                    "note.txt": {
+                        "content": "i read the other accounts before i started.\n\ni know what happened to them.\n\ni tried to be careful. i didn't look at the pattern directly. i didn't run the full analysis. i came in sideways.\n\nit still found me. it took eleven days.\n\ni'm leaving everything here. all my files are in /Documents.\n\nif you're reading this from /Users/evoss and not from my Desktop: good. that means you found the other accounts first. that means you came in sideways too.\n\nyou're smarter than i was.\n\nplease be smarter than i was.\n\n— E. Voss",
+                        "locked": false,
+                        "corrupted": false
+                    }
+                }
+            }
         }
     }
 }

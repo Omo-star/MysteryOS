@@ -45,7 +45,58 @@ bool Kernel::init() {
     return true;
 }
 
+static const char* BOOT_LINES[] = {
+    "MysteryOS v2.4.1 -- Meridian Analytics",
+    "Copyright (c) 2019-2024 Meridian Research Group",
+    "",
+    "[  0.000] Initializing kernel...",
+    "[  0.041] Memory: 8192MB available",
+    "[  0.089] Loading filesystem drivers...",
+    "[  0.134] Mounting /data ... OK",
+    "[  0.201] Loading user profile: evoss",
+    "[  0.267] Checking system integrity...",
+    "[  0.312] /System/drivers/display.sys ... OK",
+    "[  0.318] /System/drivers/input.sys ... OK",
+    "[  0.334] /System/drivers/network.sys ... MODIFIED",
+    "[  0.356] Starting network services...",
+    "[  0.401] Network interface: UP (10.0.0.14)",
+    "[  0.445] Starting session monitor...",
+    "[  0.489] Checking active processes...",
+    "[  0.534] PID 1      init           ... OK",
+    "[  0.541] PID 312    file_explorer  ... OK",
+    "[  0.548] PID 7741   [no name]      ... running since: [unknown]",
+    "[  0.571] Starting desktop environment...",
+    "[  0.623] Last session: March 14, 2024  11:48 PM",
+    "[  0.634] Session ready.",
+};
+static const int BOOT_LINE_COUNT = 22;
+
+void Kernel::render_boot() {
+    boot_timer_ += ImGui::GetIO().DeltaTime;
+    int target = (int)(boot_timer_ / 0.12f);
+    if (target > boot_line_) boot_line_ = target;
+    if (boot_timer_ > (BOOT_LINE_COUNT + 8) * 0.12f) { booting_ = false; return; }
+
+    ImGui::SetNextWindowPos({0, 0});
+    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+    ImGui::Begin("##boot", nullptr,
+        ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground);
+    int show = min(boot_line_, BOOT_LINE_COUNT);
+    for (int i = 0; i < show; i++) {
+        const char* line = BOOT_LINES[i];
+        if (strstr(line, "MODIFIED") || strstr(line, "[no name]") || strstr(line, "[unknown]"))
+            ImGui::TextColored({1.0f, 0.35f, 0.35f, 1.0f}, "%s", line);
+        else if (i < 3)
+            ImGui::TextColored({0.55f, 0.55f, 0.55f, 1.0f}, "%s", line);
+        else
+            ImGui::TextColored({0.6f, 0.85f, 0.6f, 1.0f}, "%s", line);
+    }
+    ImGui::End();
+}
+
 void Kernel::render(){
+    if (booting_) { Glitch::draw_screen_fx(); render_boot(); return; }
     Glitch::draw_screen_fx();
     render_taskbar();
     for (auto& w : windows_){

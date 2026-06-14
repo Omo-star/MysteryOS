@@ -70,7 +70,17 @@ namespace Glitch {
                 dl->AddRectFilled({offset, y}, {disp.x + offset, y + h}, IM_COL32(rand()%80, rand()%255, rand()%80, 80));
             }
         }
-
+        // jump scare
+        static int g_scare_frames = 0;
+        if (g_level >= 9) {
+            if (g_scare_frames > 0) {
+                dl->AddRectFilled({0, 0}, {disp.x, disp.y}, IM_COL32(0, 0, 0, 255));
+                float sz = ImGui::GetFontSize() * 3.0f;
+                dl->AddText(ImGui::GetFont(), sz, {disp.x * 0.32f, disp.y * 0.44f}, IM_COL32(0, 255, 0, 255), "STOP READING");
+                g_scare_frames--;
+            } 
+            else if (rand() % 480 == 0) g_scare_frames = 3;
+        }
         // heavy flash at level 10
         if (g_level >= 10 && (rand() % 40 == 0))
             dl->AddRectFilled({0, 0}, {disp.x, disp.y}, IM_COL32(0, 255, 0, 25));
