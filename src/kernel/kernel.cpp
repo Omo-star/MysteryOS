@@ -54,7 +54,11 @@ void Kernel::render(){
         ImGui::SetNextWindowPos({80.0f + offset, 50.0f + offset}, ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize({600, 400}, ImGuiCond_FirstUseEver);
         bool open = true;
-        if (ImGui::Begin(w.app->title(), &open)) w.app->render(*this);
+        string win_title = string(w.app->title());
+        if (Glitch::level() >= 7 && rand() % 25 == 0)
+            win_title = Glitch::mangle(win_title);
+        win_title += "##win" + to_string(w.id);
+        if (ImGui::Begin(win_title.c_str(), &open)) w.app->render(*this);
         ImGui::End();
         if (!open) w.open = false;
     }
