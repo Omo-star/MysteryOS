@@ -6,8 +6,31 @@
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
+#include <cctype>
 
 using namespace std;
+
+static string lower_copy(string value) {
+    for (char& c : value) c = (char)tolower((unsigned char)c);
+    return value;
+}
+
+static bool starts_with_word(const string& value, const string& word) {
+    return value == word || value.rfind(word + " ", 0) == 0;
+}
+
+static bool is_anomaly_chat_line(const string& raw) {
+    string value = lower_copy(raw);
+    return value.find('?') != string::npos ||
+        starts_with_word(value, "who") ||
+        starts_with_word(value, "what") ||
+        starts_with_word(value, "why") ||
+        starts_with_word(value, "how") ||
+        starts_with_word(value, "can") ||
+        starts_with_word(value, "are") ||
+        starts_with_word(value, "do") ||
+        starts_with_word(value, "does");
+}
 
 void Terminal::print(const string& text) {
     lines_.push_back(text);
@@ -48,6 +71,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
     ss >> cmd >> arg;
     if (cmd == "help") {
         print("Commands: help  ls [path]  cat <file>  unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>  monitor  trace <pid>  talk 7741 <message>");
+        print("  [anomaly] you can also type a question, like: who are you?");
         if (k.puzzle().stage() >= 1) print("  [hint] try: cat /System/Archive/classified.txt");
         return;
     }
@@ -170,6 +194,11 @@ void Terminal::execute(const string& raw, Kernel& k) {
         } else {
             print("decode: " + arg + ": binary decode not supported");
         }
+        return;
+    }
+    if (is_anomaly_chat_line(raw)) {
+        print("7741: [listening]");
+        k.request_anomaly(raw);
         return;
     }
     print("Unknown command: " + cmd + ". Type 'help' for a list.");

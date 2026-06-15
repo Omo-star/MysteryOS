@@ -57,6 +57,20 @@
                     (path.startsWith('/Desktop/') || path.startsWith('/System/logs/'));
             }
 
+            function mysteryosParseAnomalyJson(text) {
+                const raw = String(text || '').trim();
+                const unfenced = raw
+                    .replace(/^```(?:json)?\s*/i, '')
+                    .replace(/\s*```$/i, '')
+                    .trim();
+                const start = unfenced.indexOf('{');
+                const end = unfenced.lastIndexOf('}');
+                const candidate = start >= 0 && end > start ? unfenced.slice(start, end + 1) : unfenced;
+                const direct = JSON.parse(candidate);
+                if (direct && typeof direct === 'object') return direct;
+                return null;
+            }
+
             window.mysteryosRequestAnomaly = async function(payloadJson) {
                 const cfg = window.MYSTERYOS_ANOMALY || {};
                 if (!cfg.enabled || !cfg.groqApiKey) {
@@ -107,7 +121,8 @@
                                 {role: 'user', content: userPrompt}
                             ],
                             temperature: 0.85,
-                            max_tokens: 260
+                            max_tokens: 260,
+                            response_format: {type: 'json_object'}
                         })
                     });
 
@@ -121,7 +136,7 @@
                         data.choices[0].message && data.choices[0].message.content;
                     let artifact = null;
                     try {
-                        artifact = JSON.parse(text || '{}');
+                        artifact = mysteryosParseAnomalyJson(text);
                     } catch (err) {
                         const cleaned = (text || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
                         mysteryosDeliverAnomaly('7741: ' + cleaned);
