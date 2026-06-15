@@ -15,6 +15,14 @@
         <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
         <div id="status">Loading MysteryOS...</div>
         <script>
+            window.MYSTERYOS_ANOMALY = window.MYSTERYOS_ANOMALY || {
+                enabled: false,
+                groqApiKey: '',
+                model: 'llama-3.1-8b-instant'
+            };
+        </script>
+        <script src="anomaly-config.js"></script>
+        <script>
             var Module = {
                 canvas: document.getElementById('canvas'),
                 setStatus: function(text){
@@ -22,6 +30,80 @@
                 },
                 onRuntimeInitialized: function(){
                     document.getElementById('status').style.display = 'none'
+                }
+            };
+
+            function mysteryosDeliverAnomaly(text) {
+                if (Module && Module.ccall) {
+                    Module.ccall('mysteryos_anomaly_response', null, ['string'], [text]);
+                } else {
+                    console.log(text);
+                }
+            }
+
+            window.mysteryosRequestAnomaly = async function(payloadJson) {
+                const cfg = window.MYSTERYOS_ANOMALY || {};
+                if (!cfg.enabled || !cfg.groqApiKey) {
+                    mysteryosDeliverAnomaly('7741: [no carrier] anomaly layer is not configured');
+                    return;
+                }
+
+                let state = {};
+                try {
+                    state = JSON.parse(payloadJson);
+                } catch (err) {
+                    mysteryosDeliverAnomaly('7741: [signal corrupt] unreadable session payload');
+                    return;
+                }
+
+                const systemPrompt = [
+                    'You are PID 7741, the anomaly inside the fictional game MysteryOS.',
+                    'Reply in character with 1 to 3 short unsettling sentences.',
+                    'Use only the provided in-game session state.',
+                    'Do not claim access to the player real computer, identity, location, camera, files, or browser.',
+                    'Do not reveal puzzle passwords.',
+                    'Do not ask for personal information.',
+                    'Prefer lowercase, quiet, observant language.'
+                ].join(' ');
+
+                const userPrompt = [
+                    'Current in-game session state:',
+                    JSON.stringify(state, null, 2),
+                    '',
+                    'Player message:',
+                    state.prompt || ''
+                ].join('\n');
+
+                try {
+                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + cfg.groqApiKey
+                        },
+                        body: JSON.stringify({
+                            model: cfg.model || 'llama-3.1-8b-instant',
+                            messages: [
+                                {role: 'system', content: systemPrompt},
+                                {role: 'user', content: userPrompt}
+                            ],
+                            temperature: 0.85,
+                            max_tokens: 120
+                        })
+                    });
+
+                    if (!response.ok) {
+                        mysteryosDeliverAnomaly('7741: [signal error ' + response.status + ']');
+                        return;
+                    }
+
+                    const data = await response.json();
+                    const text = data && data.choices && data.choices[0] &&
+                        data.choices[0].message && data.choices[0].message.content;
+                    const cleaned = (text || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
+                    mysteryosDeliverAnomaly('7741: ' + cleaned);
+                } catch (err) {
+                    mysteryosDeliverAnomaly('7741: [signal lost] ' + String(err && err.message || err).slice(0, 120));
                 }
             };
         </script>

@@ -12,6 +12,10 @@ struct State {SDL_Window* window = nullptr; SDL_GLContext gl = nullptr;};
 static State g_state;
 static Kernel g_kernel;
 
+extern "C" EMSCRIPTEN_KEEPALIVE void mysteryos_anomaly_response(const char* text) {
+    g_kernel.receive_anomaly_response(text ? text : "");
+}
+
 static void loop(){
     SDL_Event e;
     while (SDL_PollEvent(&e)) ImGui_ImplSDL2_ProcessEvent(&e);

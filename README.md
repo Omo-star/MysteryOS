@@ -15,5 +15,21 @@ python3 -m http.server 8080 --directory docs
 ```
 Open http://localhost:8080
 
+## Optional AI anomaly
+
+The `talk 7741 <message>` command can call Groq from the browser when `docs/anomaly-config.js` exists.
+
+For GitHub Pages, set Pages source to **GitHub Actions**, then add this repository secret:
+```text
+GROQ_API_KEY
+```
+
+You can optionally add an Actions variable:
+```text
+GROQ_MODEL
+```
+
+If no key is configured, the game still works and `talk 7741` reports no carrier.
+
 ## Puzzle spoilers
 Don't open `data/puzzles.json` unless you are completely stuck.

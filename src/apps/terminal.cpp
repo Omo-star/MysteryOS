@@ -15,6 +15,11 @@ void Terminal::print(const string& text) {
 }
 
 void Terminal::render(Kernel& k) {
+    auto anomaly_responses = k.drain_anomaly_responses();
+    for (const auto& response : anomaly_responses) {
+        print(response);
+    }
+
     float h = ImGui::GetContentRegionAvail().y - 32;
     ImGui::BeginChild("##out", {0, h}, false);
     for (auto& line : lines_) {
@@ -42,7 +47,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
     string cmd, arg;
     ss >> cmd >> arg;
     if (cmd == "help") {
-        print("Commands: help  ls [path]  cat <file>  unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>  monitor  trace <pid>");
+        print("Commands: help  ls [path]  cat <file>  unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>  monitor  trace <pid>  talk 7741 <message>");
         if (k.puzzle().stage() >= 1) print("  [hint] try: cat /System/Archive/classified.txt");
         return;
     }
@@ -132,6 +137,26 @@ void Terminal::execute(const string& raw, Kernel& k) {
         else if (stage == 3) print("PID 7741 is bound to active user session: evoss.");
         else if (stage == 4) print("PID 7741 has written files without user input.");
         else print("PID 7741 is observing current session.");
+        return;
+    }
+    if (cmd == "talk") {
+        string message;
+        getline(ss, message);
+        if (!message.empty() && message[0] == ' ') message.erase(0, 1);
+        if (arg != "7741") {
+            print("talk: usage: talk 7741 <message>");
+            return;
+        }
+        if (message.empty()) {
+            print("talk: missing message");
+            return;
+        }
+        if (k.puzzle().stage() < 2) {
+            print("talk: no carrier");
+            return;
+        }
+        print("7741: [listening]");
+        k.request_anomaly(message);
         return;
     }
     if (cmd == "decode") {

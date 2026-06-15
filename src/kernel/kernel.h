@@ -30,6 +30,9 @@ class Kernel{
         const vector<ActivityEntry>& activity_log() const {return activity_log_;}
         int files_opened() const {return files_opened_;}
         float session_time() const {return session_time_;}
+        void request_anomaly(const string& prompt);
+        void receive_anomaly_response(const string& text);
+        vector<string> drain_anomaly_responses();
     private:
         VFS vfs_;
         PuzzleState puzzle_;
@@ -47,6 +50,7 @@ class Kernel{
         bool anomaly_spawned_ = false;
         int files_opened_ = 0;
         vector<ActivityEntry> activity_log_;
+        vector<string> anomaly_responses_;
         bool show_error_popup_ = false;
         string error_popup_msg_;
 };

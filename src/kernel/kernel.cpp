@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <emscripten.h>
+#include <sstream>
 
 using namespace std;
 
@@ -74,6 +75,23 @@ static const char* BOOT_LINES[] = {
 };
 static const int BOOT_LINE_COUNT = 22;
 
+static string quoted_js_string(const string& value) {
+    ostringstream out;
+    out << '"';
+    for (char c : value) {
+        switch (c) {
+            case '\\': out << "\\\\"; break;
+            case '"': out << "\\\""; break;
+            case '\n': out << "\\n"; break;
+            case '\r': out << "\\r"; break;
+            case '\t': out << "\\t"; break;
+            default: out << c; break;
+        }
+    }
+    out << '"';
+    return out.str();
+}
+
 void Kernel::render_boot() {
     boot_timer_ += ImGui::GetIO().DeltaTime;
     int target = (int)(boot_timer_ / 0.12f);
@@ -120,6 +138,39 @@ void Kernel::record_file_open(const string& path) {
             error_popup_msg_ = MSGS[i];
         }
     }
+}
+
+void Kernel::request_anomaly(const string& prompt) {
+    ostringstream payload;
+    payload << "{";
+    payload << "\"prompt\":" << quoted_js_string(prompt) << ",";
+    payload << "\"stage\":" << puzzle_.stage() << ",";
+    payload << "\"filesOpened\":" << files_opened_ << ",";
+    payload << "\"sessionTime\":" << (int)session_time_ << ",";
+    payload << "\"recentFiles\":[";
+    for (size_t i = 0; i < activity_log_.size(); i++) {
+        if (i > 0) payload << ",";
+        payload << quoted_js_string(activity_log_[i].path);
+    }
+    payload << "]}";
+
+    string js =
+        "if(window.mysteryosRequestAnomaly){"
+        "window.mysteryosRequestAnomaly(" + quoted_js_string(payload.str()) + ");"
+        "}else if(Module&&Module.ccall){"
+        "Module.ccall('mysteryos_anomaly_response',null,['string'],['7741: [no carrier] anomaly layer unavailable']);"
+        "}";
+    emscripten_run_script(js.c_str());
+}
+
+void Kernel::receive_anomaly_response(const string& text) {
+    anomaly_responses_.push_back(text);
+}
+
+vector<string> Kernel::drain_anomaly_responses() {
+    vector<string> responses = move(anomaly_responses_);
+    anomaly_responses_.clear();
+    return responses;
 }
 
 void Kernel::render(){

@@ -2,3 +2,4 @@ build/
 build_native/
 *.o
 *.d
+docs/anomaly-config.js
