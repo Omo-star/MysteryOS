@@ -6,4 +6,4 @@ cmake --build build -j4
 cp build/mysteryos.js build/mysteryos.wasm docs/
 cp build/mysteryos.data docs/ 2>/dev/null || true
 cp build/mysteryos.html docs/index.html
-echo "Done. Run: python3 -m http.server 8080 --directory web"
+echo "Done. Run: python3 -m http.server 8080 --directory docs"

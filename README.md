@@ -11,7 +11,7 @@ Run in Git Bash or WSL:
 ```bash
 source ~/emsdk/emsdk_env.sh
 ./build.sh
-python3 -m http.server 8080 --directory web
+python3 -m http.server 8080 --directory docs
 ```
 Open http://localhost:8080
 

@@ -94,6 +94,11 @@
                 "path": "/TRACE.log",
                 "content": "TR4CE > pr0cess still active\nTR4CE > w4iting\nTR4CE > y0u're cl0se",
                 "corrupted": true
+            },
+            {
+                "path": "/System/tools/session_monitor.txt",
+                "content": "SESSION MONITOR UTILITY\n\nUsage:\nmonitor\ntrace 7741\n\nWarning: PID 7741 may produce false negatives in standard process tools.\n\nIf monitor reports a process that ps cannot explain, trust the monitor.",
+                "corrupted": false
             }
         ]
     },

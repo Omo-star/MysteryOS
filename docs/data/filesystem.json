@@ -178,6 +178,8 @@
                 "locked": false,
                 "corrupted": false
             },
+            "tools": {
+            },
             "Archive": {
                 "locked": true,
                 "requires_password": "stage1"

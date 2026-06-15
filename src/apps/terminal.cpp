@@ -42,7 +42,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
     string cmd, arg;
     ss >> cmd >> arg;
     if (cmd == "help") {
-        print("Commands: help  ls [path]  cat <file>  unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>");
+        print("Commands: help  ls [path]  cat <file>  unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>  monitor  trace <pid>");
         if (k.puzzle().stage() >= 1) print("  [hint] try: cat /System/Archive/classified.txt");
         return;
     }
@@ -55,7 +55,10 @@ void Terminal::execute(const string& raw, Kernel& k) {
         print("    1   root      0.0  init");
         print("  312   evoss     0.0  file_explorer");
         print("  441   evoss     0.1  terminal");
-        print(" 7741   -         0.0  [no name]");
+        if (k.puzzle().stage() >= 2)
+            print(" 7741   -        31.4  [UNKNOWN]");
+        else
+            print(" 7741   -         0.0  [no name]");
         return;
     }
     if (cmd == "ping") {
@@ -109,6 +112,26 @@ void Terminal::execute(const string& raw, Kernel& k) {
         if (arg.empty()) { print("run: missing app name"); return; }
         k.launch(arg);
         print("Launching " + arg + "...");
+        return;
+    }
+    if (cmd == "monitor") {
+        if (k.puzzle().stage() < 2) {
+            print("monitor: access denied");
+        } else {
+            k.launch("session_monitor");
+            print("Launching Session Monitor...");
+        }
+        return;
+    }
+    if (cmd == "trace") {
+        if (arg.empty()) { print("trace: missing PID"); return; }
+        if (arg != "7741") { print("trace: (" + arg + "): no anomaly detected"); return; }
+        int stage = k.puzzle().stage();
+        if (stage < 2) print("trace: insufficient privileges");
+        else if (stage == 2) print("PID 7741 is not registered in process table.");
+        else if (stage == 3) print("PID 7741 is bound to active user session: evoss.");
+        else if (stage == 4) print("PID 7741 has written files without user input.");
+        else print("PID 7741 is observing current session.");
         return;
     }
     if (cmd == "decode") {

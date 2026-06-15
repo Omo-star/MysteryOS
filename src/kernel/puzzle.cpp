@@ -27,7 +27,7 @@ bool PuzzleState::load(const string& path){
 
 bool PuzzleState::try_password(const string& input, VFS& vfs) {
     for (auto& su : stages_) {
-        if (su.password == input && su.stage > stage_) {
+        if (su.password == input && su.stage == stage_ + 1) {
             apply(su, vfs);
             return true;
         }

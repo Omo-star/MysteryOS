@@ -7,6 +7,7 @@
 #include "apps/terminal.h"
 #include "apps/password_dialog.h"
 #include "apps/anomaly_message.h"
+#include "apps/session_monitor.h"
 #include <algorithm>
 #include <cmath>
 #include <emscripten.h>
@@ -97,8 +98,13 @@ void Kernel::render_boot() {
     ImGui::End();
 }
 
-void Kernel::record_file_open() {
+void Kernel::record_file_open(const string& path) {
     files_opened_++;
+    activity_log_.push_back({path, session_time_});
+    if (activity_log_.size() > 12) {
+        activity_log_.erase(activity_log_.begin());
+    }
+
     static const int THRESHOLDS[] = {8, 20, 40, 75, 120, 200};
     static const char* MSGS[] = {
         "SESSION FILE ACCESS COUNT: ELEVATED\nMonitoring in progress.",
@@ -121,6 +127,7 @@ void Kernel::render(){
 
     // Idle tracking for anomaly window
     float dt = ImGui::GetIO().DeltaTime;
+    session_time_ += dt;
     ImVec2 md = ImGui::GetIO().MouseDelta;
     bool user_active = (fabsf(md.x) + fabsf(md.y) > 0.5f)
                     || ImGui::GetIO().MouseClicked[0]
@@ -189,6 +196,7 @@ unique_ptr<App> Kernel::make_app(const string& name, const string& arg){
     if (name == "password_dialog") return make_unique<PasswordDialog>(arg);
     if (name == "image_viewer") return make_unique<ImageViewer>(arg);
     if (name == "anomaly_message") return make_unique<AnomalyMessage>();
+    if (name == "session_monitor") return make_unique<SessionMonitor>();
     return nullptr;
 }
 

@@ -14,6 +14,11 @@ struct WinEntry{
     unique_ptr<App> app;
 };
 
+struct ActivityEntry{
+    string path;
+    float time = 0.0f;
+};
+
 class Kernel{
     public:
         bool init();
@@ -21,7 +26,10 @@ class Kernel{
         void launch(const string& app_name, const string& arg = "");
         VFS& vfs() {return vfs_;}
         PuzzleState& puzzle() {return puzzle_;}
-        void record_file_open();
+        void record_file_open(const string& path);
+        const vector<ActivityEntry>& activity_log() const {return activity_log_;}
+        int files_opened() const {return files_opened_;}
+        float session_time() const {return session_time_;}
     private:
         VFS vfs_;
         PuzzleState puzzle_;
@@ -35,9 +43,10 @@ class Kernel{
         void render_taskbar();
         unique_ptr<App> make_app(const string& name, const string& arg);
         float idle_timer_ = 0.0f;
+        float session_time_ = 0.0f;
         bool anomaly_spawned_ = false;
         int files_opened_ = 0;
-        int next_popup_threshold_ = 8;
+        vector<ActivityEntry> activity_log_;
         bool show_error_popup_ = false;
         string error_popup_msg_;
 };

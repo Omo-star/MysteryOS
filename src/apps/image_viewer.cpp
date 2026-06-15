@@ -75,6 +75,7 @@ void ImageViewer::try_load(Kernel& k) {
 }
 
 void ImageViewer::render(Kernel& k) {
+    if (!counted_) { counted_ = true; k.record_file_open(path_); }
     try_load(k);
     if (!texture_) { ImGui::TextColored({1,0.3f,0.3f,1}, "[image data unreadable]"); return; }
     ImVec2 avail = ImGui::GetContentRegionAvail();
