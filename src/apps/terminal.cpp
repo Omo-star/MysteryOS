@@ -151,10 +151,6 @@ void Terminal::execute(const string& raw, Kernel& k) {
             print("talk: missing message");
             return;
         }
-        if (k.puzzle().stage() < 2) {
-            print("talk: no carrier");
-            return;
-        }
         print("7741: [listening]");
         k.request_anomaly(message);
         return;
