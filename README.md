@@ -203,30 +203,6 @@ docs/data/filesystem.json
 
 They contain the structure of the mystery, passwords, stage injections, and major story reveals.
 
-## How To Add README Buttons
-
-Those buttons are usually called **badges**. This README uses [Shields.io](https://shields.io/).
-
-Basic badge:
-
-```md
-![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=for-the-badge&logo=cplusplus)
-```
-
-Clickable badge:
-
-```md
-[![Play](https://img.shields.io/badge/play-GitHub%20Pages-111111?style=for-the-badge&logo=github)](https://overcharged-coder.github.io/MysteryOS/)
-```
-
-The pattern is:
-
-```text
-https://img.shields.io/badge/<left>-<right>-<color>?style=for-the-badge&logo=<logo>
-```
-
-Spaces become `%20`, plus signs become `%2B`, and some symbols need URL encoding.
-
 ## Status
 
 MysteryOS is heading toward its first public build.
