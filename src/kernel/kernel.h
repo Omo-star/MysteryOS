@@ -19,6 +19,11 @@ struct ActivityEntry{
     float time = 0.0f;
 };
 
+struct AnomalyResponse{
+    int terminal_id = -1;
+    string text;
+};
+
 class Kernel{
     public:
         bool init();
@@ -30,10 +35,12 @@ class Kernel{
         const vector<ActivityEntry>& activity_log() const {return activity_log_;}
         int files_opened() const {return files_opened_;}
         float session_time() const {return session_time_;}
-        void request_anomaly(const string& prompt);
+        void request_anomaly(const string& prompt, int terminal_id);
         void receive_anomaly_response(const string& text);
+        void receive_anomaly_response(int terminal_id, const string& text);
         void receive_anomaly_artifact(const string& reply, const string& path, const string& content);
-        vector<string> drain_anomaly_responses();
+        void receive_anomaly_artifact(int terminal_id, const string& reply, const string& path, const string& content);
+        vector<string> drain_anomaly_responses(int terminal_id);
     private:
         VFS vfs_;
         PuzzleState puzzle_;
@@ -51,7 +58,8 @@ class Kernel{
         bool anomaly_spawned_ = false;
         int files_opened_ = 0;
         vector<ActivityEntry> activity_log_;
-        vector<string> anomaly_responses_;
+        int last_anomaly_terminal_id_ = -1;
+        vector<AnomalyResponse> anomaly_responses_;
         bool show_error_popup_ = false;
         string error_popup_msg_;
 };

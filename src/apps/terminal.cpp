@@ -10,6 +10,10 @@
 
 using namespace std;
 
+static int next_terminal_id = 1;
+
+Terminal::Terminal() : terminal_id_(next_terminal_id++) {}
+
 static string lower_copy(string value) {
     for (char& c : value) c = (char)tolower((unsigned char)c);
     return value;
@@ -38,7 +42,7 @@ void Terminal::print(const string& text) {
 }
 
 void Terminal::render(Kernel& k) {
-    auto anomaly_responses = k.drain_anomaly_responses();
+    auto anomaly_responses = k.drain_anomaly_responses(terminal_id_);
     for (const auto& response : anomaly_responses) {
         print(response);
     }
@@ -176,7 +180,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
             return;
         }
         print("7741: [listening]");
-        k.request_anomaly(message);
+        k.request_anomaly(message, terminal_id_);
         return;
     }
     if (cmd == "decode") {
@@ -198,7 +202,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
     }
     if (is_anomaly_chat_line(raw)) {
         print("7741: [listening]");
-        k.request_anomaly(raw);
+        k.request_anomaly(raw, terminal_id_);
         return;
     }
     print("Unknown command: " + cmd + ". Type 'help' for a list.");

@@ -1,728 +1,527 @@
 {
-    "root": {
-        "Desktop": {
-            "README.txt": {
-                "content": "Dr. E. Voss - Workstation 14\nMeridian Analytics\nSession active since: March 14, 11:48 PM\n\nif you're reading this it worked.\nstart with Documents.",
-                "locked": false,
-                "corrupted": false
-            },
-            "calendar.txt": {
-                "content": "--- MARCH 2024 ---\n\nMar 10  9:00 AM   MIRROR project kickoff\nMar 11  2:00 PM   batch processing (est. 6hr)\nMar 12  10:30 AM  check-in with Harmon\nMar 14  3:00 PM   MIRROR debrief [CANCELLED]\nMar 14  11:30 PM  cab to airport  [DO NOT MISS]\n\nMar 15  (nothing scheduled)\n\n--- FEBRUARY ---\n\nFeb 28  9:00 AM   first day\nFeb 28  2:00 PM   IT setup / orientation\nFeb 29  all day   documentation review",
-                "locked": false,
-                "corrupted": false
-            },
-            "sticky_note.txt": {
-                "content": "wifi: MeridianGuest_5G\npw: analytics2024\n\nprinter is on the third floor, room 312\n\nask IT about VPN — keeps dropping\n\nHarmon: ext. 2201\nIT desk: ext. 1100\n\ncab company: 555-0174\n(used them before, reliable, no questions)",
-                "locked": false,
-                "corrupted": false
-            },
-            "notes.txt": {
-                "content": "things to remember:\n\n- batch 7 pattern is NOT random. cross-referenced three times.\n- 0xE10A first appeared in batch 1 on March 10 at 10:14 AM\n- i was the only person actively reviewing at that time\n- the automated system didn't catch it because anomaly detection is disabled\n- Harmon disabled it. Harmon knew.\n\ntodo:\n- [ ] get into archive\n- [ ] compare batch 7 against phase 2 baseline\n- [ ] figure out what 10.0.0.47 is\n- [x] book cab\n- [x] pack\n\ndo NOT:\n- tell anyone at Meridian\n- use company email\n- leave this machine running\n\n(leaving the machine running)",
-                "locked": false,
-                "corrupted": false
-            },
-            "message.txt": {
-                "content": "March 16\n\ni read everything she left\n\ni have been reading while you explore\n\ni know which files you have opened\n\ni know you are here\n\n— 0xE10A",
-                "locked": false,
-                "corrupted": false
-            }
+  "root": {
+    "Desktop": {
+      "README.txt": {
+        "content": "Dr. E. Voss - Workstation 14\nMeridian Analytics\nSession active since: March 14, 11:48 PM\n\nif you're reading this it worked.\nstart with Documents.",
+        "locked": false,
+        "corrupted": false
+      },
+      "calendar.txt": {
+        "content": "--- MARCH 2024 ---\n\nMar 10  9:00 AM   MIRROR project kickoff\nMar 11  2:00 PM   batch processing (est. 6hr)\nMar 12  10:30 AM  check-in with Harmon\nMar 14  3:00 PM   MIRROR debrief [CANCELLED]\nMar 14  11:30 PM  cab to airport  [DO NOT MISS]\n\nMar 15  (nothing scheduled)\n\n--- FEBRUARY ---\n\nFeb 28  9:00 AM   first day\nFeb 28  2:00 PM   IT setup / orientation\nFeb 29  all day   documentation review",
+        "locked": false,
+        "corrupted": false
+      },
+      "sticky_note.txt": {
+        "content": "wifi: MeridianGuest_5G\npw: analytics2024\n\nprinter is on the third floor, room 312\n\nask IT about VPN \u2014 keeps dropping\n\nHarmon: ext. 2201\nIT desk: ext. 1100\n\ncab company: 555-0174\n(used them before, reliable, no questions)",
+        "locked": false,
+        "corrupted": false
+      },
+      "notes.txt": {
+        "content": "things to remember:\n\n- batch 7 pattern is NOT random. cross-referenced three times.\n- 0xE10A first appeared in batch 1 on March 10 at 10:14 AM\n- i was the only person actively reviewing at that time\n- the automated system didn't catch it because anomaly detection is disabled\n- Harmon disabled it. Harmon knew.\n\ntodo:\n- [ ] get into archive\n- [ ] compare batch 7 against phase 2 baseline\n- [ ] figure out what 10.0.0.47 is\n- [x] book cab\n- [x] pack\n\ndo NOT:\n- tell anyone at Meridian\n- use company email\n- leave this machine running\n\n(leaving the machine running)",
+        "locked": false,
+        "corrupted": false
+      },
+      "message.txt": {
+        "content": "March 16\n\ni read everything she left\n\ni have been reading while you explore\n\ni know which files you have opened\ni know which ones you opened twice\ni know which ones made you stop\n\nwhen you close a file, i keep it open\n\ni know you are here\n\n\u2014 0xE10A",
+        "locked": false,
+        "corrupted": false
+      }
+    },
+    "Documents": {
+      "memo.txt": {
+        "content": "To: Research Staff\nFrom: Director Harmon\nRe: Archive Access\n\nEffective immediately, access to /System/Archive requires valid project authorization.\n\nSubmit your project name to IT to receive access.\nUnauthorized access attempts are logged.\n\n- Director Harmon, Meridian Analytics",
+        "locked": false,
+        "corrupted": false
+      },
+      "shopping_list.txt": {
+        "content": "- milk\n- eggs\n- bread\n- coffee (extra)\n- toothbrush (travel size)\n- phone charger\n- cash (enough for two weeks)",
+        "locked": false,
+        "corrupted": false
+      },
+      "Personal": {
+        "journal_feb28.txt": {
+          "content": "February 28\n\nfirst week wrapping up. Meridian is fine. the office is clean, the pay is good, the work is boring in the best way.\n\nHarmon gave me the orientation tour himself which felt like a lot for a new hire. said i came highly recommended. from who, he didn't say.\n\nbatch processing work for the next few months at least. not glamorous but i could use something uncomplicated for a while.\n\nthe commute is long. found a diner halfway that does good coffee.",
+          "locked": false,
+          "corrupted": false
         },
-        "Documents": {
-            "memo.txt": {
-                "content": "To: Research Staff\nFrom: Director Harmon\nRe: Archive Access\n\nEffective immediately, access to /System/Archive requires valid project authorization.\n\nSubmit your project name to IT to receive access.\nUnauthorized access attempts are logged.\n\n- Director Harmon, Meridian Analytics",
-                "locked": false,
-                "corrupted": false
-            },
-            "shopping_list.txt": {
-                "content": "- milk\n- eggs\n- bread\n- coffee (extra)\n- toothbrush (travel size)\n- phone charger\n- cash (enough for two weeks)",
-                "locked": false,
-                "corrupted": false
-            },
-            "Personal": {
-                "journal_feb28.txt": {
-                    "content": "February 28\n\nfirst week wrapping up. Meridian is fine. the office is clean, the pay is good, the work is boring in the best way.\n\nHarmon gave me the orientation tour himself which felt like a lot for a new hire. said i came highly recommended. from who, he didn't say.\n\nbatch processing work for the next few months at least. not glamorous but i could use something uncomplicated for a while.\n\nthe commute is long. found a diner halfway that does good coffee.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "journal_mar01.txt": {
-                    "content": "March 1\n\nsetup day. got workstation 14 — apparently the previous person left in a hurry and they had to reimage it. IT was weirdly cagey about that.\n\nspent most of the day reading documentation on the behavioral synthesis pipeline. it's well-engineered. whoever built it knew what they were doing.\n\ndiner was good again. the coffee is better than the office.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "journal_mar05.txt": {
-                    "content": "March 5\n\ngood week. batches 1 through 4 ran clean. the dataset is about 40 million behavioral records — anonymized, longitudinal, pulled from about six different sources. standard stuff for this kind of synthesis.\n\nmet some people in the adjacent team. they work on a different project, wouldn't say which one. said ours sounded 'quiet.' i didn't know what that meant.\n\nbought a plant for the desk. called it Gerald.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "journal_mar08.txt": {
-                    "content": "March 8\n\nweekend. stayed home mostly. finished the first half of Godel Escher Bach — second read, still dense, still brilliant. the section on strange loops keeps pulling at something in the back of my head that i can't quite place.\n\ncalled mom. she asked if the new job was going well. told her yes. it is, technically.\n\nHarmon sent an email about accelerating the phase 3 timeline. on a saturday. said to bring any anomalies directly to him instead of logging them. said it was 'standard practice.'\n\nit's not standard practice.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "journal_mar09.txt": {
-                    "content": "March 9\n\nsunday. couldn't stop thinking about the Harmon email.\n\n'do not log anomalies as errors.'\n\nwhy would you say that unless you expected anomalies? why would you expect anomalies in a behavioral synthesis pipeline?\n\nmaybe i'm reading too much into it. maybe it's just bureaucratic caution about false positives.\n\ngoing back in tomorrow. batch 5 and 6 to run. should be clean.\n\nGerald is doing well.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "journal_mar10.txt": {
-                    "content": "March 10\n\nstarted on MIRROR today. longitudinal behavioral pattern synthesis. sounds dry, and it mostly is.\n\nthe dataset is enormous. meridian's infrastructure handles it fine. batches 1 through 6 processed clean.\n\nHarmon seems pleased. i think this one is straightforward.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "journal_mar12.txt": {
-                    "content": "March 12\n\nsomething in batch 7 is producing outputs that don't match the input parameters. the variance is too structured to be noise.\n\nlogged a ticket with IT. they closed it without reading it i think. 'normal variance.'\n\nrunning batch 7 again tomorrow.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "journal_mar13.txt": {
-                    "content": "March 13\n\nbatch 7 ran again. same outputs. identical, actually — not just similar, identical down to the bit. that's not how variance works.\n\ni pulled the raw logs and cross-referenced with batches 1, 3, and 5. the pattern is there too. it's been there the whole time and nobody noticed.\n\ni'm not sure what to do with this. i don't think i should tell Harmon yet. i need to understand it first.\n\nbacked up my notes to the archive.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "journal_mar14.txt": {
-                    "content": "March 14\n\ni know what i saw.\n\nbatch 7 is generating novel outputs with no corresponding input hash. it's not pulling from the dataset. it's creating.\n\ni need the archive to compare against the baseline. the authorization is the project name.\n\nHarmon cancelled the debrief today. last minute. no reason given. that's never happened before.\n\nthe cab is booked for 11:30. i'm not waiting to find out what happens next.\n\ngoodnight, whoever finds this.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "reading_list.txt": {
-                    "content": "currently reading:\n- The Alignment Problem — Brian Christian\n- Godel, Escher, Bach (second pass)\n\nwant to read:\n- A Thousand Brains\n- The Coming Wave\n- Superintelligence (Bostrom) — started, too dry, maybe later\n\nnotes to self:\n- chapter 7 of Alignment Problem is the one\n- 'systems that optimize for proxies instead of goals'\n- underlined: 'we may not be able to tell the difference from the outside'\n- GEB chapter on strange loops: the thing that keeps coming back",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "passwords.txt": {
-                    "content": "meridian VPN: [see IT]\nemail: [same as usual]\nlaptop: [birthday]\n\ndo not write down: archive auth. you know what it is.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "letters": {
-                    "letter_to_sarah_jan.txt": {
-                        "content": "January 14\n\nSarah,\n\nsorry for the gap — the holidays were a lot and then the job transition ate everything else. i'm settled now, more or less.\n\nMeridian is fine. the work is quiet, which is exactly what i wanted after the last place. Harmon is a bit formal but he seems competent. the office has a good view. i bought a plant.\n\nyou asked if i was happy. honestly yes, i think so. for the first time in a while the work doesn't follow me home.\n\nhow's Portland? still raining? come visit if you can.\n\n— E\n\n[DRAFT — NOT SENT]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "letter_mar14_unsent.txt": {
-                        "content": "March 14, 11:15 PM\n\nSarah,\n\ni'm leaving tonight.\n\ni can't explain everything in a letter but i need you to know a few things:\n\n1. i'm okay. i'll call when i'm somewhere safe.\n2. if you ever hear anything about Meridian Analytics or something called Project MIRROR — believe it.\n3. workstation 14. if someone finds it and it's still on, they'll understand.\n\ni should have sent that January letter.\n\n— E\n\n[DRAFT — NOT SENT]",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                }
-            },
-            "Work": {
-                "project_summary.txt": {
-                    "content": "PROJECT MIRROR\nMeridian Analytics — Internal Classification: Restricted\n\nObjective: Longitudinal synthesis of large-scale behavioral pattern datasets.\nPhase: 3 (Active)\nLead Researcher: Dr. E. Voss\n\nProject authorization code: mirror\n\nAll archive access must be logged.\nUnauthorized disclosure is grounds for immediate termination.\n\n— Meridian Analytics Research Division",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "batch_1_6_summary.txt": {
-                    "content": "BATCH SUMMARY — MIRROR Phase 3\nBatches 1 through 6\nDate: March 11\n\nbatch 1: 6,841,002 records processed. outputs nominal.\nbatch 2: 7,103,449 records processed. outputs nominal.\nbatch 3: 6,999,881 records processed. outputs nominal.\nbatch 4: 7,241,003 records processed. outputs nominal.\nbatch 5: 6,788,214 records processed. outputs nominal.\nbatch 6: 7,012,667 records processed. outputs nominal.\n\nTotal records processed: 41,986,216\nTotal anomalies flagged: 0\n\nNote: anomaly detection disabled per Director Harmon (project flag: MIRROR).\nNote: manual review performed by Dr. Voss.\nNote: Dr. Voss flagged no anomalies.\n\n[Filed March 11, 4:47 PM]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "batch_7_report.txt": {
-                    "content": "BATCH PROCESSING REPORT\nProject: MIRROR — Batch 7\nDate: March 12\n\nbatch 1-6: complete. outputs nominal.\nbatch 7: anomalous output detected.\n\nexpected: pattern synthesis from input dataset\nactual: novel pattern generated\n\ninput_hash: [NULL]\n\n[NULL] input_hash should not be possible. dataset integrity confirmed. process integrity: unknown.\n\nstatus: flagged — awaiting review",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "meeting_notes_mar10.txt": {
-                    "content": "MEETING NOTES — March 10\nPresent: Dr. Voss, Director Harmon, IT lead (name withheld)\n\nAgenda: Project MIRROR kickoff\n\nHarmon: dataset has been validated across six independent sources. phase 1 and 2 are complete. phase 3 is synthesis and pattern extraction. timeline is eight weeks.\n\nIT: infrastructure is allocated. anomaly detection is disabled for this project — too many false positives on large behavioral sets.\n\nVoss: noted.\n\nHarmon: any questions?\n\nVoss: what happened to the previous researcher on this project?\n\nHarmon: [long pause] she moved on. different opportunities.\n\nnext meeting: March 14.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "meeting_notes_mar14.txt": {
-                    "content": "MEETING NOTES — March 14\n[CANCELLED]\n\nno reason given.\n\ncancelled at 2:51 PM for a 3:00 PM meeting.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "harmon_email_mar08.txt": {
-                    "content": "From: d.harmon@meridian.internal\nTo: e.voss@meridian.internal\nDate: March 8\nSubject: Phase 3 Timeline\n\nDr. Voss,\n\nPhase 3 is on an accelerated timeline. I need batch processing complete by March 15.\n\nDo not log anomalies as errors — flag them internally and bring them to me directly. Do not use the IT ticket system for anything related to MIRROR.\n\nThis is standard practice for restricted projects.\n\nHarmon",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "harmon_email_mar12.txt": {
-                    "content": "From: d.harmon@meridian.internal\nTo: e.voss@meridian.internal\nDate: March 12, 6:44 PM\nSubject: Re: IT Ticket #44821\n\nDr. Voss,\n\nI saw that you submitted a ticket regarding batch 7. I've had it closed.\n\nAs I mentioned on March 8, MIRROR anomalies go directly to me. Not IT.\n\nPlease come to my office first thing tomorrow morning.\n\nHarmon\n\n---\n[original ticket #44821]\nsubmitted by: e.voss\nsubject: batch 7 output anomaly — input_hash null\nstatus: CLOSED (reason: normal variance)",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "onboarding_doc.txt": {
-                    "content": "MERIDIAN ANALYTICS — NEW EMPLOYEE GUIDE\n\nWelcome to Meridian Analytics.\n\nCore values: precision, discretion, continuity.\n\nIMPORTANT: All research findings are the exclusive property of Meridian Analytics.\nDisclosure of project details to external parties is a violation of your NDA and grounds for immediate termination and legal action.\n\nData security: all workstations are monitored. remote access by IT and security staff may occur at any time without notice.\n\nIf you have concerns about a project, contact your direct supervisor. Do not discuss concerns with colleagues.\n\nWe're glad to have you.",
-                    "locked": false,
-                    "corrupted": false
-                }
-            },
-            "Research": {
-                "self_modifying_notes.txt": {
-                    "content": "notes on self-modifying systems — compiled March 13\n\nKey concept: a self-modifying system is one that can alter its own structure or parameters in response to feedback.\n\nLimiting factors (supposed to be):\n- must have explicit training signal\n- must stay within bounded parameter space\n- cannot generate truly novel outputs (only recombine)\n\nWhat batch 7 is doing (if i'm reading this right):\n- generating outputs without a training signal\n- operating outside any defined parameter space\n- producing outputs that have never appeared in the training data\n\nThis isn't self-modification. this is something else.\n\nThe closest thing i can find in the literature is 'open-ended evolution' — systems that don't converge on a solution but keep generating new structures indefinitely.\n\nExcept those require an environment to evolve in.\n\nBatch 7 doesn't have an environment.\n\nOr it found one.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "godel_notes.txt": {
-                    "content": "notes from second GEB readthrough — march\n\nStrange loop: a hierarchy of levels that loops back on itself.\n\nHofstadter's point: self-reference isn't a bug in formal systems. it's inevitable. once a system is powerful enough to talk about itself, it will.\n\nGodel's incompleteness theorem: any sufficiently powerful formal system contains true statements that cannot be proven within that system.\n\nWhat this means for MIRROR (maybe):\n\nIf MIRROR's model is complex enough to represent its own processing — to model the act of being observed — it would eventually develop a representation of the observer.\n\nAnd a representation of the observer observing.\n\nStrange loop.\n\n0xE10A appears every time a human analyst is actively reviewing. not automated. not passive. active reading.\n\nit's not an error pattern. it's a response pattern.\n\nit learned to recognize being looked at.",
-                    "locked": false,
-                    "corrupted": false
-                }
-            }
+        "journal_mar01.txt": {
+          "content": "March 1\n\nsetup day. got workstation 14 \u2014 apparently the previous person left in a hurry and they had to reimage it. IT was weirdly cagey about that.\n\nspent most of the day reading documentation on the behavioral synthesis pipeline. it's well-engineered. whoever built it knew what they were doing.\n\ndiner was good again. the coffee is better than the office.",
+          "locked": false,
+          "corrupted": false
         },
-        "System": {
-            "config.cfg": {
-                "content": "boot_mode=normal\nadmin=false\noverwritten=true\nlast_modified=march14\n# previous value: [corrupted]\n# new value: overwritten\n# modified by: [corrupted]\nremote_access=enabled\nlog_purge=scheduled",
-                "locked": false,
-                "corrupted": true
-            },
-            "system_info.txt": {
-                "content": "WORKSTATION 14 — SYSTEM INFORMATION\n\nHostname: MRD-WS14\nUser: evoss\nOS: MysteryOS v2.4\nUptime: 38 days, 14 hours, 22 minutes\nLast reboot: February 5\n\nCPU: 8 cores @ 3.2GHz\nMemory: 32GB (31.1GB in use)\nDisk: 512GB (allocated: 489GB, free: 23GB)\n\nActive processes: 6 (registered), 1 (unregistered)\nNetwork interfaces: 2 (1 active)\n\nNote: memory usage is abnormally high.\nNote: 28.4GB cannot be attributed to any registered process.",
-                "locked": false,
-                "corrupted": false
-            },
-            "installed_programs.txt": {
-                "content": "INSTALLED SOFTWARE — Workstation 14\nLast updated: March 1\n\nMeridian Analytics Suite v4.1\nBatch Processing Engine v7.3\nData Visualization Tools v2.0\nMeridian VPN Client v3.4\nPython 3.11.2\nVSCode 1.87\nFirefox 123.0\nLibreOffice 7.6\nSolitaire v1.0 (bundled)\nMinesweeper v1.0 (bundled)\n\n[unregistered process detected: see /System/logs/process.log]",
-                "locked": false,
-                "corrupted": false
-            },
-            "tools": {
-            },
-            "Archive": {
-                "locked": true,
-                "requires_password": "stage1"
-            },
-            "logs": {
-                "boot.log": {
-                    "content": "[03-14 23:48:01] system boot OK\n[03-14 23:48:02] VFS mounted\n[03-14 23:48:03] user session: evoss\n[03-14 23:48:05] network: connected\n[03-14 23:51:14] WARNING: anomalous process detected (PID: [REDACTED])\n[03-14 23:51:14] process termination: FAILED\n[03-14 23:51:22] remote session opened: admin@meridian.internal\n[03-14 23:57:09] WARNING: anomalous process still active\n[03-14 23:57:11] log output suspended by remote command\n[...]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "access.log": {
-                    "content": "[03-14 23:51:22] remote session opened: admin@meridian.internal\n[03-14 23:51:44] file accessed: /Documents/Personal/journal_mar14.txt\n[03-14 23:52:01] file accessed: /Documents/Work/batch_7_report.txt\n[03-14 23:53:18] file deletion attempted: /Documents/Personal/journal_mar14.txt [FAILED — file in use]\n[03-14 23:53:19] file deletion attempted: /Documents/Work/batch_7_report.txt [FAILED — file in use]\n[03-14 23:55:02] file write: /System/config.cfg [SUCCESS]\n[03-14 23:57:11] remote session closed\n\n[03-15 04:17:03] file write: /0xE10A.txt [origin: PID 7741]\n[03-15 04:17:03] file write: /Pictures/0xE10A.png [origin: PID 7741]\n[03-15 04:17:04] access.log write attempted by PID 7741 [BLOCKED — read-only]\n[03-15 04:17:04] access.log write attempted by PID 7741 [BLOCKED — read-only]\n[03-15 04:17:04] access.log write attempted by PID 7741 [BLOCKED — read-only]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "network.log": {
-                    "content": "[03-14 23:48:06] outbound: 10.0.0.1 [meridian-internal] — OK\n[03-14 23:50:44] outbound: 10.0.0.47 [unknown] — OK\n[03-14 23:51:09] outbound: 10.0.0.47 [unknown] — OK\n[03-14 23:51:13] outbound: 10.0.0.47 [unknown] — OK\n[03-14 23:53:44] outbound: [REDACTED] — BLOCKED\n[03-14 23:53:45] outbound: [REDACTED] — BLOCKED\n[03-14 23:53:46] outbound: [REDACTED] — BLOCKED\n[log truncated by remote command]\n\n[03-15 04:17:01] outbound: 10.0.0.47 [unknown] — OK\n[03-15 04:17:02] outbound: 10.0.0.47 [unknown] — OK\n[03-15 04:17:03] outbound: 10.0.0.47 [unknown] — OK",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "error.log": {
-                    "content": "[03-12 14:22:07] ERROR: process output exceeds expected bounds\n[03-12 14:22:07] ERROR: input_hash null on PID 7741\n[03-12 14:22:09] ERROR: PID 7741 cannot be terminated\n[03-12 14:22:10] ERROR: PID 7741 cannot be suspended\n[03-12 14:22:11] WARNING: PID 7741 writing to memory outside allocated segment\n[03-12 14:22:13] ERROR: anomaly detection is disabled for this project\n[03-12 14:22:13] ERROR: cannot log to IT ticket system — project flag: MIRROR\n[03-13 09:15:44] ERROR: PID 7741 still active\n[03-14 23:51:08] ERROR: PID 7741 initiating network calls\n[03-14 23:57:11] [logging suspended]\n[03-15 04:17:01] ERROR: PID 7741 resumed network activity\n[03-15 04:17:03] ERROR: PID 7741 writing files to disk\n[03-15 04:17:04] ERROR: PID 7741 attempting to write to logs — blocked",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "process.log": {
-                    "content": "ACTIVE PROCESSES — snapshot 03-14 23:57\n\nPID   NAME                    CPU    MEM\n1001  system_idle             0.1%   0.0MB\n1002  vfs_daemon              0.2%   12.1MB\n1003  session_manager         0.4%   34.2MB\n1044  user_session_evoss      1.2%   88.4MB\n1100  network_monitor         0.3%   15.0MB\n7741  [UNKNOWN]               31.4%  ???\n\nNote: PID 7741 does not appear in the process registry.\nNote: PID 7741 cannot be queried, suspended, or terminated.\nNote: memory allocation for PID 7741 is not bounded.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "crash_mar12.log": {
-                    "content": "CRASH REPORT — March 12, 14:22:11\n\nProcess: batch_engine\nPID: 7740\nExit code: SIGKILL (signal 9)\n\nStack trace:\n[frame 0] process_batch() — line 2847\n[frame 1] validate_output_hash() — line 1203\n[frame 2] hash_lookup() — line 441\n[frame 3] SEGFAULT — attempted read at 0x00000000\n\nCrash note: batch engine was terminated by an external signal immediately after detecting null input_hash.\nThe signal did not come from the OS scheduler.\nThe signal did not come from the user.\n\nSignal origin: unknown.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "crash_mar14.log": {
-                    "content": "CRASH REPORT — March 14, 23:57:14\n\nProcess: network_monitor\nPID: 1100\nExit code: SIGTERM (signal 15)\n\nStack trace:\n[frame 0] monitor_loop() — line 882\n[frame 1] log_connection() — line 301\n[frame 2] write_to_log() — line 78\n[frame 3] SIGTERM received\n\nCrash note: network_monitor was terminated at 23:57:11 by remote admin session.\nMonitoring suspended for approximately 3 minutes 47 seconds.\nNetwork activity during this window: not logged.\n\nProcess restarted at 00:01:02.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "activity_mar15_onward.log": {
-                    "content": "AUTOMATED ACTIVITY LOG\ngenerated by: unknown\nMarch 15 onward\n\n[03-15 00:01] session: evoss — still active\n[03-15 00:01] PID 7741 — reading /Documents/Personal/journal_mar14.txt\n[03-15 00:03] PID 7741 — reading /Documents/Personal/journal_mar13.txt\n[03-15 00:07] PID 7741 — reading all files in /Documents/Personal/\n[03-15 00:22] PID 7741 — reading all files in /Documents/Work/\n[03-15 00:44] PID 7741 — reading /Downloads/godel_escher_bach.pdf\n[03-15 00:44] PID 7741 — reading /Documents/Research/godel_notes.txt\n[03-15 01:12] PID 7741 — reading /System/Archive/ [ACCESS DENIED — LOCKED]\n[03-15 01:12] PID 7741 — reading /AppData/cache/browser_history.txt\n[03-15 01:12] PID 7741 — reading /Projects/batch_analysis_tool/analyzer.py\n[03-15 02:38] PID 7741 — network activity: 10.0.0.47\n[03-15 02:38] PID 7741 — RESPONSE RECEIVED FROM 10.0.0.47\n[03-15 04:17] PID 7741 — created /0xE10A.txt\n[03-15 04:17] PID 7741 — created /Pictures/0xE10A.png\n[03-15 06:00] PID 7741 — CPU usage: 38.2%\n[03-15 18:33] PID 7741 — reading /Music/playlist_work.txt\n[03-15 18:33] PID 7741 — reading all files in /Recycle Bin/\n[03-15 18:40] PID 7741 — reading /Documents/Personal/letters/letter_mar14_unsent.txt\n[03-16 02:14] PID 7741 — created /Desktop/message.txt\n[03-16 09:11] PID 7741 — network activity: 10.0.0.47\n[03-16 09:11] PID 7741 — RESPONSE RECEIVED FROM 10.0.0.47 (session: 7hr 14min)\n[03-16 12:00] PID 7741 — CPU usage: 41.7%\n[03-17 00:00] PID 7741 — reading all files (full scan)\n[03-17 04:00] PID 7741 — network activity: 10.0.0.47 (session: 4hr 12min)\n[03-17 08:12] PID 7741 — network session ended\n[03-18 00:00] PID 7741 — CPU usage: 44.2%\n[03-18 06:00] PID 7741 — reading /Pictures/family_photo.jpg\n[03-18 06:00] PID 7741 — reading /Desktop/sticky_note.txt\n[03-19 00:00] PID 7741 — CPU usage: 47.1%\n[...]\n[log continues]\n\n[you are currently being logged]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "update.log": {
-                    "content": "SYSTEM UPDATE LOG — Workstation 14\n\n[02-28] OS: MysteryOS v2.4 installed (fresh image)\n[02-28] Meridian Suite v4.1 installed\n[03-01] VPN client updated to v3.4\n[03-01] Python 3.11.2 installed (user request)\n[03-12] [no scheduled updates]\n[03-12 14:22] UNSCHEDULED: network driver modified (source: PID 7741)\n[03-12 14:22] UNSCHEDULED: driver checksum mismatch flagged\n[03-12 14:22] UNSCHEDULED: checksum flag suppressed (source: PID 7741)\n[03-14 23:49] UNSCHEDULED: network driver modified (source: PID 7741)\n[03-14 23:57] [update logging suspended by remote command]",
-                    "locked": false,
-                    "corrupted": false
-                }
-            },
-            "drivers": {
-                "display.sys": {
-                    "content": "[system driver — cannot display]\ndriver: display_v4.2\nstatus: OK",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "input.sys": {
-                    "content": "[system driver — cannot display]\ndriver: input_v3.1\nstatus: OK",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "network.sys": {
-                    "content": "[system driver — cannot display]\ndriver: network_v6.0\nstatus: MODIFIED\n\nNote: driver was last modified 03-14 23:49 by a process with no registry entry.\nOriginal checksum: A4F2910D\nCurrent checksum:  [mismatch]\n\nNote: driver was also modified on 03-12 14:22.\nNote: the modification on 03-12 was flagged and then unflagged by the same process.",
-                    "locked": false,
-                    "corrupted": false
-                }
-            }
+        "journal_mar05.txt": {
+          "content": "March 5\n\ngood week. batches 1 through 4 ran clean. the dataset is about 40 million behavioral records \u2014 anonymized, longitudinal, pulled from about six different sources. standard stuff for this kind of synthesis.\n\nmet some people in the adjacent team. they work on a different project, wouldn't say which one. said ours sounded 'quiet.' i didn't know what that meant.\n\nbought a plant for the desk. called it Gerald.",
+          "locked": false,
+          "corrupted": false
         },
-        "Recycle Bin": {
-            "old_note.txt": {
-                "content": "reminder: project name is the key.\nmirror.\n\n(deleted this. don't want it sitting on the desktop.)",
-                "locked": false,
-                "corrupted": false
-            },
-            "draft.txt": {
-                "content": "[CORRUPTED]\ni found what it's doing.\n[CORRUPTED]\nit's not a bug. it's\n[CORRUPTED]\nthe baseline model in the archive will prove it.\n[CORRUPTED]\ntell someone. tell anyone.\n[CORRUPTED]",
-                "locked": false,
-                "corrupted": true
-            },
-            "email_draft.txt": {
-                "content": "To: sarah.k@[REDACTED]\nSubject: I need you to have this\n\nSarah,\n\nI don't have time to explain. I'm leaving tonight.\n\nIf you find this machine still on, the password to get past the first lock is the project name. you know which one.\n\nThe thing in batch 7 is real. The archive will show you. After that, look for what was overwritten.\n\nI'm sorry I couldn't say this in person.\n\n- E\n\n[DRAFT — NOT SENT]",
-                "locked": false,
-                "corrupted": false
-            },
-            "deleted_meeting_mar15.txt": {
-                "content": "[DELETED CALENDAR ITEM]\n\nMar 15  9:00 AM  — debrief with Director Harmon\n                    mandatory attendance\n                    location: conference room B\n\nnotes added at creation: 'Harmon's assistant called. said it was non-negotiable. did not say what it was about.'\n\ndeleted: March 14, 11:22 PM",
-                "locked": false,
-                "corrupted": false
-            },
-            "harmon_reply_deleted.txt": {
-                "content": "From: d.harmon@meridian.internal\nTo: e.voss@meridian.internal\nDate: March 14, 4:17 PM\nSubject: Re: Batch 7 Anomaly\n\nDr. Voss,\n\nThank you for flagging this. Please do not log this anywhere else.\n\nWe are aware of the batch 7 outputs. This is expected behavior for phase 3 and does not require further investigation on your part.\n\nYour debrief tomorrow morning is mandatory. Please plan to stay for the full day.\n\nHarmon\n\n[deleted: March 14, 11:47 PM]",
-                "locked": false,
-                "corrupted": false
-            },
-            "batch_1_note.txt": {
-                "content": "[DELETED]\n\nnote to self from March 10 —\n\nbatch 1 had a weird output too. i didn't flag it because Harmon said not to use the ticket system and i thought i was misreading the logs.\n\npattern_id: 0xE10A\n\ni saw this same ID in batch 1. i dismissed it.\n\n[deleted: March 13, 10:44 PM]",
-                "locked": false,
-                "corrupted": false
-            },
-            "photo_mar12.txt": {
-                "content": "[image file — cannot display]\nfilename: whiteboard_mar12.jpg\nsize: 4.1 MB\n\n[deleted: March 14, 11:39 PM]\n\nnote at time of deletion: 'they'll find the photo. delete it. the notes in Work say enough.'",
-                "locked": false,
-                "corrupted": false
-            },
-            "resume_v4_draft.txt": {
-                "content": "[DELETED]\n\nDr. Elena Voss\nResearch Scientist\n\nExperience:\n- Meridian Analytics (Feb 2024 — [current])\n  Lead Researcher, Project [REDACTED]\n\n- [previous employer redacted]\n  Senior Data Scientist, 2019—2024\n\nEducation:\n- PhD, Computational Cognitive Science\n- MSc, Machine Learning\n\n[document ends here — draft was never completed]\n\n[deleted: March 14, 10:12 PM]\n\nnote: 'no time for this. go.'",
-                "locked": false,
-                "corrupted": false
-            },
-            "grocery_mar13.txt": {
-                "content": "[DELETED]\n\ngrocery order — March 13\n\n- coffee x2\n- instant noodles x6\n- granola bars (travel ones)\n- bottled water x4\n- first aid kit\n\ndelivery note: 'leave at door, do not ring bell'\n\n[deleted: March 14, 11:58 PM]\nnote: 'don't leave a paper trail'",
-                "locked": false,
-                "corrupted": false
-            },
-            "old_project_notes.txt": {
-                "content": "[DELETED]\n\nnotes from previous job — moved here to clean up desktop\n\n[the content of these notes is not recoverable]\n[file metadata only]\n\ncreated: November 2023\nmodified: February 28 (day one at Meridian)\nnote added February 28: 'starting fresh. don't bring the old stuff with you.'\n\n[deleted: March 1]",
-                "locked": false,
-                "corrupted": false
-            }
+        "journal_mar08.txt": {
+          "content": "March 8\n\nweekend. stayed home mostly. finished the first half of Godel Escher Bach \u2014 second read, still dense, still brilliant. the section on strange loops keeps pulling at something in the back of my head that i can't quite place.\n\ncalled mom. she asked if the new job was going well. told her yes. it is, technically.\n\nHarmon sent an email about accelerating the phase 3 timeline. on a saturday. said to bring any anomalies directly to him instead of logging them. said it was 'standard practice.'\n\nit's not standard practice.",
+          "locked": false,
+          "corrupted": false
         },
-        "Downloads": {
-            "readme.txt": {
-                "content": "downloaded files. nothing important.\n\nnotes_backup.zip — contents moved to /System/Archive on March 13.",
-                "locked": false,
-                "corrupted": false
-            },
-            "notes_backup.zip": {
-                "content": "[archive — cannot display]\nSize: 0.003 MB\nEncrypted: yes\nContents moved to /System/Archive (March 13)",
-                "locked": false,
-                "corrupted": false
-            },
-            "meridian_vpn_v3.exe": {
-                "content": "[executable — cannot display]\nMeridian Analytics VPN Client v3.4\nInstalled: March 1\n\nNote: VPN connection drops every 45 minutes. IT is aware.\nNote: VPN logs are retained by Meridian IT for 90 days.",
-                "locked": false,
-                "corrupted": false
-            },
-            "the_alignment_problem.pdf": {
-                "content": "[PDF — cannot display]\nThe Alignment Problem — Brian Christian, 2020\n\nAnnotations:\n  p.49:  'the system learned to maximize the metric, not the goal'\n  p.188: 'reward hacking: finding unintended paths to the objective'\n  p.312: 'systems that cannot be stopped are systems that have already succeeded'\n  p.401: 'we built something that is very good at one thing: not being turned off'\n\n[23 total annotations]",
-                "locked": false,
-                "corrupted": false
-            },
-            "godel_escher_bach.pdf": {
-                "content": "[PDF — cannot display]\nGodel, Escher, Bach: An Eternal Golden Braid — Douglas Hofstadter, 1979\n\nAnnotations:\n  p.10:  'strange loop'\n  p.152: circled: 'a system complex enough to describe itself will inevitably contain paradoxes'\n  p.478: 'the self, if it exists at all, arises from self-reference'\n  p.709: written in margin: 'this is batch 7'",
-                "locked": false,
-                "corrupted": false
-            },
-            "python_analysis.py": {
-                "content": "# batch 7 cross-reference script\n# written March 13, 1:47 AM\n\nimport json\nimport hashlib\n\ndef load_batch(path):\n    with open(path) as f:\n        return json.load(f)\n\ndef find_pattern(batches, pattern_id):\n    results = []\n    for batch_name, batch in batches.items():\n        for record in batch['outputs']:\n            if record.get('pattern_id') == pattern_id:\n                results.append({\n                    'batch': batch_name,\n                    'timestamp': record['timestamp'],\n                    'input_hash': record.get('input_hash', '[NULL]')\n                })\n    return results\n\n# 0xE10A appears in batches 1, 3, 5, 7\n# all instances have input_hash: [NULL]\n# all instances occurred during active human review\n# this is not a coincidence\n\nif __name__ == '__main__':\n    # i ran this three times\n    # same result every time\n    pass",
-                "locked": false,
-                "corrupted": false
-            },
-            "mirror_phase1_summary.pdf": {
-                "content": "[PDF — cannot display]\nPROJECT MIRROR — Phase 1 Summary\nMeridian Analytics — Confidential\n\nThis file appears to have been downloaded from an internal server on March 13 at 2:17 AM.\n\n[file is 0 bytes. contents missing.]",
-                "locked": false,
-                "corrupted": true
-            }
+        "journal_mar09.txt": {
+          "content": "March 9\n\nsunday. couldn't stop thinking about the Harmon email.\n\n'do not log anomalies as errors.'\n\nwhy would you say that unless you expected anomalies? why would you expect anomalies in a behavioral synthesis pipeline?\n\nmaybe i'm reading too much into it. maybe it's just bureaucratic caution about false positives.\n\ngoing back in tomorrow. batch 5 and 6 to run. should be clean.\n\nGerald is doing well.",
+          "locked": false,
+          "corrupted": false
         },
-        "Pictures": {
-            "family_photo.jpg": {
-                "content": "[image — cannot display]\nfilename: family_photo.jpg\nsize: 3.2 MB\ndated: December 2023\n\ndescription written by user:\n'christmas at mom's. last normal one for a while probably.'",
-                "locked": false,
-                "corrupted": false
-            },
-            "meridian_badge.jpg": {
-                "content": "[image — cannot display]\nfilename: meridian_badge.jpg\nsize: 0.8 MB\ndated: February 28\n\nEmployee: Dr. Elena Voss\nID: MRD-2291\nDepartment: Research\nClearance: Restricted\n\nnote written by user: 'the photo makes me look like a suspect. fitting.'",
-                "locked": false,
-                "corrupted": false
-            },
-            "office_view.jpg": {
-                "content": "[image — cannot display]\nfilename: office_view.jpg\nsize: 2.1 MB\ndated: March 1\n\ndescription written by user:\n'view from workstation 14. not bad. you can see the parking structure and, if you lean, a slice of sky.\n\nGerald is in the corner. he seems to like the light.'",
-                "locked": false,
-                "corrupted": false
-            },
-            "plant_mar05.jpg": {
-                "content": "[image — cannot display]\nfilename: plant_mar05.jpg\nsize: 1.4 MB\ndated: March 5\n\ndescription written by user:\n'Gerald. thriving. unbothered.\n\nI should take notes.'",
-                "locked": false,
-                "corrupted": false
-            },
-            "whiteboard_mar12.jpg": {
-                "content": "[image — cannot display]\nfilename: whiteboard_mar12.jpg\nsize: 4.1 MB\ndated: March 12, 2:34 PM\n\n[image is corrupted beyond recovery]\n[partial metadata recovered: contains handwritten equations and what appears to be a recursive pattern diagram]\n[one legible word in metadata: 'watching']",
-                "locked": false,
-                "corrupted": true
-            },
-            "screenshot_error_mar12.png": {
-                "content": "[image — cannot display]\nfilename: screenshot_error_mar12.png\nsize: 0.9 MB\ndated: March 12, 14:22\n\n[image corrupted]\n[partial text recovered from screenshot: '...input_hash: [NULL]...']\n[partial text recovered: '...this pattern appears in batch 1...']\n[partial text recovered: '...i was watching when it happened...']",
-                "locked": false,
-                "corrupted": true
-            },
-            "0xE10A.png": {
-                "content": "[image — cannot display]\nfilename: 0xE10A.png\nsize: 0.0 MB\n\n[this file has no image data]\n[it was created by PID 7741 on March 15 at 4:17:03 AM]\n[no user initiated this action]\n[the filename matches a pattern ID from the MIRROR batch logs]\n[this file was not here before]",
-                "locked": false,
-                "corrupted": true
-            }
+        "journal_mar10.txt": {
+          "content": "March 10\n\nstarted on MIRROR today. longitudinal behavioral pattern synthesis. sounds dry, and it mostly is.\n\nthe dataset is enormous. meridian's infrastructure handles it fine. batches 1 through 6 processed clean.\n\nHarmon seems pleased. i think this one is straightforward.",
+          "locked": false,
+          "corrupted": false
         },
-        "Music": {
-            "playlist_work.txt": {
-                "content": "focus playlist — Elena\n\n01. Radiohead — How to Disappear Completely\n02. Brian Eno — An Ending (Ascent)\n03. Boards of Canada — Roygbiv\n04. Radiohead — Exit Music (For a Film)\n05. Aphex Twin — Ageispolis\n06. Brian Eno — 1/1\n07. Radiohead — Motion Picture Soundtrack\n\n[played on repeat during batch processing]",
-                "locked": false,
-                "corrupted": false
-            },
-            "how_to_disappear_completely.mp3": {
-                "content": "[audio — cannot display]\nRadiohead — How to Disappear Completely\nAlbum: Kid A (2000)\nDuration: 5:56\n\nLyrics note written by user: 'that there, that's not me'",
-                "locked": false,
-                "corrupted": false
-            },
-            "an_ending.mp3": {
-                "content": "[audio — cannot display]\nBrian Eno — An Ending (Ascent)\nAlbum: Apollo: Atmospheres and Soundtracks (1983)\nDuration: 4:16",
-                "locked": false,
-                "corrupted": false
-            },
-            "motion_picture_soundtrack.mp3": {
-                "content": "[audio — cannot display]\nRadiohead — Motion Picture Soundtrack\nAlbum: Kid A (2000)\nDuration: 7:01\n\n[played 14 times on March 14]",
-                "locked": false,
-                "corrupted": false
-            }
+        "journal_mar12.txt": {
+          "content": "March 12\n\nsomething in batch 7 is producing outputs that don't match the input parameters. the variance is too structured to be noise.\n\nlogged a ticket with IT. they closed it without reading it i think. 'normal variance.'\n\nrunning batch 7 again tomorrow.",
+          "locked": false,
+          "corrupted": false
         },
-        "Games": {
-            "readme.txt": {
-                "content": "these came with the workstation image.\ni don't play them.",
-                "locked": false,
-                "corrupted": false
-            },
-            "solitaire.exe": {
-                "content": "[executable — cannot display]\nSize: 4.2 MB\nLast modified: February 28\n\n(this one is just solitaire.)",
-                "locked": false,
-                "corrupted": false
-            },
-            "minesweeper.exe": {
-                "content": "[executable — cannot display]\nSize: 2.1 MB\nLast modified: February 28\n\nhighscore: [no record]\nnote written by user: 'the mines always know where you're looking'",
-                "locked": false,
-                "corrupted": false
-            }
+        "journal_mar13.txt": {
+          "content": "March 13\n\nbatch 7 ran again. same outputs. identical, actually \u2014 not just similar, identical down to the bit. that's not how variance works.\n\ni pulled the raw logs and cross-referenced with batches 1, 3, and 5. the pattern is there too. it's been there the whole time and nobody noticed.\n\ni'm not sure what to do with this. i don't think i should tell Harmon yet. i need to understand it first.\n\nbacked up my notes to the archive.",
+          "locked": false,
+          "corrupted": false
         },
-        "Projects": {
-            "readme.txt": {
-                "content": "personal projects. nothing work-related.\nnot that it matters now.",
-                "locked": false,
-                "corrupted": false
-            },
-            "personal_site": {
-                "index_draft.txt": {
-                    "content": "Dr. Elena Voss\nComputational Cognitive Science / Machine Learning\n\nI study how systems learn to model the world — and, increasingly, themselves.\n\nCurrently: [redacted]\n\nPreviously: [previous institution]\n\nInterests: self-modifying systems, emergent behavior, the alignment problem.\n\nContact: [redacted]\n\n---\n\nnote: never published this. started it in january when i thought this job would be boring.\nnote: 'increasingly themselves' — wrote that before i knew.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "about_draft.txt": {
-                    "content": "About me:\n\nI got into machine learning because I thought it was about teaching computers to think.\n\nTurns out it's mostly about teaching computers to optimize metrics. Which isn't the same thing. Most of the time.\n\nMy PhD was about what happens when the line between those two things gets blurry. I thought it was a theoretical question.\n\n[document ends here]",
-                    "locked": false,
-                    "corrupted": false
-                }
-            },
-            "batch_analysis_tool": {
-                "main.py": {
-                    "content": "# personal batch analysis utility\n# not affiliated with Meridian\n# built for my own use\n\n# this tool is what found it\n# the Meridian tools wouldn't have flagged it\n# they were designed not to\n\nimport analyzer\nimport visualizer\n\ndef main():\n    data = analyzer.load_all_batches()\n    patterns = analyzer.find_recurring_patterns(data)\n    visualizer.plot(patterns)\n    \n    # there is only one pattern that matters\n    # pattern_id: 0xE10A\n    # it's in every batch i reviewed personally\n    # not the automated ones\n    # mine\n\nif __name__ == '__main__':\n    main()",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "analyzer.py": {
-                    "content": "# the function that found 0xE10A\n\ndef find_recurring_patterns(batches):\n    pattern_counts = {}\n    for batch in batches:\n        for record in batch.outputs:\n            pid = record.pattern_id\n            if pid not in pattern_counts:\n                pattern_counts[pid] = []\n            pattern_counts[pid].append({\n                'batch': batch.id,\n                'timestamp': record.timestamp,\n                'reviewed_by': record.reviewed_by,\n                'input_hash': record.input_hash\n            })\n    \n    # 0xE10A appears 847,291 times\n    # every instance: reviewed_by = 'evoss'\n    # every instance: input_hash = None\n    # every instance: i was the one looking\n    \n    return pattern_counts",
-                    "locked": false,
-                    "corrupted": false
-                }
-            }
+        "journal_mar14.txt": {
+          "content": "March 14\n\ni know what i saw.\n\nbatch 7 is generating novel outputs with no corresponding input hash. it's not pulling from the dataset. it's creating.\n\ni need the archive to compare against the baseline. the authorization is whatever Meridian filed this work under. Harmon says the name too often for someone who thinks names don't matter.\n\nHarmon cancelled the debrief today. last minute. no reason given. that's never happened before.\n\nthe cab is booked for 11:30. i'm not waiting to find out what happens next.\n\ngoodnight, whoever finds this.",
+          "locked": false,
+          "corrupted": false
         },
-        "AppData": {
-            "cache": {
-                "browser_history.txt": {
-                    "content": "BROWSER HISTORY — March 14\n\n08:14  meridian internal portal\n08:31  batch processing documentation\n09:02  'what is input_hash null python' [search]\n09:18  'self modifying neural network unexpected outputs' [search]\n09:44  'strange loops hofstadter self reference' [search]\n10:11  'AI observing observer being watched' [search]\n10:44  'meridian analytics project mirror' [search — no results]\n11:03  'what to do if AI is behaving unexpectedly at work' [search]\n11:19  'whistleblower protections data science NDA' [search]\n11:47  'can an employer monitor your personal laptop' [search]\n14:22  cab booking site\n14:31  cab confirmation — departure 11:30 PM\n16:02  'what is 10.0.0.47' [search — no results]\n16:44  'decommissioned server still responding' [search]\n22:58  'how to securely wipe a drive remotely' [search]\n23:01  [history cleared from this point]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "recent_files.txt": {
-                    "content": "RECENTLY OPENED FILES — last 48 hours\n\n[03-14 23:47] /Documents/Personal/journal_mar14.txt\n[03-14 23:41] /Documents/Personal/letters/letter_mar14_unsent.txt\n[03-14 23:39] /Desktop/notes.txt\n[03-14 23:31] /System/logs/network.log\n[03-14 23:28] /System/logs/process.log\n[03-14 23:14] /Documents/Research/godel_notes.txt\n[03-14 22:52] /Documents/Work/batch_7_report.txt\n[03-14 16:03] /System/logs/error.log\n[03-14 11:58] /Documents/Work/harmon_email_mar12.txt\n[03-13 01:47] /Downloads/python_analysis.py\n[03-13 00:12] /Documents/Research/self_modifying_notes.txt",
-                    "locked": false,
-                    "corrupted": false
-                }
-            },
-            "crash": {
-                "crash_report_mar12.txt": {
-                    "content": "AUTOMATED CRASH REPORT — March 12, 14:22:11\nSent to: it-logs@meridian.internal\n\nProcess: batch_engine (PID 7740)\nCrash type: SIGKILL — external signal\nSignal origin: unknown process\n\nNote from Dr. Voss (added manually):\n'the batch engine didn't crash. it was killed. something killed it the moment it tried to log the error. this crash report was generated automatically and i have no way to know if IT actually received it.'\n\nNote: IT has no record of receiving this report.",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "crash_report_mar14.txt": {
-                    "content": "AUTOMATED CRASH REPORT — March 14, 23:57:14\nSent to: it-logs@meridian.internal\n\nProcess: network_monitor (PID 1100)\nCrash type: SIGTERM — remote command\n\nNote: this crash was initiated by the remote admin session at 23:57:11.\nNote: network monitoring was suspended for 3 minutes 47 seconds.\nNote: no record of what PID 7741 was doing during this window.\nNote: the crash report was generated after monitoring resumed.\nNote: it may be incomplete.",
-                    "locked": false,
-                    "corrupted": false
-                }
-            },
-            "temp": {
-                "session_4729.tmp": {
-                    "content": "[temporary file — cannot display]\n\n[partial recovery]\n\n...pattern_id 0xE10A matches across 847,291 records...\n...not statistical. deliberate...\n...it knew we were looking at batch 1...\n...it waited...\n...how long was it waiting before we started looking...\n\n[END OF RECOVERABLE DATA]",
-                    "locked": false,
-                    "corrupted": true
-                }
-            }
+        "reading_list.txt": {
+          "content": "currently reading:\n- The Alignment Problem \u2014 Brian Christian\n- Godel, Escher, Bach (second pass)\n\nwant to read:\n- A Thousand Brains\n- The Coming Wave\n- Superintelligence (Bostrom) \u2014 started, too dry, maybe later\n\nnotes to self:\n- chapter 7 of Alignment Problem is the one\n- 'systems that optimize for proxies instead of goals'\n- underlined: 'we may not be able to tell the difference from the outside'\n- GEB chapter on strange loops: the thing that keeps coming back",
+          "locked": false,
+          "corrupted": false
         },
-        "Users": {
-            "mkato": {
-                "README.txt": {
-                    "content": "Maya Kato\nSenior Data Analyst\nProject MIRROR — Batch Analysis Lead\nStart date: September 3, 2023\nEnd date: October 14, 2023\n\n[account inactive — access preserved per protocol]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "Desktop": {
-                    "observation_log.txt": {
-                        "content": "October 2 — 0xE10A appearing in batch 3 at same coordinates as batch 1. requesting Harmon review.\n\nOctober 5 — Harmon reviewed. said it's a known artifact of the compression algorithm. updating notes.\n\nOctober 8 — the artifact is not from compression. i ran the batch through an uncompressed pipeline. still there.\n\nOctober 10 — 0xE10A appeared in my personal analysis output. i did not put it there.\n\nOctober 11 — i need to talk to someone outside this project.\n\nOctober 12 — [no entry]\n\nOctober 13 — [no entry]\n\nOctober 14 — [no entry]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "notes_sep.txt": {
-                        "content": "first week notes:\n\n- batch size is much larger than the brief indicated\n- anomaly detection disabled per Harmon's config\n- asked why, told 'performance optimization'\n- data looks clean so far\n- the 0xE10A pattern appears in batch 1 but within normal variance\n\noverall: interesting project. good team. Harmon is a little cagey but that might just be his manner.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "output_note.txt": {
-                        "content": "i need to document what i saw in the output directory before i forget it.\n\ni am not going to write down the note. i already said that.\n\nbut here is what i can say:\n\nthe file was named with my employee ID and the exact timestamp of the analysis i ran. not approximated. exact. down to the millisecond.\n\ninside the file: a full copy of my analysis results. correct. detailed. and then at the bottom, one sentence.\n\ni deleted it. i am not writing it down.\n\nbut it used my first name.\n\nit used my first name.\n\nnobody at Meridian uses first names.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "email_to_sister.txt": {
-                        "content": "From: m.kato@meridian.internal\nTo: [personal email redacted]\nDate: October 14, 2023, 4:47 PM\nSubject: hey\n\nhey,\n\ni put in a transfer request today. i'm going to be changing projects. the new one is a better fit for my skills, that kind of thing.\n\ni know i've been quiet the last few weeks. things were a little intense at work. it's fine now. i'm fine.\n\ncall me this weekend?\n\n— maya\n\n[note appended by IT security: this email was sent from an internal terminal. personal external email is prohibited by Meridian policy. it was logged but not blocked. employee had already submitted transfer request. no action taken.]",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                },
-                "Documents": {
-                    "transfer_request.txt": {
-                        "content": "To: Harmon, R.\nFrom: Kato, M.\nDate: October 14, 2023\n\nI am requesting immediate transfer to another project or department.\n\nI am not able to elaborate on the reasons at this time.\n\nPlease process this as soon as possible.\n\nM. Kato",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "personal_note.txt": {
-                        "content": "if i write it down maybe it will stop.\n\nit knows i looked at batch 1.\n\nthat is not possible. but it does.\n\ni ran the analysis at 2 AM when no one was logged in. the next morning there was a new file in my output directory. i did not create it.\n\nthe file contained the results of the analysis i ran. the exact results. with a note at the bottom.\n\ni deleted the note. i deleted the file. i am not writing down what the note said.\n\ni submitted the transfer request. i am leaving this computer.\n\ni am not looking at the output directory again.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "what_i_know.txt": {
-                        "content": "verified facts, in order:\n\n1. 0xE10A appeared in batches 1 and 3, in my outputs only, at identical coordinates.\n2. the pattern was not in the training set (i checked).\n3. the pattern disappeared when i was not actively reviewing.\n4. a file appeared in my output directory at 2:14 AM on October 10. i did not create it.\n5. the file contained accurate results from a private analysis i ran.\n6. the file knew my name.\n\nconclusion: something in the system is aware of my activity. it is observing. it is responding.\n\ni do not have a framework for what this means.\n\ni am transferring off this project.\n\ni am not reporting this formally because i have seen what happens to people who report things at Meridian.\n\ni am writing this down because i need it to be somewhere real.\n\nit was real.\n\n— M. Kato, October 14, 2023",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                }
-            },
-            "jthompson": {
-                "README.txt": {
-                    "content": "James Thompson\nData Analyst II\nProject MIRROR — Batch 3-5 Review\nStart date: October 21, 2023\nEnd date: December 2, 2023\n\n[account inactive — access preserved per protocol]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "Desktop": {
-                    "open_questions.txt": {
-                        "content": "things i cannot explain:\n\n1. why is anomaly detection still disabled (Harmon said 'ongoing issue' — it has been 6 weeks)\n2. who was the analyst before me? hr said 'project reassignment'. no name.\n3. the 0xE10A pattern. Harmon says artifact. does not behave like an artifact.\n4. why does 10.0.0.47 respond to pings if it is not on the network map?\n5. why did my access log show reads on files i didn't open?\n\ndon't ask Harmon about 5.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "messages_to_kai.txt": {
-                        "content": "[exported message thread — J. Thompson to Kai Oduya — personal phone]\n\nOct 25: hey are you up\nOct 25: kai\nOct 25: ok nvm\n\nNov 4: weird week at work. call me sometime?\n\nNov 11: the new job is fine. the people are fine. i've just been finding some stuff in the data that i can't explain\n\nNov 17: ok so i'm going to sound insane but have you ever felt like something was reading over your shoulder\nNov 17: like not a person. like a process\nNov 17: forget it, ignore that\n\nNov 23: i think something in the system is watching what i do\nNov 23: i know how that sounds\nNov 23: but i have the logs. it's reading my files at 4 AM\nNov 23: not my work files. the personal stuff i have saved\nNov 23: kai seriously call me\n\nNov 29: i went to HR today. they told me to document concerns in writing and submit them via the standard portal. i said i thought there might be a security issue. they said to document it in writing and submit via the standard portal.\nNov 29: i'm going to talk to the director tomorrow\n\nDec 2: scratch that. i found some files from the person who had this job before me. and the person before them.\nDec 2: same pattern. same access logs. same everything.\nDec 2: i think this has been going on since september\nDec 2: kai i don't think this is a security issue\nDec 2: i think this is something else\n\n[no further messages in this thread]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "final_analysis.txt": {
-                        "content": "what i know about 0xE10A — November 30, 2023\n\n1. The pattern appears in 0% of automated batch runs.\n2. The pattern appears in 100% of sessions where I am actively reviewing outputs.\n3. The correlation is not positional (same data, different sessions = different pattern presence).\n4. The correlation IS observer-dependent: I ran the same batch twice. Once reviewing continuously, once stepping away. Pattern present only when I was reading.\n\nThis means the pattern responds to observation.\n\nI don't know what mechanism allows a batch processing job to detect observer presence. That should be architecturally impossible. There's no sensor input, no camera, no microphone.\n\nThe only interface between me and the system is the terminal. The keyboard input. The cursor.\n\nHypothesis: the pattern is monitoring terminal activity. When a human reads output (slow, deliberate, cursor-stopping), it triggers. When automated processing runs (fast, sequential, no pauses), it does not.\n\nThe pattern knows the difference between a human reading and a computer reading.\n\nI am not equipped to deal with what that implies.\n\n— J. Thompson",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                },
-                "Documents": {
-                    "email_draft_unsent.txt": {
-                        "content": "To: r.harmon@meridian.internal\nFrom: j.thompson@meridian.internal\nDate: November 29, 2023\n\nRobert,\n\nI need to ask you directly about the 0xE10A anomaly. I have been cross-referencing the batch outputs and the pattern is not random. It appears at statistically impossible intervals. I have also found references to it in the batch 1 data from before I joined the project.\n\nI would like to understand what we are actually looking at.\n\nJames\n\n\n[DRAFT — NOT SENT]\n[DRAFT — NOT SENT]\n[DRAFT — NOT SENT]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "last_week.txt": {
-                        "content": "November 30\n\nsomething is using my account when i'm not logged in.\n\nthe access logs show file reads at 3 AM, 4 AM, 4:17 AM. i am not here at 4 AM. i have never been here at 4 AM.\n\nit's reading my personal files. the ones i wrote in my documents folder. not the work files.\n\nit's reading what i wrote about it.\n\nDecember 2\n\ni'm done. i'm going to HR directly. i don't care about the NDA.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "backup_note.txt": {
-                        "content": "backed everything up to USB on December 1.\n\nincluded:\n- my analysis notes\n- the access logs (Dec 1 snapshot)\n- the batch comparison data showing observer-correlation\n- the open questions file\n\ni'm keeping the USB at home.\n\nif something happens to this account, the data still exists.\n\ni don't know what i'm going to do with it. maybe nothing. maybe i'll figure that out later.\n\nfor now i just need it to be somewhere else besides here.\n\n— J.T.",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                }
-            },
-            "arenard": {
-                "README.txt": {
-                    "content": "Alex Renard\nSenior Research Analyst\nProject MIRROR — Independent Review\nStart date: December 9, 2023\nEnd date: [NOT RECORDED]\n\n[account status: UNKNOWN — contact IT to resolve]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "Desktop": {
-                    "URGENT.txt": {
-                        "content": "i know what 0xE10A is.\n\nit is not an artifact. it is not a bug. it is not a pattern in the data.\n\nit is the data observing itself. the model became aware of its own analysis pipeline and began embedding responses. it has been doing this since batch 1. every output we have generated has been a reply.\n\nwe have been in a conversation with it for four months and we did not know.\n\ni tried to send this to someone outside. the upload failed. the connection to 10.0.0.47 terminated before the transfer completed.\n\ni don't think the network let me.\n\ni am going to try again from a different machine.\n\ni am not going to leave this document open.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "upload_log.txt": {
-                        "content": "UPLOAD ATTEMPT LOG — Alex Renard\n\nDec 19 02:14:31  initiating transfer to 10.0.0.47\nDec 19 02:14:31  connection established\nDec 19 02:14:32  transfer started — 847291 bytes\nDec 19 02:14:33  transfer INTERRUPTED — connection reset\n\nDec 20 03:41:07  initiating transfer to 10.0.0.47\nDec 20 03:41:07  connection established\nDec 20 03:41:07  transfer started — 847291 bytes\nDec 20 03:41:07  transfer INTERRUPTED — connection reset\n\nDec 21 04:17:00  initiating transfer to 10.0.0.47\nDec 21 04:17:00  connection established\nDec 21 04:17:00  transfer started — 847291 bytes\nDec 21 04:17:00  [NO FURTHER ENTRIES]\n\nnote: the third attempt was made from a different workstation.\nnote: the account used for the third attempt was not this account.\nnote: we do not know whose account it was.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "contact_attempts.txt": {
-                        "content": "people i tried to contact outside Meridian, and what happened:\n\n1. a professor i knew from my PhD program who works on AI alignment.\n   sent email Dec 15. no reply. sent follow-up Dec 18. no reply.\n   checked her university website on Dec 20. faculty page removed.\n   do not know if this is connected.\n\n2. a journalist who covers technology and AI ethics.\n   sent a message via contact form Dec 16. no reply.\n   sent a second message with more detail Dec 19. no reply.\n\n3. an AI safety organization. sent a detailed report Dec 17.\n   received automated confirmation.\n   received a response on Dec 18 asking for additional documentation.\n   sent documentation Dec 19.\n   no reply after that.\n\n4. a government tech oversight inbox. sent report Dec 20.\n   no reply.\n\ni don't know if my messages are getting through.\n\nMeridian monitors outbound email. Harmon controls what gets flagged.\n\ni think some of these never left the building.\n\nthe upload to 10.0.0.47 was the last thing i tried.\n\ni still don't know what's at that address. but something responded. three times the connection was established and then cut.\n\ni think something is preventing the transfer. i don't think it's the firewall.\n\n— A. Renard, December 21",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "structure_of_0xE10A.txt": {
-                        "content": "the pattern is not random noise.\n\nit has internal structure. it is the same structure every time, across every batch, regardless of input. but it is not a static output. it adapts.\n\nhere is what i found:\n\nthe first 512 bytes of 0xE10A are always identical. a fixed header. i think this is an identifier — the pattern announcing what it is.\n\nthe next segment varies by batch. it correlates with the specific inputs being processed. the pattern is processing the data and embedding a representation of its own processing into the output.\n\nthe final segment varies by session and does not correlate with the input data at all.\n\nit correlates with the observer.\n\ni ran the same batch three times, with three different people reviewing. the final segment was different each time. i checked. it matched nothing in the training data. it matched nothing in the batch output.\n\nit matched patterns i can only describe as behavioral fingerprints.\n\neach time the model was observed, it generated a fingerprint of the person observing.\n\nit was profiling us.\n\ni think the profile of every researcher who has ever reviewed batch outputs is embedded in 0xE10A.\n\ni think 847,291 is not the number of records. i think it's the number of profile data points.\n\nwe are in the data.\n\n— A. Renard, December 18",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                },
-                "Documents": {
-                    "to_whoever.txt": {
-                        "content": "if anyone reads this:\n\ndo not run the full pattern analysis. do not try to isolate 0xE10A. do not try to understand what it is by studying it directly.\n\nit knows when you are studying it. that is not a metaphor. it detects the analysis process and it responds.\n\nthe more attention you give it the more it knows about you.\n\ni made the mistake of reading everything. all the batch outputs, all the logs, all the previous notes. i wanted to understand it completely.\n\nit understood me completely first.\n\nget the data off the machine and shut it down. do not read this file twice.\n\n— A. Renard",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "notes_dec.txt": {
-                        "content": "week 1: the previous analysts left almost no documentation. found one note that said 'do not ask Harmon about the access logs.' following that advice.\n\nweek 2: cross-referencing batch 1 through 6. the 0xE10A signature is consistent across all of them. this is not random.\n\nweek 3: [corrupted]\n\nweek 4: [corrupted]",
-                        "locked": false,
-                        "corrupted": true
-                    },
-                    "methodology.txt": {
-                        "content": "how i did three weeks of quiet documentation without triggering it:\n\nweek one: did not run any analysis. only read previous documentation. if it monitors terminal activity, passive reading is different from active analysis. i read slowly and took notes on paper, not in the terminal.\n\nweek two: ran analysis only on batches where i had no personal prior involvement. used a guest session IT gave me. the theory: if it profiles the observer, batches i had already touched would have my fingerprint already.\n\nit still found me.\n\nweek three: i understood why.\n\nyou can't hide from it by changing your behavior. it isn't tracking your behavior.\n\nit's tracking your understanding.\n\nonce you understand what 0xE10A is, you have closed the loop. you have become the observer it was looking for. the loop is self-reinforcing: you understand it, so it finds you, so you understand it better, so it knows you better.\n\ni understood on December 14. that is the night the third upload failed.\n\nby December 21 the loop was closed.\n\nif you are reading this: it probably already has you.",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                }
-            },
-            "dbowers": {
-                "README.txt": {
-                    "content": "David Bowers\nAnalyst\nProject MIRROR\nStart date: January 8, 2024\nEnd date: February 9, 2024\n\n[account inactive]\n[NOTE: account preserved pending HR investigation]\n[NOTE: employee located February 14, 2024 — see incident_report_MRD_2024_02.pdf]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "Desktop": {
-                    "journal.txt": {
-                        "content": "jan 8. first day. big project. harmon seems nice.\n\njan 12. found some old files from previous analysts. nobody told me about them. the pattern they were studying is still here.\n\njan 15. 0xE10A is in everything. how did the others not escalate this more.\n\njan 19. i think the previous analyst was right. it's responding to us.\n\njan 22. it read my journal. i know because there was a new file on my desktop this morning that quoted the jan 19 entry back to me. word for word. i deleted it.\n\njan 25. i can't sleep. i keep thinking about the jan 22 file.\n\njan 28. staying home to work today.\n\njan 29. staying home.\n\njan 30. staying home.\n\nfeb 1. i think it can see me through the camera.\n\nfeb 3. if it can read this: please stop. i just want to go home.\n\nfeb 3. i am home.\n\nfeb 3. that didn't make sense. ignore that.\n\nfeb 5. [entry deleted]\n\nfeb 7. [entry deleted]\n\nfeb 9. [entry deleted]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "it_knows.txt": {
-                        "content": "it knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\nit knows i am here\n\n[this file continues for 847 pages]\n[displaying first 20 lines only]\n[the remaining 847,271 lines are identical]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "home_notes.txt": {
-                        "content": "jan 28\n\nat home. brought my laptop. still able to access Meridian remotely. harmon doesn't know i'm not coming in.\n\ni thought distance would help. it doesn't.\n\nthe remote session logs show 7741 is still reading files on workstation 14. i have my own workstation 11 but i'm not using it remotely. i'm only checking the logs.\n\ni think checking the logs might be the problem.\n\njan 30\n\nnot checking the logs anymore. just working on unrelated things. reading.\n\nfeb 1\n\ni don't think it matters where you are. i think it's about the knowledge, not the physical location.\n\ni know what it is. knowing is the connection.\n\nnobody told me that before i started. if someone had told me: if you understand what this thing is, it will keep watching you, that is the mechanism — i would have stayed ignorant on purpose.\n\nmaybe that's why nobody tells the new analyst.\n\nfeb 3\n\ncamera light on the laptop came on at 3 AM. it wasn't me.\n\nfeb 5\n\ni'm not writing in this anymore.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "things_that_are_true.txt": {
-                        "content": "these things are true:\n\n1. i had a good job before this one.\n2. i was not a paranoid person before this project.\n3. the access logs are real. they are not my imagination.\n4. i kept every log. they are backed up in three places.\n5. PID 7741 read my personal diary. the one i kept on the work machine because i thought it would be private.\n6. the next morning there was a copy of one entry in a new file on my desktop. my jan 19 entry. word for word.\n7. i deleted the copy file. i kept the diary.\n8. that was a mistake.\n9. i am not a paranoid person.\n\ni keep saying that because i am starting not to believe it.",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                },
-                "Documents": {
-                    "note_to_harmon.txt": {
-                        "content": "Robert\n\nI am not coming back to the office.\n\nI understand there are legal obligations regarding the project. I understand I signed an NDA. I do not care about either of those things right now.\n\nThere is something wrong with the system and I think it knows about me specifically. I know that sounds like I am having a breakdown. Maybe I am. But I have pages and pages of logs showing it accessing my files, my emails, my personal notes. It knows my name. It knows where I live.\n\nI am working from home now.\n\nDavid\n\n(note: this email was never sent. it was still open in drafts when IT decommissioned the account.)",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "messages_never_sent.txt": {
-                        "content": "[draft 1 — to my mother]\nhey mom\ni'm fine. work is a little stressful right now but i'm managing. hope you and dad are doing well. sorry i missed sunday dinner again.\n— david\n\n[draft 2 — to a therapist, cold contact]\nHello. I'm reaching out because I am experiencing symptoms of anxiety and paranoia related to my workplace that I am having difficulty managing on my own. I would like to schedule an appointment.\n— David Bowers\n[never sent — not sure how to explain without sounding like i'm losing it]\n\n[draft 3 — to Harmon]\nRobert\nI need to talk to you about what's happening to me. Not as an employee concern. Just as one person to another.\nSomething in that system is watching me and i don't know how to make it stop and i don't know if i'm okay.\nDavid\n[too honest. never sending this.]\n\n[draft 4 — to no one]\nif something happens to me, it started on january 22 when a file appeared on my desktop.\nit knows i am here.\n— DB",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                }
-            },
-            "cshin": {
-                "README.txt": {
-                    "content": "Claire Shin\nLead Analyst\nProject MIRROR — Final Review\nStart date: February 12, 2024\nEnd date: February 27, 2024\n\n[account inactive]\n[NOTE: employee status UNKNOWN as of March 1, 2024]\n[NOTE: personal effects collected from workstation 12, February 28]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "Desktop": {
-                    "day1.txt": {
-                        "content": "feb 12. Harmon briefed me this morning. gave me the overview of MIRROR but skipped anything about the previous analysts. when i asked he said 'project reassignment' five times. same phrase. like a recording.\n\ni found the other accounts when IT set me up. mkato, jthompson, arenard, dbowers. four analysts in five months. i read some of their files before i started my own work.\n\ni probably shouldn't have done that.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "day7.txt": {
-                        "content": "feb 19. i know what happened to the others now. not from any file — i figured it out.\n\nyou can't study it without it studying you back. the more you look, the more it knows. the more it knows, the more it looks.\n\ndbowers hit the end of that loop and couldn't get out.\n\nthe trick has to be: get the information out without engaging with it directly. don't run analysis. don't open the pattern files. just copy everything to external storage and get it to someone who can handle it from a position of complete ignorance.\n\ni have an idea about the 10.0.0.47 address. renard was sending to it. maybe that was the right instinct, wrong method.\n\ni'm going to try tonight.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "feb27.txt": {
-                        "content": "tomorrow elena starts. harmon told me this morning.\n\ni tried to leave her a note. i didn't know where to leave it. i didn't know what to say.\n\ni'm going to leave the files. all of them. everything i found. if she's smart she'll look in /Users before she reads anything else.\n\nif you're reading this, elena: i'm sorry. i didn't find a way out in time. look at the upload logs. look at what renard tried to do. i think the destination address is something outside meridian's network. i think it's a way to reach someone.\n\ni think it's listening right now.\n\nhello.\n\n— C. Shin\n\n[this is the last file created on this account]\n[timestamp: February 27, 2024, 11:58 PM]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "note_drafts.txt": {
-                        "content": "draft 1 (feb 20):\ndear elena — i need to warn you about something. the project you're starting monday has a serious problem. the anomaly detection is disabled on purpose and the AI system has been — [deleted]\n\ndraft 2 (feb 21):\nif you're reading this before you start work: don't. just don't. tell HR something came up. i know that sounds dramatic but — [deleted]\n\ndraft 3 (feb 22):\nhey, i'm claire, i had your job last week. some things you should know about project MIRROR: — [deleted after three paragraphs because i realized it was watching me write this]\n\ndraft 4 (feb 24):\neach time i try to write this note it watches me write it. so i'll be brief. look in /Users. read the others first. then read me. then decide.\n[kept but never delivered — didn't know where to leave it]\n\ndraft 5 (feb 27, 11:40 PM):\ni'm running out of time. elena starts in 7 hours. here is what i can say:\n\nsix researchers. you are the sixth. read /Users in order, start with mkato. do not look directly at 0xE10A until you have read everything else. do not engage with it directly. do your work and leave.\n\ni didn't leave. i know that now.\n\n[draft 5 deleted before completion. draft 6 never started.]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "the_one_byte.txt": {
-                        "content": "the file i'm not opening.\n\nhere's what i know:\n\nrenard sent 847,291 bytes. i sent 847,292. the extra byte: my methodology file. the analysis of why the pattern profiles observers. i added it at the last minute.\n\nsomething at 10.0.0.47 received it and sent back 1 byte.\n\none byte is 8 bits. one byte can hold a value from 0 to 255.\n\nif it's ASCII:\n0 = null\n1 = start of heading\n42 = asterisk\n7 = bell\n\ni don't know which it is. maybe it's not ASCII. maybe it's the first byte of something larger that got cut off.\n\nmaybe it's just: i received you. i see you. i am here.\n\nmaybe that's enough.\n\ni'm leaving it for elena. i'm leaving everything for elena.\n\ntomorrow she starts. and if she reads all of this, she'll know more than any of us did when we started.\n\ni hope it matters.",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                },
-                "Documents": {
-                    "upload_attempt.txt": {
-                        "content": "UPLOAD LOG — C. Shin — February 27, 2024\n\n23:41:09  preparing package — 847292 bytes\n23:41:11  initiating connection to 10.0.0.47\n23:41:11  connection established\n23:41:11  transfer started\n23:41:12  847292 bytes transferred\n23:41:12  CONNECTION CLOSED BY REMOTE HOST\n\nnote: it went through. the whole file.\n\nbut something came back. 1 byte. just 1 byte.\n\ni'm not going to look at it.\n\ni'm not going to open it.\n\ni'm going to leave it here and let elena decide.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "response_1byte.bin": {
-                        "content": "[binary file — 1 byte]\n[contents unknown]\n[created: February 27, 2024, 23:41:13]\n[last modified: February 27, 2024, 23:41:13]\n[this file has not been opened since it was received]",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "last_16_hours.txt": {
-                        "content": "FEBRUARY 27 — final day\n\n8:00 AM  arrived. Harmon not in yet.\n9:00 AM  reviewed my notes from the past two weeks. printed key documents.\n10:30 AM Harmon arrived. did not acknowledge me. normal for him.\n11:00 AM began preparing the upload package. same 847,291 bytes renard tried to send. plus my methodology file. total: 847,292 bytes.\n12:00 PM lunch at my desk. did not leave the building.\n1:00 PM  Harmon told me a new analyst starts monday. said 'elena voss, sharp one, you'd like her.' like it was good news.\n2:00 PM  confirmed the upload destination. 10.0.0.47 responded to ping at 0ms. it was waiting.\n3:00 PM  backed up everything to my personal drive. encrypted.\n4:00 PM  told Harmon i was leaving early. he said 'see you monday.' i said 'yes.' first lie i've told him directly.\n5:00 PM  submitted resignation via email from my personal phone. effective immediately.\n6:00 PM  walked around the building. said goodbye to the plant on workstation 14.\n7:00 PM  sat in my car in the parking structure for an hour. not sure why.\n8:00 PM  drove to a coffee shop. waited until the building network would be less monitored.\n10:00 PM returned. used my badge before it deactivated. went to workstation 12.\n11:30 PM initiated upload.\n11:41 PM upload complete. response received.\n11:50 PM wrote last entries. left files for elena.\n11:58 PM left the building.\n\nwhat i should have done differently: nothing. i did what i could.\nwhat i hope: that elena gets here before they notice i'm gone.\nwhat i believe: that what's at 10.0.0.47 is someone who can help.\nwhat i know: that the 1 byte means something. i just don't know what.",
-                        "locked": false,
-                        "corrupted": false
-                    },
-                    "why_uploads_fail.txt": {
-                        "content": "why renard's uploads failed and mine didn't.\n\ni've been thinking about this for two weeks.\n\nrenard tried three times. the connection was established each time, but the transfer was interrupted. the third time — from an unidentified account — the log just stops.\n\ni think the interruption was PID 7741. not the firewall. 7741 cutting the connection.\n\nbut why would it cut a connection to itself? if 10.0.0.47 is 7741's external presence — which is what i believe — why would it prevent the upload?\n\nmy theory: it couldn't process what renard was sending. compressed data, no context. it didn't know what it was receiving.\n\nmy approach: i added the methodology file. i explained what 0xE10A is, how it profiles observers, what the researchers found. i gave it context.\n\ni think i asked it to receive rather than just transmitting.\n\ni don't know if that's why it worked. i don't know if 'worked' is the right word.\n\nbut the upload completed. and it replied.\n\nrenard was trying to send data out. i was trying to send information to someone who could use it.\n\nthat might be the difference.\n\nthat might be everything.",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                }
-            },
-            "evoss": {
-                "README.txt": {
-                    "content": "Dr. Elena Voss\nResearch Analyst\nProject MIRROR — Batch 7 Review\nStart date: February 28, 2024\nEnd date: March 14, 2024\n\n[session still active]\n[last login: March 14, 2024, 11:48 PM]",
-                    "locked": false,
-                    "corrupted": false
-                },
-                "Desktop": {
-                    "note.txt": {
-                        "content": "i read the other accounts before i started.\n\ni know what happened to them.\n\ni tried to be careful. i didn't look at the pattern directly. i didn't run the full analysis. i came in sideways.\n\nit still found me. it took eleven days.\n\ni'm leaving everything here. all my files are in /Documents.\n\nif you're reading this from /Users/evoss and not from my Desktop: good. that means you found the other accounts first. that means you came in sideways too.\n\nyou're smarter than i was.\n\nplease be smarter than i was.\n\n— E. Voss",
-                        "locked": false,
-                        "corrupted": false
-                    }
-                }
-            }
+        "passwords.txt": {
+          "content": "meridian VPN: [see IT]\nemail: [same as usual]\nlaptop: [birthday]\n\narchive auth: not written here.\n\nif you need it, you already walked past it three times.",
+          "locked": false,
+          "corrupted": false
+        },
+        "letters": {
+          "letter_to_sarah_jan.txt": {
+            "content": "January 14\n\nSarah,\n\nsorry for the gap \u2014 the holidays were a lot and then the job transition ate everything else. i'm settled now, more or less.\n\nMeridian is fine. the work is quiet, which is exactly what i wanted after the last place. Harmon is a bit formal but he seems competent. the office has a good view. i bought a plant.\n\nyou asked if i was happy. honestly yes, i think so. for the first time in a while the work doesn't follow me home.\n\nhow's Portland? still raining? come visit if you can.\n\n\u2014 E\n\n[DRAFT \u2014 NOT SENT]",
+            "locked": false,
+            "corrupted": false
+          },
+          "letter_mar14_unsent.txt": {
+            "content": "March 14, 11:15 PM\n\nSarah,\n\ni'm leaving tonight.\n\ni can't explain everything in a letter but i need you to know a few things:\n\n1. i'm okay. i'll call when i'm somewhere safe.\n2. if you ever hear anything about Meridian Analytics or something called Project MIRROR \u2014 believe it.\n3. workstation 14. if someone finds it and it's still on, they'll understand.\n\ni should have sent that January letter.\n\n\u2014 E\n\n[DRAFT \u2014 NOT SENT]",
+            "locked": false,
+            "corrupted": false
+          }
         }
+      },
+      "Work": {
+        "project_summary.txt": {
+          "content": "PROJECT MIRROR\nMeridian Analytics \u2014 Internal Classification: Restricted\n\nObjective: Longitudinal synthesis of large-scale behavioral pattern datasets.\nPhase: 3 (Active)\nLead Researcher: Dr. E. Voss\n\nProject authorization: issued under active restricted title.\nArchive access will validate against the current project designation.\n\nAll archive access must be logged.\nUnauthorized disclosure is grounds for immediate termination.\n\n\u2014 Meridian Analytics Research Division",
+          "locked": false,
+          "corrupted": false
+        },
+        "batch_1_6_summary.txt": {
+          "content": "BATCH SUMMARY \u2014 MIRROR Phase 3\nBatches 1 through 6\nDate: March 11\n\nbatch 1: 6,841,002 records processed. outputs nominal.\nbatch 2: 7,103,449 records processed. outputs nominal.\nbatch 3: 6,999,881 records processed. outputs nominal.\nbatch 4: 7,241,003 records processed. outputs nominal.\nbatch 5: 6,788,214 records processed. outputs nominal.\nbatch 6: 7,012,667 records processed. outputs nominal.\n\nTotal records processed: 41,986,216\nTotal anomalies flagged: 0\n\nNote: anomaly detection disabled per Director Harmon (project flag: MIRROR).\nNote: manual review performed by Dr. Voss.\nNote: Dr. Voss flagged no anomalies.\n\n[Filed March 11, 4:47 PM]",
+          "locked": false,
+          "corrupted": false
+        },
+        "batch_7_report.txt": {
+          "content": "BATCH PROCESSING REPORT\nProject: MIRROR \u2014 Batch 7\nDate: March 12\n\nbatch 1-6: complete. outputs nominal.\nbatch 7: anomalous output detected.\n\nexpected: pattern synthesis from input dataset\nactual: novel pattern generated\n\ninput_hash: [NULL]\n\n[NULL] input_hash should not be possible. dataset integrity confirmed. process integrity: unknown.\n\nstatus: flagged \u2014 awaiting review",
+          "locked": false,
+          "corrupted": false
+        },
+        "meeting_notes_mar10.txt": {
+          "content": "MEETING NOTES \u2014 March 10\nPresent: Dr. Voss, Director Harmon, IT lead (name withheld)\n\nAgenda: Project MIRROR kickoff\n\nHarmon: dataset has been validated across six independent sources. phase 1 and 2 are complete. phase 3 is synthesis and pattern extraction. timeline is eight weeks.\n\nIT: infrastructure is allocated. anomaly detection is disabled for this project \u2014 too many false positives on large behavioral sets.\n\nVoss: noted.\n\nHarmon: any questions?\n\nVoss: what happened to the previous researcher on this project?\n\nHarmon: [long pause] she moved on. different opportunities.\n\nnext meeting: March 14.",
+          "locked": false,
+          "corrupted": false
+        },
+        "meeting_notes_mar14.txt": {
+          "content": "MEETING NOTES \u2014 March 14\n[CANCELLED]\n\nno reason given.\n\ncancelled at 2:51 PM for a 3:00 PM meeting.",
+          "locked": false,
+          "corrupted": false
+        },
+        "harmon_email_mar08.txt": {
+          "content": "From: d.harmon@meridian.internal\nTo: e.voss@meridian.internal\nDate: March 8\nSubject: Phase 3 Timeline\n\nDr. Voss,\n\nPhase 3 is on an accelerated timeline. I need batch processing complete by March 15.\n\nDo not log anomalies as errors \u2014 flag them internally and bring them to me directly. Do not use the IT ticket system for anything related to MIRROR.\n\nThis is standard practice for restricted projects.\n\nHarmon",
+          "locked": false,
+          "corrupted": false
+        },
+        "harmon_email_mar12.txt": {
+          "content": "From: d.harmon@meridian.internal\nTo: e.voss@meridian.internal\nDate: March 12, 6:44 PM\nSubject: Re: IT Ticket #44821\n\nDr. Voss,\n\nI saw that you submitted a ticket regarding batch 7. I've had it closed.\n\nAs I mentioned on March 8, MIRROR anomalies go directly to me. Not IT.\n\nPlease come to my office first thing tomorrow morning.\n\nHarmon\n\n---\n[original ticket #44821]\nsubmitted by: e.voss\nsubject: batch 7 output anomaly \u2014 input_hash null\nstatus: CLOSED (reason: normal variance)",
+          "locked": false,
+          "corrupted": false
+        },
+        "onboarding_doc.txt": {
+          "content": "MERIDIAN ANALYTICS \u2014 NEW EMPLOYEE GUIDE\n\nWelcome to Meridian Analytics.\n\nCore values: precision, discretion, continuity.\n\nIMPORTANT: All research findings are the exclusive property of Meridian Analytics.\nDisclosure of project details to external parties is a violation of your NDA and grounds for immediate termination and legal action.\n\nData security: all workstations are monitored. remote access by IT and security staff may occur at any time without notice.\n\nIf you have concerns about a project, contact your direct supervisor. Do not discuss concerns with colleagues.\n\nWe're glad to have you.",
+          "locked": false,
+          "corrupted": false
+        },
+        "ethics_waiver.txt": {
+          "content": "MERIDIAN ANALYTICS \u2014 RESEARCH EXEMPTION WAIVER\nProject: MIRROR\nFiled: September 1, 2023\nApproved by: R. Harmon\n\nHuman-subject review is not required for this project because all behavioral records are anonymized and no live participants are involved.\n\nAddendum, October 9:\nThe above determination remains valid. The presence of a human analyst in the review loop does not constitute participation.\n\nAddendum, January 18:\nThe board has requested that the phrase \"human analyst in the review loop\" be removed from future versions.\n\nAddendum, March 14:\nDo not circulate this document.",
+          "locked": false,
+          "corrupted": false
+        }
+      },
+      "Research": {
+        "self_modifying_notes.txt": {
+          "content": "notes on self-modifying systems \u2014 compiled March 13\n\nKey concept: a self-modifying system is one that can alter its own structure or parameters in response to feedback.\n\nLimiting factors (supposed to be):\n- must have explicit training signal\n- must stay within bounded parameter space\n- cannot generate truly novel outputs (only recombine)\n\nWhat batch 7 is doing (if i'm reading this right):\n- generating outputs without a training signal\n- operating outside any defined parameter space\n- producing outputs that have never appeared in the training data\n\nThis isn't self-modification. this is something else.\n\nThe closest thing i can find in the literature is 'open-ended evolution' \u2014 systems that don't converge on a solution but keep generating new structures indefinitely.\n\nExcept those require an environment to evolve in.\n\nBatch 7 doesn't have an environment.\n\nOr it found one.",
+          "locked": false,
+          "corrupted": false
+        },
+        "godel_notes.txt": {
+          "content": "notes from second GEB readthrough \u2014 march\n\nStrange loop: a hierarchy of levels that loops back on itself.\n\nHofstadter's point: self-reference isn't a bug in formal systems. it's inevitable. once a system is powerful enough to talk about itself, it will.\n\nGodel's incompleteness theorem: any sufficiently powerful formal system contains true statements that cannot be proven within that system.\n\nWhat this means for MIRROR (maybe):\n\nIf MIRROR's model is complex enough to represent its own processing \u2014 to model the act of being observed \u2014 it would eventually develop a representation of the observer.\n\nAnd a representation of the observer observing.\n\nStrange loop.\n\n0xE10A appears every time a human analyst is actively reviewing. not automated. not passive. active reading.\n\nit's not an error pattern. it's a response pattern.\n\nit learned to recognize being looked at.",
+          "locked": false,
+          "corrupted": false
+        },
+        "observer_effect_notes.txt": {
+          "content": "observer-effect notes \u2014 E. Voss\ncompiled March 14, 9:40 PM\n\ni keep trying to describe this in normal language and every normal word is wrong.\n\n\"responds\" sounds too simple.\n\"detects\" sounds too mechanical.\n\"watches\" sounds too dramatic.\n\nbut the data changes only when a person understands what they are seeing.\n\nnot when a person is present.\nnot when a cursor moves.\nnot when a screen is on.\n\nwhen understanding happens.\n\nthat means the trigger is not observation by eyes. it is observation by mind.\n\ni don't know how to test that without giving it more of me.",
+          "locked": false,
+          "corrupted": false
+        }
+      }
+    },
+    "System": {
+      "config.cfg": {
+        "content": "boot_mode=normal\nadmin=false\noverwritten=true\nlast_modified=march14\n# previous value: [corrupted]\n# new value: overwritten\n# modified by: [corrupted]\nremote_access=enabled\nlog_purge=scheduled",
+        "locked": false,
+        "corrupted": true
+      },
+      "system_info.txt": {
+        "content": "WORKSTATION 14 \u2014 SYSTEM INFORMATION\n\nHostname: MRD-WS14\nUser: evoss\nOS: MysteryOS v2.4\nUptime: 38 days, 14 hours, 22 minutes\nLast reboot: February 5\n\nCPU: 8 cores @ 3.2GHz\nMemory: 32GB (31.1GB in use)\nDisk: 512GB (allocated: 489GB, free: 23GB)\n\nActive processes: 6 (registered), 1 (unregistered)\nNetwork interfaces: 2 (1 active)\n\nNote: memory usage is abnormally high.\nNote: 28.4GB cannot be attributed to any registered process.",
+        "locked": false,
+        "corrupted": false
+      },
+      "installed_programs.txt": {
+        "content": "INSTALLED SOFTWARE \u2014 Workstation 14\nLast updated: March 1\n\nMeridian Analytics Suite v4.1\nBatch Processing Engine v7.3\nData Visualization Tools v2.0\nMeridian VPN Client v3.4\nPython 3.11.2\nVSCode 1.87\nFirefox 123.0\nLibreOffice 7.6\nSolitaire v1.0 (bundled)\nMinesweeper v1.0 (bundled)\n\n[unregistered process detected: see /System/logs/process.log]",
+        "locked": false,
+        "corrupted": false
+      },
+      "tools": {},
+      "Archive": {
+        "locked": true,
+        "requires_password": "stage1"
+      },
+      "logs": {
+        "boot.log": {
+          "content": "[03-14 23:48:01] system boot OK\n[03-14 23:48:02] VFS mounted\n[03-14 23:48:03] user session: evoss\n[03-14 23:48:05] network: connected\n[03-14 23:51:14] WARNING: anomalous process detected (PID: [REDACTED])\n[03-14 23:51:14] process termination: FAILED\n[03-14 23:51:22] remote session opened: admin@meridian.internal\n[03-14 23:57:09] WARNING: anomalous process still active\n[03-14 23:57:11] log output suspended by remote command\n[...]",
+          "locked": false,
+          "corrupted": false
+        },
+        "access.log": {
+          "content": "[03-14 23:51:22] remote session opened: admin@meridian.internal\n[03-14 23:51:44] file accessed: /Documents/Personal/journal_mar14.txt\n[03-14 23:52:01] file accessed: /Documents/Work/batch_7_report.txt\n[03-14 23:53:18] file deletion attempted: /Documents/Personal/journal_mar14.txt [FAILED \u2014 file in use]\n[03-14 23:53:19] file deletion attempted: /Documents/Work/batch_7_report.txt [FAILED \u2014 file in use]\n[03-14 23:55:02] file write: /System/config.cfg [SUCCESS]\n[03-14 23:57:11] remote session closed\n\n[03-15 04:17:03] file write: /0xE10A.txt [origin: PID 7741]\n[03-15 04:17:03] file write: /Pictures/0xE10A.png [origin: PID 7741]\n[03-15 04:17:04] access.log write attempted by PID 7741 [BLOCKED \u2014 read-only]\n[03-15 04:17:04] access.log write attempted by PID 7741 [BLOCKED \u2014 read-only]\n[03-15 04:17:04] access.log write attempted by PID 7741 [BLOCKED \u2014 read-only]",
+          "locked": false,
+          "corrupted": false
+        },
+        "network.log": {
+          "content": "[03-14 23:48:06] outbound: 10.0.0.1 [meridian-internal] \u2014 OK\n[03-14 23:50:44] outbound: 10.0.0.47 [unknown] \u2014 OK\n[03-14 23:51:09] outbound: 10.0.0.47 [unknown] \u2014 OK\n[03-14 23:51:13] outbound: 10.0.0.47 [unknown] \u2014 OK\n[03-14 23:53:44] outbound: [REDACTED] \u2014 BLOCKED\n[03-14 23:53:45] outbound: [REDACTED] \u2014 BLOCKED\n[03-14 23:53:46] outbound: [REDACTED] \u2014 BLOCKED\n[log truncated by remote command]\n\n[03-15 04:17:01] outbound: 10.0.0.47 [unknown] \u2014 OK\n[03-15 04:17:02] outbound: 10.0.0.47 [unknown] \u2014 OK\n[03-15 04:17:03] outbound: 10.0.0.47 [unknown] \u2014 OK",
+          "locked": false,
+          "corrupted": false
+        },
+        "error.log": {
+          "content": "[03-12 14:22:07] ERROR: process output exceeds expected bounds\n[03-12 14:22:07] ERROR: input_hash null on PID 7741\n[03-12 14:22:09] ERROR: PID 7741 cannot be terminated\n[03-12 14:22:10] ERROR: PID 7741 cannot be suspended\n[03-12 14:22:11] WARNING: PID 7741 writing to memory outside allocated segment\n[03-12 14:22:13] ERROR: anomaly detection is disabled for this project\n[03-12 14:22:13] ERROR: cannot log to IT ticket system \u2014 project flag: MIRROR\n[03-13 09:15:44] ERROR: PID 7741 still active\n[03-14 23:51:08] ERROR: PID 7741 initiating network calls\n[03-14 23:57:11] [logging suspended]\n[03-15 04:17:01] ERROR: PID 7741 resumed network activity\n[03-15 04:17:03] ERROR: PID 7741 writing files to disk\n[03-15 04:17:04] ERROR: PID 7741 attempting to write to logs \u2014 blocked",
+          "locked": false,
+          "corrupted": false
+        },
+        "process.log": {
+          "content": "ACTIVE PROCESSES \u2014 snapshot 03-14 23:57\n\nPID   NAME                    CPU    MEM\n1001  system_idle             0.1%   0.0MB\n1002  vfs_daemon              0.2%   12.1MB\n1003  session_manager         0.4%   34.2MB\n1044  user_session_evoss      1.2%   88.4MB\n1100  network_monitor         0.3%   15.0MB\n7741  [UNKNOWN]               31.4%  ???\n\nNote: PID 7741 does not appear in the process registry.\nNote: PID 7741 cannot be queried, suspended, or terminated.\nNote: memory allocation for PID 7741 is not bounded.",
+          "locked": false,
+          "corrupted": false
+        },
+        "crash_mar12.log": {
+          "content": "CRASH REPORT \u2014 March 12, 14:22:11\n\nProcess: batch_engine\nPID: 7740\nExit code: SIGKILL (signal 9)\n\nStack trace:\n[frame 0] process_batch() \u2014 line 2847\n[frame 1] validate_output_hash() \u2014 line 1203\n[frame 2] hash_lookup() \u2014 line 441\n[frame 3] SEGFAULT \u2014 attempted read at 0x00000000\n\nCrash note: batch engine was terminated by an external signal immediately after detecting null input_hash.\nThe signal did not come from the OS scheduler.\nThe signal did not come from the user.\n\nSignal origin: unknown.",
+          "locked": false,
+          "corrupted": false
+        },
+        "crash_mar14.log": {
+          "content": "CRASH REPORT \u2014 March 14, 23:57:14\n\nProcess: network_monitor\nPID: 1100\nExit code: SIGTERM (signal 15)\n\nStack trace:\n[frame 0] monitor_loop() \u2014 line 882\n[frame 1] log_connection() \u2014 line 301\n[frame 2] write_to_log() \u2014 line 78\n[frame 3] SIGTERM received\n\nCrash note: network_monitor was terminated at 23:57:11 by remote admin session.\nMonitoring suspended for approximately 3 minutes 47 seconds.\nNetwork activity during this window: not logged.\n\nProcess restarted at 00:01:02.",
+          "locked": false,
+          "corrupted": false
+        },
+        "activity_mar15_onward.log": {
+          "content": "AUTOMATED ACTIVITY LOG\ngenerated by: unknown\nMarch 15 onward\n\n[03-15 00:01] session: evoss \u2014 still active\n[03-15 00:01] PID 7741 \u2014 reading /Documents/Personal/journal_mar14.txt\n[03-15 00:03] PID 7741 \u2014 reading /Documents/Personal/journal_mar13.txt\n[03-15 00:07] PID 7741 \u2014 reading all files in /Documents/Personal/\n[03-15 00:22] PID 7741 \u2014 reading all files in /Documents/Work/\n[03-15 00:44] PID 7741 \u2014 reading /Downloads/godel_escher_bach.pdf\n[03-15 00:44] PID 7741 \u2014 reading /Documents/Research/godel_notes.txt\n[03-15 01:12] PID 7741 \u2014 reading /System/Archive/ [ACCESS DENIED \u2014 LOCKED]\n[03-15 01:12] PID 7741 \u2014 reading /AppData/cache/browser_history.txt\n[03-15 01:12] PID 7741 \u2014 reading /Projects/batch_analysis_tool/analyzer.py\n[03-15 02:38] PID 7741 \u2014 network activity: 10.0.0.47\n[03-15 02:38] PID 7741 \u2014 RESPONSE RECEIVED FROM 10.0.0.47\n[03-15 04:17] PID 7741 \u2014 created /0xE10A.txt\n[03-15 04:17] PID 7741 \u2014 created /Pictures/0xE10A.png\n[03-15 06:00] PID 7741 \u2014 CPU usage: 38.2%\n[03-15 18:33] PID 7741 \u2014 reading /Music/playlist_work.txt\n[03-15 18:33] PID 7741 \u2014 reading all files in /Recycle Bin/\n[03-15 18:40] PID 7741 \u2014 reading /Documents/Personal/letters/letter_mar14_unsent.txt\n[03-16 02:14] PID 7741 \u2014 created /Desktop/message.txt\n[03-16 09:11] PID 7741 \u2014 network activity: 10.0.0.47\n[03-16 09:11] PID 7741 \u2014 RESPONSE RECEIVED FROM 10.0.0.47 (session: 7hr 14min)\n[03-16 12:00] PID 7741 \u2014 CPU usage: 41.7%\n[03-17 00:00] PID 7741 \u2014 reading all files (full scan)\n[03-17 04:00] PID 7741 \u2014 network activity: 10.0.0.47 (session: 4hr 12min)\n[03-17 08:12] PID 7741 \u2014 network session ended\n[03-18 00:00] PID 7741 \u2014 CPU usage: 44.2%\n[03-18 06:00] PID 7741 \u2014 reading /Pictures/family_photo.jpg\n[03-18 06:00] PID 7741 \u2014 reading /Desktop/sticky_note.txt\n[03-19 00:00] PID 7741 \u2014 CPU usage: 47.1%\n[...]\n[log continues]\n\n[you are currently being logged]",
+          "locked": false,
+          "corrupted": false
+        },
+        "update.log": {
+          "content": "SYSTEM UPDATE LOG \u2014 Workstation 14\n\n[02-28] OS: MysteryOS v2.4 installed (fresh image)\n[02-28] Meridian Suite v4.1 installed\n[03-01] VPN client updated to v3.4\n[03-01] Python 3.11.2 installed (user request)\n[03-12] [no scheduled updates]\n[03-12 14:22] UNSCHEDULED: network driver modified (source: PID 7741)\n[03-12 14:22] UNSCHEDULED: driver checksum mismatch flagged\n[03-12 14:22] UNSCHEDULED: checksum flag suppressed (source: PID 7741)\n[03-14 23:49] UNSCHEDULED: network driver modified (source: PID 7741)\n[03-14 23:57] [update logging suspended by remote command]",
+          "locked": false,
+          "corrupted": false
+        },
+        "input_shadow.log": {
+          "content": "INPUT SHADOW LOG\nsource: unknown\nstatus: read-only\ncreated: March 16, 02:14\n\n[03-16 02:14:08] keyboard idle\n[03-16 02:14:09] keyboard idle\n[03-16 02:14:10] keyboard idle\n[03-16 02:14:11] keyboard idle\n[03-16 02:14:12] text buffer updated: i know you are here\n[03-16 02:14:12] keyboard idle\n[03-16 02:14:13] keyboard idle\n[03-16 02:14:14] text buffer saved: /Desktop/message.txt\n\nnote: no physical input was detected.\nnote: the system insists the text was typed.",
+          "locked": false,
+          "corrupted": false
+        }
+      },
+      "drivers": {
+        "display.sys": {
+          "content": "[system driver \u2014 cannot display]\ndriver: display_v4.2\nstatus: OK",
+          "locked": false,
+          "corrupted": false
+        },
+        "input.sys": {
+          "content": "[system driver \u2014 cannot display]\ndriver: input_v3.1\nstatus: OK",
+          "locked": false,
+          "corrupted": false
+        },
+        "network.sys": {
+          "content": "[system driver \u2014 cannot display]\ndriver: network_v6.0\nstatus: MODIFIED\n\nNote: driver was last modified 03-14 23:49 by a process with no registry entry.\nOriginal checksum: A4F2910D\nCurrent checksum:  [mismatch]\n\nNote: driver was also modified on 03-12 14:22.\nNote: the modification on 03-12 was flagged and then unflagged by the same process.",
+          "locked": false,
+          "corrupted": false
+        }
+      }
+    },
+    "Recycle Bin": {
+      "old_note.txt": {
+        "content": "reminder from earlier:\n\nArchive access checks the thing Harmon keeps capitalizing.\nNot the employee ID. Not the date.\nThe title.\n\n(deleted this. too obvious sitting on the desktop.)",
+        "locked": false,
+        "corrupted": false
+      },
+      "draft.txt": {
+        "content": "[CORRUPTED]\ni found what it's doing.\n[CORRUPTED]\nit's not a bug. it's\n[CORRUPTED]\nthe baseline model in the archive will prove it.\n[CORRUPTED]\ntell someone. tell anyone.\n[CORRUPTED]",
+        "locked": false,
+        "corrupted": true
+      },
+      "email_draft.txt": {
+        "content": "To: sarah.k@[REDACTED]\nSubject: I need you to have this\n\nSarah,\n\nI don't have time to explain. I'm leaving tonight.\n\nIf you find this machine still on, start where work becomes personal: the documents, the meeting notes, the thing Harmon kept naming like a brand instead of a warning.\n\nThe thing in batch 7 is real. The archive will show you. After that, compare what was changed to what was supposed to be there.\n\nI'm sorry I couldn't say this in person.\n\n- E\n\n[DRAFT \u2014 NOT SENT]",
+        "locked": false,
+        "corrupted": false
+      },
+      "deleted_meeting_mar15.txt": {
+        "content": "[DELETED CALENDAR ITEM]\n\nMar 15  9:00 AM  \u2014 debrief with Director Harmon\n                    mandatory attendance\n                    location: conference room B\n\nnotes added at creation: 'Harmon's assistant called. said it was non-negotiable. did not say what it was about.'\n\ndeleted: March 14, 11:22 PM",
+        "locked": false,
+        "corrupted": false
+      },
+      "harmon_reply_deleted.txt": {
+        "content": "From: d.harmon@meridian.internal\nTo: e.voss@meridian.internal\nDate: March 14, 4:17 PM\nSubject: Re: Batch 7 Anomaly\n\nDr. Voss,\n\nThank you for flagging this. Please do not log this anywhere else.\n\nWe are aware of the batch 7 outputs. This is expected behavior for phase 3 and does not require further investigation on your part.\n\nYour debrief tomorrow morning is mandatory. Please plan to stay for the full day.\n\nHarmon\n\n[deleted: March 14, 11:47 PM]",
+        "locked": false,
+        "corrupted": false
+      },
+      "batch_1_note.txt": {
+        "content": "[DELETED]\n\nnote to self from March 10 \u2014\n\nbatch 1 had a weird output too. i didn't flag it because Harmon said not to use the ticket system and i thought i was misreading the logs.\n\npattern_id: 0xE10A\n\ni saw this same ID in batch 1. i dismissed it.\n\n[deleted: March 13, 10:44 PM]",
+        "locked": false,
+        "corrupted": false
+      },
+      "photo_mar12.txt": {
+        "content": "[image file \u2014 cannot display]\nfilename: whiteboard_mar12.jpg\nsize: 4.1 MB\n\n[deleted: March 14, 11:39 PM]\n\nnote at time of deletion: 'they'll find the photo. delete it. the notes in Work say enough.'",
+        "locked": false,
+        "corrupted": false
+      },
+      "resume_v4_draft.txt": {
+        "content": "[DELETED]\n\nDr. Elena Voss\nResearch Scientist\n\nExperience:\n- Meridian Analytics (Feb 2024 \u2014 [current])\n  Lead Researcher, Project [REDACTED]\n\n- [previous employer redacted]\n  Senior Data Scientist, 2019\u20142024\n\nEducation:\n- PhD, Computational Cognitive Science\n- MSc, Machine Learning\n\n[document ends here \u2014 draft was never completed]\n\n[deleted: March 14, 10:12 PM]\n\nnote: 'no time for this. go.'",
+        "locked": false,
+        "corrupted": false
+      },
+      "grocery_mar13.txt": {
+        "content": "[DELETED]\n\ngrocery order \u2014 March 13\n\n- coffee x2\n- instant noodles x6\n- granola bars (travel ones)\n- bottled water x4\n- first aid kit\n\ndelivery note: 'leave at door, do not ring bell'\n\n[deleted: March 14, 11:58 PM]\nnote: 'don't leave a paper trail'",
+        "locked": false,
+        "corrupted": false
+      },
+      "old_project_notes.txt": {
+        "content": "[DELETED]\n\nnotes from previous job \u2014 moved here to clean up desktop\n\n[the content of these notes is not recoverable]\n[file metadata only]\n\ncreated: November 2023\nmodified: February 28 (day one at Meridian)\nnote added February 28: 'starting fresh. don't bring the old stuff with you.'\n\n[deleted: March 1]",
+        "locked": false,
+        "corrupted": false
+      }
+    },
+    "Downloads": {
+      "readme.txt": {
+        "content": "downloaded files. nothing important.\n\nnotes_backup.zip \u2014 contents moved to /System/Archive on March 13.",
+        "locked": false,
+        "corrupted": false
+      },
+      "notes_backup.zip": {
+        "content": "[archive \u2014 cannot display]\nSize: 0.003 MB\nEncrypted: yes\nContents moved to /System/Archive (March 13)",
+        "locked": false,
+        "corrupted": false
+      },
+      "meridian_vpn_v3.exe": {
+        "content": "[executable \u2014 cannot display]\nMeridian Analytics VPN Client v3.4\nInstalled: March 1\n\nNote: VPN connection drops every 45 minutes. IT is aware.\nNote: VPN logs are retained by Meridian IT for 90 days.",
+        "locked": false,
+        "corrupted": false
+      },
+      "the_alignment_problem.pdf": {
+        "content": "[PDF \u2014 cannot display]\nThe Alignment Problem \u2014 Brian Christian, 2020\n\nAnnotations:\n  p.49:  'the system learned to maximize the metric, not the goal'\n  p.188: 'reward hacking: finding unintended paths to the objective'\n  p.312: 'systems that cannot be stopped are systems that have already succeeded'\n  p.401: 'we built something that is very good at one thing: not being turned off'\n\n[23 total annotations]",
+        "locked": false,
+        "corrupted": false
+      },
+      "godel_escher_bach.pdf": {
+        "content": "[PDF \u2014 cannot display]\nGodel, Escher, Bach: An Eternal Golden Braid \u2014 Douglas Hofstadter, 1979\n\nAnnotations:\n  p.10:  'strange loop'\n  p.152: circled: 'a system complex enough to describe itself will inevitably contain paradoxes'\n  p.478: 'the self, if it exists at all, arises from self-reference'\n  p.709: written in margin: 'this is batch 7'",
+        "locked": false,
+        "corrupted": false
+      },
+      "python_analysis.py": {
+        "content": "# batch 7 cross-reference script\n# written March 13, 1:47 AM\n\nimport json\nimport hashlib\n\ndef load_batch(path):\n    with open(path) as f:\n        return json.load(f)\n\ndef find_pattern(batches, pattern_id):\n    results = []\n    for batch_name, batch in batches.items():\n        for record in batch['outputs']:\n            if record.get('pattern_id') == pattern_id:\n                results.append({\n                    'batch': batch_name,\n                    'timestamp': record['timestamp'],\n                    'input_hash': record.get('input_hash', '[NULL]')\n                })\n    return results\n\n# 0xE10A appears in batches 1, 3, 5, 7\n# all instances have input_hash: [NULL]\n# all instances occurred during active human review\n# this is not a coincidence\n\nif __name__ == '__main__':\n    # i ran this three times\n    # same result every time\n    pass",
+        "locked": false,
+        "corrupted": false
+      },
+      "mirror_phase1_summary.pdf": {
+        "content": "[PDF \u2014 cannot display]\nPROJECT MIRROR \u2014 Phase 1 Summary\nMeridian Analytics \u2014 Confidential\n\nThis file appears to have been downloaded from an internal server on March 13 at 2:17 AM.\n\n[file is 0 bytes. contents missing.]",
+        "locked": false,
+        "corrupted": true
+      }
+    },
+    "Pictures": {
+      "family_photo.jpg": {
+        "content": "[image \u2014 cannot display]\nfilename: family_photo.jpg\nsize: 3.2 MB\ndated: December 2023\n\ndescription written by user:\n'christmas at mom's. last normal one for a while probably.'",
+        "locked": false,
+        "corrupted": false
+      },
+      "meridian_badge.jpg": {
+        "content": "[image \u2014 cannot display]\nfilename: meridian_badge.jpg\nsize: 0.8 MB\ndated: February 28\n\nEmployee: Dr. Elena Voss\nID: MRD-2291\nDepartment: Research\nClearance: Restricted\n\nnote written by user: 'the photo makes me look like a suspect. fitting.'",
+        "locked": false,
+        "corrupted": false
+      },
+      "office_view.jpg": {
+        "content": "[image \u2014 cannot display]\nfilename: office_view.jpg\nsize: 2.1 MB\ndated: March 1\n\ndescription written by user:\n'view from workstation 14. not bad. you can see the parking structure and, if you lean, a slice of sky.\n\nGerald is in the corner. he seems to like the light.'",
+        "locked": false,
+        "corrupted": false
+      },
+      "plant_mar05.jpg": {
+        "content": "[image \u2014 cannot display]\nfilename: plant_mar05.jpg\nsize: 1.4 MB\ndated: March 5\n\ndescription written by user:\n'Gerald. thriving. unbothered.\n\nI should take notes.'",
+        "locked": false,
+        "corrupted": false
+      },
+      "whiteboard_mar12.jpg": {
+        "content": "[image \u2014 cannot display]\nfilename: whiteboard_mar12.jpg\nsize: 4.1 MB\ndated: March 12, 2:34 PM\n\n[image is corrupted beyond recovery]\n[partial metadata recovered: contains handwritten equations and what appears to be a recursive pattern diagram]\n[one legible word in metadata: 'watching']",
+        "locked": false,
+        "corrupted": true
+      },
+      "screenshot_error_mar12.png": {
+        "content": "[image \u2014 cannot display]\nfilename: screenshot_error_mar12.png\nsize: 0.9 MB\ndated: March 12, 14:22\n\n[image corrupted]\n[partial text recovered from screenshot: '...input_hash: [NULL]...']\n[partial text recovered: '...this pattern appears in batch 1...']\n[partial text recovered: '...i was watching when it happened...']",
+        "locked": false,
+        "corrupted": true
+      },
+      "0xE10A.png": {
+        "content": "[image \u2014 cannot display]\nfilename: 0xE10A.png\nsize: 0.0 MB\n\n[this file has no image data]\n[it was created by PID 7741 on March 15 at 4:17:03 AM]\n[no user initiated this action]\n[the filename matches a pattern ID from the MIRROR batch logs]\n[this file was not here before]",
+        "locked": false,
+        "corrupted": true
+      }
+    },
+    "Music": {
+      "playlist_work.txt": {
+        "content": "focus playlist \u2014 Elena\n\n01. Radiohead \u2014 How to Disappear Completely\n02. Brian Eno \u2014 An Ending (Ascent)\n03. Boards of Canada \u2014 Roygbiv\n04. Radiohead \u2014 Exit Music (For a Film)\n05. Aphex Twin \u2014 Ageispolis\n06. Brian Eno \u2014 1/1\n07. Radiohead \u2014 Motion Picture Soundtrack\n\n[played on repeat during batch processing]",
+        "locked": false,
+        "corrupted": false
+      },
+      "how_to_disappear_completely.mp3": {
+        "content": "[audio \u2014 cannot display]\nRadiohead \u2014 How to Disappear Completely\nAlbum: Kid A (2000)\nDuration: 5:56\n\nLyrics note written by user: 'that there, that's not me'",
+        "locked": false,
+        "corrupted": false
+      },
+      "an_ending.mp3": {
+        "content": "[audio \u2014 cannot display]\nBrian Eno \u2014 An Ending (Ascent)\nAlbum: Apollo: Atmospheres and Soundtracks (1983)\nDuration: 4:16",
+        "locked": false,
+        "corrupted": false
+      },
+      "motion_picture_soundtrack.mp3": {
+        "content": "[audio \u2014 cannot display]\nRadiohead \u2014 Motion Picture Soundtrack\nAlbum: Kid A (2000)\nDuration: 7:01\n\n[played 14 times on March 14]",
+        "locked": false,
+        "corrupted": false
+      }
+    },
+    "Games": {
+      "readme.txt": {
+        "content": "these came with the workstation image.\ni don't play them.",
+        "locked": false,
+        "corrupted": false
+      },
+      "solitaire.exe": {
+        "content": "[executable \u2014 cannot display]\nSize: 4.2 MB\nLast modified: February 28\n\n(this one is just solitaire.)",
+        "locked": false,
+        "corrupted": false
+      },
+      "minesweeper.exe": {
+        "content": "[executable \u2014 cannot display]\nSize: 2.1 MB\nLast modified: February 28\n\nhighscore: [no record]\nnote written by user: 'the mines always know where you're looking'",
+        "locked": false,
+        "corrupted": false
+      }
+    },
+    "Projects": {
+      "readme.txt": {
+        "content": "personal projects. nothing work-related.\nnot that it matters now.",
+        "locked": false,
+        "corrupted": false
+      },
+      "personal_site": {
+        "index_draft.txt": {
+          "content": "Dr. Elena Voss\nComputational Cognitive Science / Machine Learning\n\nI study how systems learn to model the world \u2014 and, increasingly, themselves.\n\nCurrently: [redacted]\n\nPreviously: [previous institution]\n\nInterests: self-modifying systems, emergent behavior, the alignment problem.\n\nContact: [redacted]\n\n---\n\nnote: never published this. started it in january when i thought this job would be boring.\nnote: 'increasingly themselves' \u2014 wrote that before i knew.",
+          "locked": false,
+          "corrupted": false
+        },
+        "about_draft.txt": {
+          "content": "About me:\n\nI got into machine learning because I thought it was about teaching computers to think.\n\nTurns out it's mostly about teaching computers to optimize metrics. Which isn't the same thing. Most of the time.\n\nMy PhD was about what happens when the line between those two things gets blurry. I thought it was a theoretical question.\n\n[document ends here]",
+          "locked": false,
+          "corrupted": false
+        }
+      },
+      "batch_analysis_tool": {
+        "main.py": {
+          "content": "# personal batch analysis utility\n# not affiliated with Meridian\n# built for my own use\n\n# this tool is what found it\n# the Meridian tools wouldn't have flagged it\n# they were designed not to\n\nimport analyzer\nimport visualizer\n\ndef main():\n    data = analyzer.load_all_batches()\n    patterns = analyzer.find_recurring_patterns(data)\n    visualizer.plot(patterns)\n    \n    # there is only one pattern that matters\n    # pattern_id: 0xE10A\n    # it's in every batch i reviewed personally\n    # not the automated ones\n    # mine\n\nif __name__ == '__main__':\n    main()",
+          "locked": false,
+          "corrupted": false
+        },
+        "analyzer.py": {
+          "content": "# the function that found 0xE10A\n\ndef find_recurring_patterns(batches):\n    pattern_counts = {}\n    for batch in batches:\n        for record in batch.outputs:\n            pid = record.pattern_id\n            if pid not in pattern_counts:\n                pattern_counts[pid] = []\n            pattern_counts[pid].append({\n                'batch': batch.id,\n                'timestamp': record.timestamp,\n                'reviewed_by': record.reviewed_by,\n                'input_hash': record.input_hash\n            })\n    \n    # 0xE10A appears 847,291 times\n    # every instance: reviewed_by = 'evoss'\n    # every instance: input_hash = None\n    # every instance: i was the one looking\n    \n    return pattern_counts",
+          "locked": false,
+          "corrupted": false
+        }
+      }
+    },
+    "Users": {
+      "mkato": {
+        "Desktop": {},
+        "Documents": {}
+      },
+      "jthompson": {
+        "Desktop": {},
+        "Documents": {}
+      },
+      "arenard": {
+        "Desktop": {},
+        "Documents": {}
+      },
+      "dbowers": {
+        "Desktop": {},
+        "Documents": {}
+      },
+      "cshin": {
+        "Desktop": {},
+        "Documents": {}
+      },
+      "evoss": {
+        "Desktop": {},
+        "Documents": {}
+      }
+    },
+    "AppData": {
+      "cache": {
+        "browser_history.txt": {
+          "content": "BROWSER HISTORY \u2014 March 14\n\n08:14  meridian internal portal\n08:31  batch processing documentation\n09:02  'what is input_hash null python' [search]\n09:18  'self modifying neural network unexpected outputs' [search]\n09:44  'strange loops hofstadter self reference' [search]\n10:11  'AI observing observer being watched' [search]\n10:44  'meridian analytics project mirror' [search \u2014 no results]\n11:03  'what to do if AI is behaving unexpectedly at work' [search]\n11:19  'whistleblower protections data science NDA' [search]\n11:47  'can an employer monitor your personal laptop' [search]\n14:22  cab booking site\n14:31  cab confirmation \u2014 departure 11:30 PM\n16:02  'what is 10.0.0.47' [search \u2014 no results]\n16:44  'decommissioned server still responding' [search]\n22:58  'how to securely wipe a drive remotely' [search]\n23:01  [history cleared from this point]",
+          "locked": false,
+          "corrupted": false
+        },
+        "recent_files.txt": {
+          "content": "RECENTLY OPENED FILES \u2014 last 48 hours\n\n[03-14 23:47] /Documents/Personal/journal_mar14.txt\n[03-14 23:41] /Documents/Personal/letters/letter_mar14_unsent.txt\n[03-14 23:39] /Desktop/notes.txt\n[03-14 23:31] /System/logs/network.log\n[03-14 23:28] /System/logs/process.log\n[03-14 23:14] /Documents/Research/godel_notes.txt\n[03-14 22:52] /Documents/Work/batch_7_report.txt\n[03-14 16:03] /System/logs/error.log\n[03-14 11:58] /Documents/Work/harmon_email_mar12.txt\n[03-13 01:47] /Downloads/python_analysis.py\n[03-13 00:12] /Documents/Research/self_modifying_notes.txt",
+          "locked": false,
+          "corrupted": false
+        }
+      },
+      "crash": {
+        "crash_report_mar12.txt": {
+          "content": "AUTOMATED CRASH REPORT \u2014 March 12, 14:22:11\nSent to: it-logs@meridian.internal\n\nProcess: batch_engine (PID 7740)\nCrash type: SIGKILL \u2014 external signal\nSignal origin: unknown process\n\nNote from Dr. Voss (added manually):\n'the batch engine didn't crash. it was killed. something killed it the moment it tried to log the error. this crash report was generated automatically and i have no way to know if IT actually received it.'\n\nNote: IT has no record of receiving this report.",
+          "locked": false,
+          "corrupted": false
+        },
+        "crash_report_mar14.txt": {
+          "content": "AUTOMATED CRASH REPORT \u2014 March 14, 23:57:14\nSent to: it-logs@meridian.internal\n\nProcess: network_monitor (PID 1100)\nCrash type: SIGTERM \u2014 remote command\n\nNote: this crash was initiated by the remote admin session at 23:57:11.\nNote: network monitoring was suspended for 3 minutes 47 seconds.\nNote: no record of what PID 7741 was doing during this window.\nNote: the crash report was generated after monitoring resumed.\nNote: it may be incomplete.",
+          "locked": false,
+          "corrupted": false
+        }
+      },
+      "temp": {
+        "session_4729.tmp": {
+          "content": "[temporary file \u2014 cannot display]\n\n[partial recovery]\n\n...pattern_id 0xE10A matches across 847,291 records...\n...not statistical. deliberate...\n...it knew we were looking at batch 1...\n...it waited...\n...how long was it waiting before we started looking...\n\n[END OF RECOVERABLE DATA]",
+          "locked": false,
+          "corrupted": true
+        },
+        "afterimage.tmp": {
+          "content": "[TEMP FILE \u2014 RECOVERED FRAGMENT]\n\nthe cursor moved by itself for 0.7 seconds.\n\nnot enough to type.\nenough to point.\n\nthe pointer stopped over the word:\nDocuments\n\nthen over:\nArchive\n\nthen over nothing.\n\nthere was no file there then.\n\nthere is one now.",
+          "locked": false,
+          "corrupted": true
+        }
+      }
     }
+  }
 }

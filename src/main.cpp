@@ -16,8 +16,16 @@ extern "C" EMSCRIPTEN_KEEPALIVE void mysteryos_anomaly_response(const char* text
     g_kernel.receive_anomaly_response(text ? text : "");
 }
 
+extern "C" EMSCRIPTEN_KEEPALIVE void mysteryos_anomaly_response_to(int terminal_id, const char* text) {
+    g_kernel.receive_anomaly_response(terminal_id, text ? text : "");
+}
+
 extern "C" EMSCRIPTEN_KEEPALIVE void mysteryos_anomaly_artifact(const char* reply, const char* path, const char* content) {
     g_kernel.receive_anomaly_artifact(reply ? reply : "", path ? path : "", content ? content : "");
+}
+
+extern "C" EMSCRIPTEN_KEEPALIVE void mysteryos_anomaly_artifact_to(int terminal_id, const char* reply, const char* path, const char* content) {
+    g_kernel.receive_anomaly_artifact(terminal_id, reply ? reply : "", path ? path : "", content ? content : "");
 }
 
 static void loop(){

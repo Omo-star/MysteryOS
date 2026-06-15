@@ -53,15 +53,15 @@
                 console.warn('MysteryOS anomaly delivery failed:', label);
             }
 
-            function mysteryosDeliverAnomaly(text) {
+            function mysteryosDeliverAnomaly(text, terminalId) {
                 mysteryosRetryDelivery(function() {
-                    Module.ccall('mysteryos_anomaly_response', null, ['string'], [text]);
+                    Module.ccall('mysteryos_anomaly_response_to', null, ['number', 'string'], [terminalId || -1, text]);
                 }, text, 0);
             }
 
-            function mysteryosDeliverArtifact(reply, path, content) {
+            function mysteryosDeliverArtifact(reply, path, content, terminalId) {
                 mysteryosRetryDelivery(function() {
-                    Module.ccall('mysteryos_anomaly_artifact', null, ['string', 'string', 'string'], [reply || '', path || '', content || '']);
+                    Module.ccall('mysteryos_anomaly_artifact_to', null, ['number', 'string', 'string', 'string'], [terminalId || -1, reply || '', path || '', content || '']);
                 }, reply || path || 'artifact', 0);
             }
 
@@ -89,6 +89,7 @@
 
             function mysteryosLocalAnomaly(state, reason) {
                 const prompt = String(state && state.prompt || '').toLowerCase();
+                const terminalId = Number.isFinite(Number(state && state.terminalId)) ? Number(state.terminalId) : -1;
                 let reply = 'the line goes quiet. something still answers from inside the machine.';
                 let file = null;
 
@@ -113,9 +114,9 @@
                 }
 
                 if (file) {
-                    mysteryosDeliverArtifact(reply, file.path, file.content);
+                    mysteryosDeliverArtifact(reply, file.path, file.content, terminalId);
                 } else {
-                    mysteryosDeliverAnomaly('7741: ' + reply);
+                    mysteryosDeliverAnomaly('7741: ' + reply, terminalId);
                 }
             }
 
@@ -125,9 +126,10 @@
                 try {
                     state = JSON.parse(payloadJson);
                 } catch (err) {
-                    mysteryosDeliverAnomaly('7741: [signal corrupt] unreadable session payload');
+                    mysteryosDeliverAnomaly('7741: [signal corrupt] unreadable session payload', -1);
                     return;
                 }
+                const terminalId = Number.isFinite(Number(state.terminalId)) ? Number(state.terminalId) : -1;
 
                 if (!cfg.enabled || !cfg.groqApiKey) {
                     mysteryosLocalAnomaly(state, 'no carrier');
@@ -193,16 +195,16 @@
                         artifact = mysteryosParseAnomalyJson(text);
                     } catch (err) {
                         const cleaned = (text || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
-                        mysteryosDeliverAnomaly('7741: ' + cleaned);
+                        mysteryosDeliverAnomaly('7741: ' + cleaned, terminalId);
                         return;
                     }
 
                     const reply = String(artifact.reply || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
                     const file = artifact.createFile || null;
                     if (file && mysteryosAllowedAnomalyPath(file.path) && file.content) {
-                        mysteryosDeliverArtifact(reply, String(file.path), String(file.content).slice(0, 900));
+                        mysteryosDeliverArtifact(reply, String(file.path), String(file.content).slice(0, 900), terminalId);
                     } else {
-                        mysteryosDeliverArtifact(reply, '', '');
+                        mysteryosDeliverArtifact(reply, '', '', terminalId);
                     }
                 } catch (err) {
                     const reason = err && err.name === 'AbortError'

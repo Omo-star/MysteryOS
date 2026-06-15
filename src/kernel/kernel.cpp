@@ -145,10 +145,12 @@ void Kernel::record_file_open(const string& path) {
     }
 }
 
-void Kernel::request_anomaly(const string& prompt) {
+void Kernel::request_anomaly(const string& prompt, int terminal_id) {
+    last_anomaly_terminal_id_ = terminal_id;
     ostringstream payload;
     payload << "{";
     payload << "\"prompt\":" << quoted_js_string(prompt) << ",";
+    payload << "\"terminalId\":" << terminal_id << ",";
     payload << "\"stage\":" << puzzle_.stage() << ",";
     payload << "\"filesOpened\":" << files_opened_ << ",";
     payload << "\"sessionTime\":" << (int)session_time_ << ",";
@@ -163,34 +165,50 @@ void Kernel::request_anomaly(const string& prompt) {
         "if(window.mysteryosRequestAnomaly){"
         "window.mysteryosRequestAnomaly(" + quoted_js_string(payload.str()) + ");"
         "}else if(Module&&Module.ccall){"
-        "Module.ccall('mysteryos_anomaly_response',null,['string'],['7741: [no carrier] anomaly layer unavailable']);"
+        "Module.ccall('mysteryos_anomaly_response_to',null,['number','string'],[" + to_string(terminal_id) + ",'7741: [no carrier] anomaly layer unavailable']);"
         "}";
     emscripten_run_script(js.c_str());
 }
 
 void Kernel::receive_anomaly_response(const string& text) {
-    anomaly_responses_.push_back(text);
+    receive_anomaly_response(last_anomaly_terminal_id_, text);
+}
+
+void Kernel::receive_anomaly_response(int terminal_id, const string& text) {
+    anomaly_responses_.push_back({terminal_id, text});
 }
 
 void Kernel::receive_anomaly_artifact(const string& reply, const string& path, const string& content) {
+    receive_anomaly_artifact(last_anomaly_terminal_id_, reply, path, content);
+}
+
+void Kernel::receive_anomaly_artifact(int terminal_id, const string& reply, const string& path, const string& content) {
     if (!reply.empty()) {
-        anomaly_responses_.push_back("7741: " + reply);
+        anomaly_responses_.push_back({terminal_id, "7741: " + reply});
     }
 
     if (path.empty() || content.empty()) return;
 
     if (!is_allowed_anomaly_path(path)) {
-        anomaly_responses_.push_back("7741: [write blocked] " + path);
+        anomaly_responses_.push_back({terminal_id, "7741: [write blocked] " + path});
         return;
     }
 
     vfs_.inject(path, content, false);
-    anomaly_responses_.push_back("7741: [wrote " + path + "]");
+    anomaly_responses_.push_back({terminal_id, "7741: [wrote " + path + "]"});
 }
 
-vector<string> Kernel::drain_anomaly_responses() {
-    vector<string> responses = move(anomaly_responses_);
-    anomaly_responses_.clear();
+vector<string> Kernel::drain_anomaly_responses(int terminal_id) {
+    vector<string> responses;
+    vector<AnomalyResponse> pending;
+    for (auto& response : anomaly_responses_) {
+        if (response.terminal_id == terminal_id || response.terminal_id < 0) {
+            responses.push_back(move(response.text));
+        } else {
+            pending.push_back(move(response));
+        }
+    }
+    anomaly_responses_ = move(pending);
     return responses;
 }
 
