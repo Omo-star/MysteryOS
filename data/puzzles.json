@@ -246,7 +246,9 @@
   {
     "stage": 4,
     "password": "gerald",
-    "unlock_paths": [],
+    "unlock_paths": [
+      "/Users"
+    ],
     "unlock_apps": [],
     "glitch_level": 7,
     "inject_files": [

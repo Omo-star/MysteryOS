@@ -26,6 +26,7 @@ void FileExplorer::render(Kernel& k){
 void FileExplorer::render_tree(Kernel& k, VFSNode* node, const string& path){
     if (!node || !node->is_dir) return;
     for (auto& [name, child] : node->children){
+        if (child->hidden) continue;
         if (!child->is_dir) continue;
         string child_path = (path == "/" ? "/" : path + "/") + name;
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
@@ -41,6 +42,7 @@ void FileExplorer::render_tree(Kernel& k, VFSNode* node, const string& path){
 
 void FileExplorer::render_contents(Kernel& k, VFSNode* dir, const string& path){
     for (auto& [name, child] : dir->children){
+        if (child->hidden) continue;
         string child_path = (path == "/" ? "/" : path + "/") + name;
         if (child->is_dir) {
             if (child->locked) {

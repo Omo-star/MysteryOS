@@ -118,14 +118,19 @@ void Terminal::execute(const string& raw, Kernel& k) {
         return;
     }
     if (cmd == "ls") {
-        VFSNode* dir = k.vfs().get(arg.empty() ? "/" : arg);
+        string path = arg.empty() ? "/" : arg;
+        if (k.vfs().is_hidden(path)) { print("ls: not found: " + path); return; }
+        VFSNode* dir = k.vfs().get(path);
         if (!dir || !dir->is_dir) { print("ls: not a directory: " + arg); return; }
-        for (auto& [name, child] : dir->children)
+        for (auto& [name, child] : dir->children) {
+            if (child->hidden) continue;
             print("  " + name + (child->is_dir ? "/" : "") + (child->locked ? "  [locked]" : ""));
+        }
         return;
     }
     if (cmd == "cat") {
         if (arg.empty()) { print("cat: missing path"); return; }
+        if (k.vfs().is_hidden(arg)) { print("cat: not found: " + arg); return; }
         VFSNode* node = k.vfs().get(arg);
         if (!node)        { print("cat: not found: " + arg); return; }
         if (node->locked) { print("cat: permission denied"); return; }

@@ -460,6 +460,7 @@
       }
     },
     "Users": {
+      "hidden": true,
       "mkato": {
         "Desktop": {},
         "Documents": {}
