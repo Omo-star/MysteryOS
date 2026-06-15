@@ -23,6 +23,7 @@ set(GAME_SOURCES
     src/apps/file_explorer.cpp
     src/apps/text_editor.cpp
     src/apps/terminal.cpp
+    src/apps/terminal_tools.cpp
     src/apps/password_dialog.cpp
     src/fx/glitch.cpp
 )
@@ -46,6 +47,7 @@ if(EMSCRIPTEN)
 else()
     add_executable(test_logic
         tests/test_main.cpp
+        src/apps/terminal_tools.cpp
         src/kernel/vfs.cpp
         src/kernel/puzzle.cpp
         src/fx/glitch.cpp

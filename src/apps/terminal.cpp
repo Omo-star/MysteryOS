@@ -1,4 +1,5 @@
 #include "terminal.h"
+#include "terminal_tools.h"
 #include "kernel/kernel.h"
 #include "kernel/vfs.h"
 #include "fx/glitch.h"
@@ -74,7 +75,8 @@ void Terminal::execute(const string& raw, Kernel& k) {
     string cmd, arg;
     ss >> cmd >> arg;
     if (cmd == "help") {
-        print("Commands: help  ls [path]  cat <file>  unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>  monitor  trace <pid>  talk 7741 <message>");
+        print("Commands: help  ls [path]  cat <file>  grep <word> [path]  find <name> [path]  timeline [path]");
+        print("          unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>  monitor  trace <pid>  talk 7741 <message>");
         print("  [anomaly] you can also type a question, like: who are you?");
         if (k.puzzle().stage() >= 1) print("  [hint] try: cat /System/Archive/classified.txt");
         return;
@@ -125,6 +127,35 @@ void Terminal::execute(const string& raw, Kernel& k) {
         for (auto& [name, child] : dir->children) {
             if (child->hidden) continue;
             print("  " + name + (child->is_dir ? "/" : "") + (child->locked ? "  [locked]" : ""));
+        }
+        return;
+    }
+    if (cmd == "grep") {
+        string path;
+        ss >> path;
+        if (path.empty()) path = "/";
+        for (const auto& line : TerminalTools::grep(k.vfs(), arg, path)) {
+            print(line);
+        }
+        return;
+    }
+    if (cmd == "find") {
+        string path;
+        ss >> path;
+        if (path.empty()) path = "/";
+        for (const auto& line : TerminalTools::find(k.vfs(), arg, path)) {
+            print(line);
+        }
+        return;
+    }
+    if (cmd == "timeline") {
+        string path = arg.empty() ? "/" : arg;
+        if (k.puzzle().stage() < 4) {
+            print("timeline: index unavailable");
+            return;
+        }
+        for (const auto& line : TerminalTools::timeline(k.vfs(), path)) {
+            print(line);
         }
         return;
     }

@@ -43,7 +43,7 @@ The main interaction is reading. You open documents, inspect logs, follow hints,
 - Text editor for readable documents
 - Image viewer for real JPG/PNG files
 - Procedural corrupted image rendering
-- Terminal commands like `ls`, `cat`, `ps`, `ping`, `kill`, `decode`, `monitor`, `trace`, and `talk`
+- Terminal commands like `ls`, `cat`, `grep`, `find`, `timeline`, `ps`, `ping`, `kill`, `decode`, `monitor`, `trace`, and `talk`
 - Five staged unlocks driven by passwords
 - Stage-based file injection
 - Session Monitor app for investigating PID 7741
@@ -59,6 +59,9 @@ Open the terminal in-game and try:
 help
 ls /
 cat /Desktop/README.txt
+grep september /Users
+find notes /
+timeline /Users
 unlock <password>
 ps
 kill 7741
@@ -205,6 +208,6 @@ They contain the structure of the mystery, passwords, stage injections, and majo
 
 ## Status
 
-MysteryOS is heading toward its first public build.
+MysteryOS v1 is playable now.
 
-The current focus is making the machine feel deeper, stranger, and more reactive without breaking the core puzzle path.
+The next focus is making the machine feel deeper, stranger, and more reactive without breaking the core puzzle path.
