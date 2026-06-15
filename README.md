@@ -30,6 +30,7 @@ GROQ_MODEL
 ```
 
 If no key is configured, the game still works and `talk 7741` reports no carrier.
+When configured, PID 7741 can reply and may write generated files under `/Desktop/` or `/System/logs/`.
 
 ## Puzzle spoilers
 Don't open `data/puzzles.json` unless you are completely stuck.

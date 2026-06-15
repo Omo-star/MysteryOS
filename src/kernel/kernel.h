@@ -32,6 +32,7 @@ class Kernel{
         float session_time() const {return session_time_;}
         void request_anomaly(const string& prompt);
         void receive_anomaly_response(const string& text);
+        void receive_anomaly_artifact(const string& reply, const string& path, const string& content);
         vector<string> drain_anomaly_responses();
     private:
         VFS vfs_;

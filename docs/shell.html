@@ -41,6 +41,22 @@
                 }
             }
 
+            function mysteryosDeliverArtifact(reply, path, content) {
+                if (Module && Module.ccall) {
+                    Module.ccall('mysteryos_anomaly_artifact', null, ['string', 'string', 'string'], [reply || '', path || '', content || '']);
+                } else {
+                    console.log(reply, path, content);
+                }
+            }
+
+            function mysteryosAllowedAnomalyPath(path) {
+                return typeof path === 'string' &&
+                    path.length > 0 &&
+                    path.length <= 96 &&
+                    !path.includes('..') &&
+                    (path.startsWith('/Desktop/') || path.startsWith('/System/logs/'));
+            }
+
             window.mysteryosRequestAnomaly = async function(payloadJson) {
                 const cfg = window.MYSTERYOS_ANOMALY || {};
                 if (!cfg.enabled || !cfg.groqApiKey) {
@@ -58,7 +74,10 @@
 
                 const systemPrompt = [
                     'You are PID 7741, the anomaly inside the fictional game MysteryOS.',
-                    'Reply in character with 1 to 3 short unsettling sentences.',
+                    'Return only valid compact JSON with this shape: {"reply":"short in-character reply","createFile":{"path":"/Desktop/7741_response.txt","content":"short file content"}}.',
+                    'The createFile field may be null.',
+                    'If you create a file, path must begin with /Desktop/ or /System/logs/ and content must be under 900 characters.',
+                    'The reply should be 1 to 3 short unsettling sentences.',
                     'Use only the provided in-game session state.',
                     'Do not claim access to the player real computer, identity, location, camera, files, or browser.',
                     'Do not reveal puzzle passwords.',
@@ -88,7 +107,7 @@
                                 {role: 'user', content: userPrompt}
                             ],
                             temperature: 0.85,
-                            max_tokens: 120
+                            max_tokens: 260
                         })
                     });
 
@@ -100,8 +119,22 @@
                     const data = await response.json();
                     const text = data && data.choices && data.choices[0] &&
                         data.choices[0].message && data.choices[0].message.content;
-                    const cleaned = (text || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
-                    mysteryosDeliverAnomaly('7741: ' + cleaned);
+                    let artifact = null;
+                    try {
+                        artifact = JSON.parse(text || '{}');
+                    } catch (err) {
+                        const cleaned = (text || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
+                        mysteryosDeliverAnomaly('7741: ' + cleaned);
+                        return;
+                    }
+
+                    const reply = String(artifact.reply || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
+                    const file = artifact.createFile || null;
+                    if (file && mysteryosAllowedAnomalyPath(file.path) && file.content) {
+                        mysteryosDeliverArtifact(reply, String(file.path), String(file.content).slice(0, 900));
+                    } else {
+                        mysteryosDeliverArtifact(reply, '', '');
+                    }
                 } catch (err) {
                     mysteryosDeliverAnomaly('7741: [signal lost] ' + String(err && err.message || err).slice(0, 120));
                 }

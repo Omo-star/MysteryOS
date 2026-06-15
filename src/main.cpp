@@ -16,6 +16,10 @@ extern "C" EMSCRIPTEN_KEEPALIVE void mysteryos_anomaly_response(const char* text
     g_kernel.receive_anomaly_response(text ? text : "");
 }
 
+extern "C" EMSCRIPTEN_KEEPALIVE void mysteryos_anomaly_artifact(const char* reply, const char* path, const char* content) {
+    g_kernel.receive_anomaly_artifact(reply ? reply : "", path ? path : "", content ? content : "");
+}
+
 static void loop(){
     SDL_Event e;
     while (SDL_PollEvent(&e)) ImGui_ImplSDL2_ProcessEvent(&e);

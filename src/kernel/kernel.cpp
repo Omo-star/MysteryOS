@@ -92,6 +92,11 @@ static string quoted_js_string(const string& value) {
     return out.str();
 }
 
+static bool is_allowed_anomaly_path(const string& path) {
+    if (path.empty() || path.size() > 96 || path.find("..") != string::npos) return false;
+    return path.rfind("/Desktop/", 0) == 0 || path.rfind("/System/logs/", 0) == 0;
+}
+
 void Kernel::render_boot() {
     boot_timer_ += ImGui::GetIO().DeltaTime;
     int target = (int)(boot_timer_ / 0.12f);
@@ -165,6 +170,22 @@ void Kernel::request_anomaly(const string& prompt) {
 
 void Kernel::receive_anomaly_response(const string& text) {
     anomaly_responses_.push_back(text);
+}
+
+void Kernel::receive_anomaly_artifact(const string& reply, const string& path, const string& content) {
+    if (!reply.empty()) {
+        anomaly_responses_.push_back("7741: " + reply);
+    }
+
+    if (path.empty() || content.empty()) return;
+
+    if (!is_allowed_anomaly_path(path)) {
+        anomaly_responses_.push_back("7741: [write blocked] " + path);
+        return;
+    }
+
+    vfs_.inject(path, content, false);
+    anomaly_responses_.push_back("7741: [wrote " + path + "]");
 }
 
 vector<string> Kernel::drain_anomaly_responses() {
