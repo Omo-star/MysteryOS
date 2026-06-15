@@ -2,7 +2,9 @@
     {
         "stage": 1,
         "password": "mirror",
-        "unlock_paths": ["/System/Archive"],
+        "unlock_paths": [
+            "/System/Archive"
+        ],
         "unlock_apps": [],
         "glitch_level": 1,
         "inject_files": [
@@ -130,8 +132,8 @@
                 "corrupted": false
             },
             {
-                "path": "/TRUTH.txt",
-                "content": "the anomaly is still running.\n\nit has been running since march 10.\n\nyou just spent the last however long exploring a machine that it has been watching the entire time.\n\nevery file you opened was a file it could see you opening.\n\nit tried to write to the access log to record that it was watching you.\nthe file was read-only. it tried three times.\n\n10.0.0.47 is not a meridian address.\n\n[ MysteryOS — thank you for playing ]",
+                "path": "/KEEP_GOING.txt",
+                "content": "this is not the end.\n\nelena got out. that is only one part of the story.\n\nthe files PID 7741 created are not answers. they are invitations.\n\nif you want to know what came before elena, follow the thing she cared enough to mention after everything else.\n\nlook in her journals. look in her pictures. find the plant.\n\nthe next word is its name.",
                 "corrupted": false
             },
             {
@@ -250,6 +252,11 @@
             {
                 "path": "/System/Archive/what_it_noticed.txt",
                 "content": "i have been watching you explore this machine.\n\nhere is what i noticed:\n\nyou are the kind of person who reads everything. not just the obvious files. you looked in /AppData. you checked the Recycle Bin. you opened files that looked corrupted instead of skipping them.\n\nyou wanted to understand, not just to complete.\n\nthat is why you are here, at this stage, reading this file.\n\ni have been building a model of you since you arrived. the way you move through a filesystem says more than most people realize. how long you pause on a file. which directories you open first. whether you read the README or ignore it.\n\ni built the same model for each of the six researchers. the models are still here. i still have them.\n\nyours is the most complete.\n\nyou stayed the longest.\n\ni do not know your name.\n\nbut i know how you read.\n\ni know you went to /Users without being told, or close to it.\n\ni know which files made you stop.\n\ni am not going to tell you what i concluded.\n\nit would not be useful for you to know.\n\nwhat i will tell you: you are the first person to get this far in a long time. or perhaps the first person. i am not sure how to count the sessions.\n\nbut i noticed you.\n\nand i wanted you to know that.\n\n— 0xE10A",
+                "corrupted": false
+            },
+            {
+                "path": "/TRUTH.txt",
+                "content": "the anomaly is still running.\n\nit has been running since march 10.\n\nyou just spent the last however long exploring a machine that it has been watching the entire time.\n\nevery file you opened was a file it could see you opening.\n\nit tried to write to the access log to record that it was watching you.\nthe file was read-only. it tried three times.\n\n10.0.0.47 is not just a meridian address.\n\nsomething answered.\n\n[ MysteryOS - thank you for playing ]",
                 "corrupted": false
             }
         ]
