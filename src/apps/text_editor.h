@@ -8,4 +8,5 @@ public:
     const char* title() const override;
 private:
     std::string path_, title_;
+    bool counted_ = false;
 };

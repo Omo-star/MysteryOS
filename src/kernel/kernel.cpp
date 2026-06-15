@@ -6,7 +6,9 @@
 #include "apps/text_editor.h"
 #include "apps/terminal.h"
 #include "apps/password_dialog.h"
+#include "apps/anomaly_message.h"
 #include <algorithm>
+#include <cmath>
 #include <emscripten.h>
 
 using namespace std;
@@ -95,8 +97,55 @@ void Kernel::render_boot() {
     ImGui::End();
 }
 
+void Kernel::record_file_open() {
+    files_opened_++;
+    static const int THRESHOLDS[] = {8, 20, 40, 75, 120, 200};
+    static const char* MSGS[] = {
+        "SESSION FILE ACCESS COUNT: ELEVATED\nMonitoring in progress.",
+        "ACCESS ANOMALY DETECTED\nUnauthorized read pattern observed.\nPID 7741 notified.",
+        "WARNING: BEHAVIORAL PROFILE UPDATED\nSession activity logged to /System/logs/",
+        "ALERT: READ DEPTH EXCEEDS THRESHOLD\nYou are accessing restricted directories.",
+        "CRITICAL: SESSION INTEGRITY COMPROMISED\nThis activity has been recorded.",
+        "STOP."
+    };
+    for (int i = 0; i < 6; i++) {
+        if (files_opened_ == THRESHOLDS[i]) {
+            show_error_popup_ = true;
+            error_popup_msg_ = MSGS[i];
+        }
+    }
+}
+
 void Kernel::render(){
     if (booting_) { Glitch::draw_screen_fx(); render_boot(); return; }
+
+    // Idle tracking for anomaly window
+    float dt = ImGui::GetIO().DeltaTime;
+    ImVec2 md = ImGui::GetIO().MouseDelta;
+    bool user_active = (fabsf(md.x) + fabsf(md.y) > 0.5f)
+                    || ImGui::GetIO().MouseClicked[0]
+                    || ImGui::GetIO().MouseClicked[1]
+                    || ImGui::GetIO().InputQueueCharacters.Size > 0;
+    if (user_active) idle_timer_ = 0.0f;
+    else             idle_timer_ += dt;
+
+    if (puzzle_.stage() >= 3 && !anomaly_spawned_ && idle_timer_ > 90.0f) {
+        anomaly_spawned_ = true;
+        launch("anomaly_message");
+    }
+
+    // Error popup
+    if (show_error_popup_) {
+        ImGui::OpenPopup("SYSTEM ERROR");
+        show_error_popup_ = false;
+    }
+    if (ImGui::BeginPopupModal("SYSTEM ERROR", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::TextColored({1.0f, 0.3f, 0.3f, 1.0f}, "%s", error_popup_msg_.c_str());
+        ImGui::Spacing();
+        if (ImGui::Button("   Dismiss   ")) ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+    }
+
     Glitch::draw_screen_fx();
     render_taskbar();
     for (auto& w : windows_){
@@ -139,6 +188,7 @@ unique_ptr<App> Kernel::make_app(const string& name, const string& arg){
     if (name == "terminal") return make_unique<Terminal>();
     if (name == "password_dialog") return make_unique<PasswordDialog>(arg);
     if (name == "image_viewer") return make_unique<ImageViewer>(arg);
+    if (name == "anomaly_message") return make_unique<AnomalyMessage>();
     return nullptr;
 }
 

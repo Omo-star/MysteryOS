@@ -42,7 +42,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
     string cmd, arg;
     ss >> cmd >> arg;
     if (cmd == "help") {
-        print("Commands: help  ls [path]  cat <file>  unlock <password>  whoami  ps  ping <host>  kill <pid>");
+        print("Commands: help  ls [path]  cat <file>  unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>");
         if (k.puzzle().stage() >= 1) print("  [hint] try: cat /System/Archive/classified.txt");
         return;
     }
@@ -109,6 +109,23 @@ void Terminal::execute(const string& raw, Kernel& k) {
         if (arg.empty()) { print("run: missing app name"); return; }
         k.launch(arg);
         print("Launching " + arg + "...");
+        return;
+    }
+    if (cmd == "decode") {
+        if (arg.empty()) { print("decode: missing path"); return; }
+        VFSNode* node = k.vfs().get(arg);
+        if (!node)        { print("decode: not found: " + arg); return; }
+        if (node->locked) { print("decode: permission denied"); return; }
+        if (arg == "/Users/cshin/Documents/response_1byte.bin") {
+            print("Decoding " + arg + "...");
+            print("Content (1 byte):");
+            print("");
+            print("  Hex:   0x3F");
+            print("  ASCII: ?");
+            print("  Value: 63");
+        } else {
+            print("decode: " + arg + ": binary decode not supported");
+        }
         return;
     }
     print("Unknown command: " + cmd + ". Type 'help' for a list.");
