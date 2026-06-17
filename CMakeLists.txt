@@ -26,6 +26,7 @@ set(GAME_SOURCES
     src/apps/terminal_tools.cpp
     src/apps/password_dialog.cpp
     src/fx/glitch.cpp
+    src/fx/scare_director.cpp
 )
 
 if(EMSCRIPTEN)
@@ -51,6 +52,7 @@ else()
         src/kernel/vfs.cpp
         src/kernel/puzzle.cpp
         src/fx/glitch.cpp
+        src/fx/scare_director.cpp
     )
     target_include_directories(test_logic PRIVATE src third_party)
     target_compile_definitions(test_logic PRIVATE MYSTERYOS_TEST)

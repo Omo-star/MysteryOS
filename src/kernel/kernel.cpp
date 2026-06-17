@@ -21,6 +21,7 @@ bool Kernel::init() {
     puzzle_.set_callback([this](const StageUnlock& u) {
         int level = puzzle_.glitch_level();
         Glitch::set_level(level);
+        scare_director_.on_stage_unlock(u.stage, session_time_);
         float freq = 60.0f + level * 18.0f;
         float gain = 0.04f + level * 0.012f;
         char js[256];
@@ -143,6 +144,14 @@ void Kernel::record_file_open(const string& path) {
             error_popup_msg_ = MSGS[i];
         }
     }
+
+    VFSNode* node = vfs_.get(path);
+    bool corrupted = node && node->corrupted;
+    scare_director_.on_file_open(path, puzzle_.stage(), corrupted, files_opened_, session_time_);
+}
+
+void Kernel::record_terminal_search(const string& command, const string& query) {
+    scare_director_.on_terminal_search(command, query, puzzle_.stage(), session_time_);
 }
 
 void Kernel::request_anomaly(const string& prompt, int terminal_id) {
@@ -213,7 +222,7 @@ vector<string> Kernel::drain_anomaly_responses(int terminal_id) {
 }
 
 void Kernel::render(){
-    if (booting_) { Glitch::draw_screen_fx(); render_boot(); return; }
+    if (booting_) { Glitch::draw_screen_fx(); scare_director_.render(session_time_); render_boot(); return; }
 
     // Idle tracking for anomaly window
     float dt = ImGui::GetIO().DeltaTime;
@@ -229,6 +238,10 @@ void Kernel::render(){
     if (puzzle_.stage() >= 3 && !anomaly_spawned_ && idle_timer_ > 90.0f) {
         anomaly_spawned_ = true;
         launch("anomaly_message");
+    }
+
+    for (const auto& whisper : scare_director_.drain_terminal_messages(session_time_)) {
+        anomaly_responses_.push_back({-1, whisper});
     }
 
     // Error popup
@@ -265,6 +278,7 @@ void Kernel::render(){
         if (app) windows_.push_back({next_id_++, true, move(app)});
     }
     pending_launches_.clear();
+    scare_director_.render(session_time_);
 }
 
 void Kernel::render_taskbar(){

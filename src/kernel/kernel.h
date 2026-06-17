@@ -5,6 +5,7 @@
 #include "vfs.h"
 #include "puzzle.h"
 #include "app.h"
+#include "fx/scare_director.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ class Kernel{
         VFS& vfs() {return vfs_;}
         PuzzleState& puzzle() {return puzzle_;}
         void record_file_open(const string& path);
+        void record_terminal_search(const string& command, const string& query);
         const vector<ActivityEntry>& activity_log() const {return activity_log_;}
         int files_opened() const {return files_opened_;}
         float session_time() const {return session_time_;}
@@ -44,6 +46,7 @@ class Kernel{
     private:
         VFS vfs_;
         PuzzleState puzzle_;
+        ScareDirector scare_director_;
         vector<WinEntry> windows_;
         vector<pair<string,string>> pending_launches_;
         bool booting_ = true;

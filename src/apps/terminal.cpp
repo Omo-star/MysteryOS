@@ -134,6 +134,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
         string path;
         ss >> path;
         if (path.empty()) path = "/";
+        k.record_terminal_search("grep", arg);
         for (const auto& line : TerminalTools::grep(k.vfs(), arg, path)) {
             print(line);
         }
@@ -143,6 +144,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
         string path;
         ss >> path;
         if (path.empty()) path = "/";
+        k.record_terminal_search("find", arg);
         for (const auto& line : TerminalTools::find(k.vfs(), arg, path)) {
             print(line);
         }
@@ -154,6 +156,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
             print("timeline: index unavailable");
             return;
         }
+        k.record_terminal_search("timeline", path);
         for (const auto& line : TerminalTools::timeline(k.vfs(), path)) {
             print(line);
         }

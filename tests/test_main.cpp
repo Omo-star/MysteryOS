@@ -2,6 +2,7 @@
 #include "kernel/vfs.h"
 #include "apps/terminal_tools.h"
 #include "fx/glitch.h"
+#include "fx/scare_director.h"
 #include <algorithm>
 #include <cstdlib>
 #include <cstdio>
@@ -75,6 +76,40 @@ int main() {
     if (expect(first_corruption == same_frame_corruption, "corrupted text should be cached between refresh ticks")) return 1;
     std::string refreshed_corruption = corruptor.render(corruption_source, 1.4f);
     if (expect(refreshed_corruption != first_corruption, "corrupted text should refresh after its own timer")) return 1;
+
+    ScareDirector scares;
+    scares.on_file_open("/System/config.cfg", 2, true, 8, 10.0f);
+    if (expect(scares.has_active(ScareKind::BlackFlash), "corrupted file should trigger a black flash")) return 1;
+    scares.update(10.4f);
+    if (expect(!scares.has_active(ScareKind::BlackFlash), "black flash should expire quickly")) return 1;
+
+    scares.on_file_open("/Pictures/0xE10A.png", 3, true, 12, 20.0f);
+    if (expect(scares.has_active(ScareKind::GreenAfterimage), "0xE10A image should trigger green afterimage")) return 1;
+    if (expect(scares.has_active(ScareKind::FullscreenMessage), "0xE10A image should trigger fullscreen message")) return 1;
+
+    ScareDirector users_scares;
+    users_scares.on_file_open("/Users/mkato/Documents/first_week_notes.txt", 4, false, 30, 30.0f);
+    if (expect(users_scares.has_active(ScareKind::FakeError), "first /Users file should trigger fake error")) return 1;
+    users_scares.update(40.0f);
+    users_scares.on_file_open("/Users/cshin/Documents/final_day.txt", 4, false, 31, 40.0f);
+    if (expect(!users_scares.has_active(ScareKind::FakeError), "/Users fake error should only happen once")) return 1;
+
+    ScareDirector deleted_whisper_scares;
+    deleted_whisper_scares.on_file_open("/Users/mkato/.deleted/transfer_second_thoughts.txt", 4, false, 42, 100.0f);
+    auto early_whispers = deleted_whisper_scares.drain_terminal_messages(105.0f);
+    if (expect(early_whispers.empty(), "deleted-file whisper should wait before speaking")) return 1;
+    auto late_whispers = deleted_whisper_scares.drain_terminal_messages(114.0f);
+    if (expect(has_line_containing(late_whispers, "deleted does not mean gone"), "deleted file should schedule a delayed whisper")) return 1;
+
+    ScareDirector search_scares;
+    search_scares.on_terminal_search("grep", "september", 4, 200.0f);
+    if (expect(search_scares.has_active(ScareKind::FakeError), "september search should trigger fake profiling error")) return 1;
+    auto search_whispers = search_scares.drain_terminal_messages(209.0f);
+    if (expect(has_line_containing(search_whispers, "first month"), "september search should schedule terminal whisper")) return 1;
+
+    ScareDirector timeline_scares;
+    timeline_scares.on_terminal_search("timeline", "/Users", 4, 300.0f);
+    if (expect(timeline_scares.has_active(ScareKind::FakeError), "timeline use should trigger reconstruction warning")) return 1;
 
     std::printf("All tests passed.\n");
     return 0;
