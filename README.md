@@ -43,11 +43,13 @@ The main interaction is reading. You open documents, inspect logs, follow hints,
 - Text editor for readable documents
 - Image viewer for real JPG/PNG files
 - Procedural corrupted image rendering
-- Terminal commands like `ls`, `cat`, `grep`, `find`, `timeline`, `ps`, `ping`, `kill`, `decode`, `monitor`, `trace`, and `talk`
+- Terminal commands like `ls`, `cat`, `grep`, `find`, `timeline`, `diff`, `stat`, `strings`, `hash`, `history`, `ps`, `ping`, `kill`, `decode`, `monitor`, `trace`, and `talk`
 - Five staged unlocks driven by passwords
 - Stage-based file injection
 - Session Monitor app for investigating PID 7741
 - Activity tracking for files opened during the current session
+- Behavior-aware late-game files that react to rereads, searches, deleted-file reads, and terminal-heavy play
+- Full-screen scare events, generated audio stingers, phantom file entries, and delayed anomaly whispers
 - Optional Groq-powered `talk 7741` anomaly
 - Optional AI-generated files written into the fake filesystem
 
@@ -62,6 +64,11 @@ cat /Desktop/README.txt
 grep september /Users
 find notes /
 timeline /Users
+diff <file1> <file2>
+stat <file>
+strings <file>
+hash <file>
+history
 unlock <password>
 ps
 kill 7741
@@ -150,6 +157,8 @@ GROQ_MODEL
 
 The workflow writes `docs/anomaly-config.js` during deployment.
 
+The GitHub Pages workflow also installs Emscripten and runs `./build.sh` before uploading `docs/`, so pushes to `main` publish a fresh WebAssembly build instead of relying on prebuilt local artifacts.
+
 For local testing, create `docs/anomaly-config.js` yourself:
 
 ```js
@@ -172,7 +181,7 @@ cmake --build build_native
 ./build_native/Debug/test_logic.exe
 ```
 
-The tests cover core puzzle progression and staged filesystem injection.
+The tests cover core puzzle progression, staged filesystem injection, terminal investigation tools, player-profile behavior, and scare triggers.
 
 ## Project Structure
 

@@ -23,6 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Emscripten
+        uses: emscripten-core/setup-emsdk@v16
+
+      - name: Build MysteryOS
+        shell: bash
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
       - name: Write anomaly config
         shell: pwsh
         run: |
