@@ -1,5 +1,6 @@
 #include "kernel/puzzle.h"
 #include "kernel/vfs.h"
+#include "kernel/player_profile.h"
 #include "apps/terminal_tools.h"
 #include "fx/glitch.h"
 #include "fx/scare_director.h"
@@ -66,6 +67,39 @@ int main() {
     auto timeline_lines = TerminalTools::timeline(vfs, "/Desktop");
     if (expect(has_line_containing(timeline_lines, "/Desktop/search_alpha.txt: September 1 happened"), "timeline should surface month/date evidence")) return 1;
     if (expect(!has_line_containing(timeline_lines, "/Desktop/no_date.txt"), "timeline should not treat modal may as a date")) return 1;
+
+    vfs.inject("/Desktop/diff_a.txt", "same\nleft only\nshared\n", false);
+    vfs.inject("/Desktop/diff_b.txt", "same\nright only\nshared\n", false);
+    auto diff_lines = TerminalTools::diff(vfs, "/Desktop/diff_a.txt", "/Desktop/diff_b.txt");
+    if (expect(has_line_containing(diff_lines, "- left only"), "diff should show removed lines")) return 1;
+    if (expect(has_line_containing(diff_lines, "+ right only"), "diff should show added lines")) return 1;
+
+    auto stat_lines = TerminalTools::stat(vfs, "/Desktop/diff_a.txt");
+    if (expect(has_line_containing(stat_lines, "type: file"), "stat should report file type")) return 1;
+    if (expect(has_line_containing(stat_lines, "bytes:"), "stat should report byte count")) return 1;
+
+    vfs.inject("/Desktop/blob.bin", "abc\001\002VISIBLE_TEXT\003tail", false);
+    auto strings_lines = TerminalTools::strings(vfs, "/Desktop/blob.bin");
+    if (expect(has_line_containing(strings_lines, "VISIBLE_TEXT"), "strings should extract printable runs")) return 1;
+
+    auto hash_lines = TerminalTools::hash(vfs, "/Desktop/diff_a.txt");
+    if (expect(has_line_containing(hash_lines, "fnv1a64:"), "hash should report deterministic file hash")) return 1;
+
+    VFSNode* live_node = vfs.get("/Desktop/diff_a.txt");
+    live_node->content = "changed by test";
+    if (expect(vfs.get("/Desktop/diff_a.txt")->content == "changed by test", "VFS content should be mutable for living files")) return 1;
+
+    PlayerProfile profile;
+    profile.record_command("cat /System/config.cfg");
+    profile.record_file_open("/System/config.cfg", "terminal");
+    profile.record_file_open("/System/config.cfg", "terminal");
+    profile.record_file_open("/Users/mkato/.deleted/transfer_second_thoughts.txt", "gui");
+    profile.record_search("grep", "september");
+    auto observations = profile.observations(5);
+    if (expect(has_line_containing(observations, "returned to /System/config.cfg"), "profile should notice rereads")) return 1;
+    if (expect(has_line_containing(observations, "deleted files"), "profile should notice deleted-file focus")) return 1;
+    if (expect(has_line_containing(observations, "commands more than windows"), "profile should notice terminal preference")) return 1;
+    if (expect(profile.live_profile_content(5).find("september") != std::string::npos, "live profile should include searched terms")) return 1;
 
     srand(12345);
     int expected_next_rand = rand();
@@ -138,6 +172,10 @@ int main() {
     if (expect(player_folder_scares.has_active(ScareKind::HardJumpscare), "door file should trigger hard jumpscare")) return 1;
     auto door_sounds = player_folder_scares.drain_sound_requests();
     if (expect(has_sound(door_sounds, ScareSound::Impact), "door file should request impact sound")) return 1;
+
+    ScareDirector do_not_open_scares;
+    do_not_open_scares.on_file_open("/Desktop/you/do_not_open_until_you_are_done.txt", 5, false, 151, 600.0f);
+    if (expect(do_not_open_scares.has_active(ScareKind::HardJumpscare), "do-not-open file should trigger a setpiece scare")) return 1;
 
     std::printf("All tests passed.\n");
     return 0;

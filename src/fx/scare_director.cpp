@@ -54,6 +54,7 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
         saw_users_ = true;
         add(ScareKind::FakeError, now, 2.4f, 1.0f, "CROSS-CONTAMINATION ACCELERATING");
         add(ScareKind::WindowShake, now, 1.0f, 0.8f);
+        request_sound(ScareSound::Dread);
     }
 
     if (stage >= 4 && starts_with(path, "/Users/") && !whispered_users_file_) {
@@ -84,6 +85,14 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
         saw_stage5_door_file_ = true;
         add(ScareKind::HardJumpscare, now, 2.0f, 1.0f, "IT OPENED BACK");
         request_sound(ScareSound::Impact);
+    }
+
+    if (stage >= 5 && path == "/Desktop/you/do_not_open_until_you_are_done.txt" && !saw_do_not_open_file_) {
+        saw_do_not_open_file_ = true;
+        add(ScareKind::HardJumpscare, now, 2.2f, 1.0f, "YOU OPENED IT EARLY");
+        add(ScareKind::ApertureOpen, now + 2.1f, 1.5f, 0.9f, "THANK YOU");
+        request_sound(ScareSound::Impact);
+        request_sound(ScareSound::Aperture);
     }
 
     if (stage >= 5 && starts_with(path, "/Desktop/you/") && !whispered_player_folder_) {

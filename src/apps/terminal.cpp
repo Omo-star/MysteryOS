@@ -71,11 +71,13 @@ void Terminal::render(Kernel& k) {
 }
 
 void Terminal::execute(const string& raw, Kernel& k) {
+    k.record_terminal_command(raw);
     istringstream ss(raw);
     string cmd, arg;
     ss >> cmd >> arg;
     if (cmd == "help") {
         print("Commands: help  ls [path]  cat <file>  grep <word> [path]  find <name> [path]  timeline [path]");
+        print("          diff <file1> <file2>  stat <file>  strings <file>  hash <file>  history");
         print("          unlock <password>  whoami  ps  ping <host>  kill <pid>  decode <file>  monitor  trace <pid>  talk 7741 <message>");
         print("  [anomaly] you can also type a question, like: who are you?");
         if (k.puzzle().stage() >= 1) print("  [hint] try: cat /System/Archive/classified.txt");
@@ -130,6 +132,36 @@ void Terminal::execute(const string& raw, Kernel& k) {
         }
         return;
     }
+    if (cmd == "history") {
+        auto history = k.command_history();
+        int start = (int)history.size() > 20 ? (int)history.size() - 20 : 0;
+        for (int i = start; i < (int)history.size(); i++) {
+            print(to_string(i + 1) + "  " + history[i]);
+        }
+        return;
+    }
+    if (cmd == "diff") {
+        string right;
+        ss >> right;
+        if (arg.empty() || right.empty()) { print("diff: usage: diff <file1> <file2>"); return; }
+        for (const auto& line : TerminalTools::diff(k.vfs(), arg, right)) print(line);
+        return;
+    }
+    if (cmd == "stat") {
+        if (arg.empty()) { print("stat: missing path"); return; }
+        for (const auto& line : TerminalTools::stat(k.vfs(), arg)) print(line);
+        return;
+    }
+    if (cmd == "strings") {
+        if (arg.empty()) { print("strings: missing path"); return; }
+        for (const auto& line : TerminalTools::strings(k.vfs(), arg)) print(line);
+        return;
+    }
+    if (cmd == "hash") {
+        if (arg.empty()) { print("hash: missing path"); return; }
+        for (const auto& line : TerminalTools::hash(k.vfs(), arg)) print(line);
+        return;
+    }
     if (cmd == "grep") {
         string path;
         ss >> path;
@@ -169,7 +201,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
         if (!node)        { print("cat: not found: " + arg); return; }
         if (node->locked) { print("cat: permission denied"); return; }
         if (node->is_dir) { print("cat: is a directory"); return; }
-        k.record_file_open(arg);
+        k.record_file_open(arg, "terminal");
         print(node->corrupted ? Glitch::mangle(node->content) : node->content);
         return;
     }

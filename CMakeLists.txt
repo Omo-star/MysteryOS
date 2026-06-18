@@ -20,6 +20,7 @@ set(GAME_SOURCES
     src/kernel/kernel.cpp
     src/kernel/vfs.cpp
     src/kernel/puzzle.cpp
+    src/kernel/player_profile.cpp
     src/apps/file_explorer.cpp
     src/apps/text_editor.cpp
     src/apps/terminal.cpp
@@ -51,6 +52,7 @@ else()
         src/apps/terminal_tools.cpp
         src/kernel/vfs.cpp
         src/kernel/puzzle.cpp
+        src/kernel/player_profile.cpp
         src/fx/glitch.cpp
         src/fx/scare_director.cpp
     )

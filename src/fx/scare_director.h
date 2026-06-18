@@ -53,6 +53,7 @@ class ScareDirector {
         bool saw_users_ = false;
         bool saw_stage5_player_folder_ = false;
         bool saw_stage5_door_file_ = false;
+        bool saw_do_not_open_file_ = false;
         bool stage4_unlock_hit_ = false;
         bool stage5_unlock_hit_ = false;
         bool whispered_deleted_file_ = false;

@@ -41,6 +41,15 @@ void FileExplorer::render_tree(Kernel& k, VFSNode* node, const string& path){
 }
 
 void FileExplorer::render_contents(Kernel& k, VFSNode* dir, const string& path){
+    for (const PhantomEntry& phantom : k.phantom_entries_for(path)) {
+        ImGui::TextColored({0.45f, 1.0f, 0.55f, 0.55f}, "%s %s",
+            phantom.is_dir ? "[dir]" : "[ghost]",
+            (phantom.name + (phantom.is_dir ? "/" : "")).c_str());
+        if (ImGui::IsItemClicked()) {
+            k.record_file_open(path + "/" + phantom.name, "phantom");
+        }
+    }
+
     for (auto& [name, child] : dir->children){
         if (child->hidden) continue;
         string child_path = (path == "/" ? "/" : path + "/") + name;

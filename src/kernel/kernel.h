@@ -6,6 +6,7 @@
 #include "puzzle.h"
 #include "app.h"
 #include "fx/scare_director.h"
+#include "player_profile.h"
 
 using namespace std;
 
@@ -25,6 +26,11 @@ struct AnomalyResponse{
     string text;
 };
 
+struct PhantomEntry{
+    string name;
+    bool is_dir = false;
+};
+
 class Kernel{
     public:
         bool init();
@@ -32,8 +38,11 @@ class Kernel{
         void launch(const string& app_name, const string& arg = "");
         VFS& vfs() {return vfs_;}
         PuzzleState& puzzle() {return puzzle_;}
-        void record_file_open(const string& path);
+        void record_file_open(const string& path, const string& source = "gui");
+        void record_terminal_command(const string& command);
         void record_terminal_search(const string& command, const string& query);
+        vector<string> command_history() const;
+        vector<PhantomEntry> phantom_entries_for(const string& path) const;
         const vector<ActivityEntry>& activity_log() const {return activity_log_;}
         int files_opened() const {return files_opened_;}
         float session_time() const {return session_time_;}
@@ -47,6 +56,7 @@ class Kernel{
         VFS vfs_;
         PuzzleState puzzle_;
         ScareDirector scare_director_;
+        PlayerProfile player_profile_;
         vector<WinEntry> windows_;
         vector<pair<string,string>> pending_launches_;
         bool booting_ = true;
@@ -61,6 +71,7 @@ class Kernel{
         bool anomaly_spawned_ = false;
         int files_opened_ = 0;
         void play_scare_sound(ScareSound sound);
+        void update_living_files();
         vector<ActivityEntry> activity_log_;
         int last_anomaly_terminal_id_ = -1;
         vector<AnomalyResponse> anomaly_responses_;

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 #include <sstream>
 
 using namespace std;
@@ -171,6 +172,37 @@ namespace {
         if (vfs.is_hidden(root)) return nullptr;
         return vfs.get(root);
     }
+
+    VFSNode* visible_file(VFS& vfs, const string& path, const string& command, vector<string>& out) {
+        string root = clean_path(path);
+        if (vfs.is_hidden(root)) {
+            out.push_back(command + ": not found: " + root);
+            return nullptr;
+        }
+        VFSNode* node = vfs.get(root);
+        if (!node) {
+            out.push_back(command + ": not found: " + root);
+            return nullptr;
+        }
+        if (node->locked) {
+            out.push_back(command + ": permission denied: " + root);
+            return nullptr;
+        }
+        if (node->is_dir) {
+            out.push_back(command + ": is a directory: " + root);
+            return nullptr;
+        }
+        return node;
+    }
+
+    vector<string> split_lines(const string& content) {
+        vector<string> lines;
+        istringstream in(content);
+        string line;
+        while (getline(in, line)) lines.push_back(trim_cr(line));
+        if (!content.empty() && content.back() == '\n') return lines;
+        return lines;
+    }
 }
 
 namespace TerminalTools {
@@ -206,6 +238,83 @@ namespace TerminalTools {
         vector<string> out;
         timeline_node(node, root, out);
         if (out.empty()) out.push_back("timeline: no dated lines found");
+        return out;
+    }
+
+    vector<string> diff(VFS& vfs, const string& left_path, const string& right_path) {
+        vector<string> out;
+        VFSNode* left = visible_file(vfs, left_path, "diff", out);
+        VFSNode* right = visible_file(vfs, right_path, "diff", out);
+        if (!left || !right) return out;
+
+        vector<string> left_lines = split_lines(left->content);
+        vector<string> right_lines = split_lines(right->content);
+        size_t max_lines = max(left_lines.size(), right_lines.size());
+        for (size_t i = 0; i < max_lines && out.size() < MAX_RESULTS; i++) {
+            string left_line = i < left_lines.size() ? left_lines[i] : "";
+            string right_line = i < right_lines.size() ? right_lines[i] : "";
+            if (left_line == right_line) continue;
+            if (i < left_lines.size()) out.push_back("- " + left_line);
+            if (i < right_lines.size() && out.size() < MAX_RESULTS) out.push_back("+ " + right_line);
+        }
+        if (out.empty()) out.push_back("diff: files match");
+        return out;
+    }
+
+    vector<string> stat(VFS& vfs, const string& path) {
+        string root = clean_path(path);
+        if (vfs.is_hidden(root)) return {"stat: not found: " + root};
+        VFSNode* node = vfs.get(root);
+        if (!node) return {"stat: not found: " + root};
+
+        vector<string> out;
+        out.push_back("path: " + root);
+        out.push_back(string("type: ") + (node->is_dir ? "directory" : "file"));
+        out.push_back(string("locked: ") + (node->locked ? "yes" : "no"));
+        out.push_back(string("hidden: ") + (node->hidden ? "yes" : "no"));
+        out.push_back(string("corrupted: ") + (node->corrupted ? "yes" : "no"));
+        if (node->is_dir) {
+            out.push_back("children: " + to_string(node->children.size()));
+        } else {
+            out.push_back("bytes: " + to_string(node->content.size()));
+            out.push_back("lines: " + to_string(split_lines(node->content).size()));
+        }
+        return out;
+    }
+
+    vector<string> strings(VFS& vfs, const string& path) {
+        vector<string> out;
+        VFSNode* node = visible_file(vfs, path, "strings", out);
+        if (!node) return out;
+
+        string run;
+        for (unsigned char c : node->content) {
+            if (isprint(c) || c == '\t') {
+                run.push_back((char)c);
+            } else {
+                if (run.size() >= 4) out.push_back(run);
+                run.clear();
+            }
+            if (out.size() >= MAX_RESULTS) break;
+        }
+        if (run.size() >= 4 && out.size() < MAX_RESULTS) out.push_back(run);
+        if (out.empty()) out.push_back("strings: no printable runs");
+        return out;
+    }
+
+    vector<string> hash(VFS& vfs, const string& path) {
+        vector<string> out;
+        VFSNode* node = visible_file(vfs, path, "hash", out);
+        if (!node) return out;
+
+        unsigned long long value = 1469598103934665603ull;
+        for (unsigned char c : node->content) {
+            value ^= c;
+            value *= 1099511628211ull;
+        }
+        ostringstream hex;
+        hex << "fnv1a64: 0x" << std::hex << std::setw(16) << std::setfill('0') << value;
+        out.push_back(hex.str());
         return out;
     }
 }

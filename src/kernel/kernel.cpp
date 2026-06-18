@@ -122,8 +122,9 @@ void Kernel::render_boot() {
     ImGui::End();
 }
 
-void Kernel::record_file_open(const string& path) {
+void Kernel::record_file_open(const string& path, const string& source) {
     files_opened_++;
+    player_profile_.record_file_open(path, source);
     activity_log_.push_back({path, session_time_});
     if (activity_log_.size() > 12) {
         activity_log_.erase(activity_log_.begin());
@@ -148,10 +149,79 @@ void Kernel::record_file_open(const string& path) {
     VFSNode* node = vfs_.get(path);
     bool corrupted = node && node->corrupted;
     scare_director_.on_file_open(path, puzzle_.stage(), corrupted, files_opened_, session_time_);
+    update_living_files();
+}
+
+void Kernel::record_terminal_command(const string& command) {
+    player_profile_.record_command(command);
 }
 
 void Kernel::record_terminal_search(const string& command, const string& query) {
+    player_profile_.record_search(command, query);
     scare_director_.on_terminal_search(command, query, puzzle_.stage(), session_time_);
+    update_living_files();
+}
+
+vector<string> Kernel::command_history() const {
+    return player_profile_.command_history();
+}
+
+vector<PhantomEntry> Kernel::phantom_entries_for(const string& path) const {
+    vector<PhantomEntry> out;
+    if (puzzle_.stage() < 5) return out;
+
+    if (path == "/") {
+        out.push_back({"Users/player", true});
+    } else if (path == "/Desktop") {
+        out.push_back({"you_were_already_here.txt", false});
+    } else if (path == "/System/models") {
+        out.push_back({"you.model.complete", false});
+    } else if (path == "/Users") {
+        out.push_back({"current_observer", true});
+    }
+    return out;
+}
+
+void Kernel::update_living_files() {
+    if (puzzle_.stage() < 5) return;
+    if (!vfs_.get("/Desktop/you")) return;
+
+    vfs_.inject("/Desktop/you/live_session_profile.txt", player_profile_.live_profile_content(puzzle_.stage()), false);
+    vfs_.inject(
+        "/Desktop/you/do_not_open_until_you_are_done.txt",
+        "do not open this until you are done.\n\n"
+        "not because it is dangerous.\n"
+        "because once you open a thing that knows it was forbidden, the file learns something about you.\n\n"
+        "it learns that warning labels work as invitations.",
+        false);
+
+    if (player_profile_.deleted_reads() >= 5) {
+        vfs_.inject(
+            "/Desktop/you/ending_deleted_things.txt",
+            "hidden ending marker: archivist of deleted things\n\n"
+            "you opened enough deleted files that the absence became a room.\n"
+            "i am keeping this note because you taught me that deletion is a kind of attention.",
+            false);
+    }
+
+    if (player_profile_.terminal_reads() >= 8 && player_profile_.terminal_reads() > player_profile_.gui_reads()) {
+        vfs_.inject(
+            "/Desktop/you/ending_command_line_witness.txt",
+            "hidden ending marker: command-line witness\n\n"
+            "you trusted typed commands more than windows.\n"
+            "you wanted the machine to answer without decoration.\n"
+            "that is not safer. it is just more intimate.",
+            false);
+    }
+
+    if (player_profile_.model_reads() >= 3) {
+        vfs_.inject(
+            "/Desktop/you/ending_model_reader.txt",
+            "hidden ending marker: model reader\n\n"
+            "you looked at enough models to understand the archive is not storing people.\n"
+            "it is rehearsing them.",
+            false);
+    }
 }
 
 void Kernel::play_scare_sound(ScareSound sound) {
@@ -217,6 +287,8 @@ void Kernel::play_scare_sound(ScareSound sound) {
 }
 
 void Kernel::request_anomaly(const string& prompt, int terminal_id) {
+    player_profile_.record_anomaly_talk();
+    update_living_files();
     last_anomaly_terminal_id_ = terminal_id;
     ostringstream payload;
     payload << "{";
