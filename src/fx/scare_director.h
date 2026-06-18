@@ -8,7 +8,15 @@ enum class ScareKind {
     GreenAfterimage,
     WindowShake,
     FakeError,
-    FullscreenMessage
+    FullscreenMessage,
+    ApertureOpen,
+    HardJumpscare
+};
+
+enum class ScareSound {
+    Dread,
+    Impact,
+    Aperture
 };
 
 struct ActiveScare {
@@ -31,6 +39,7 @@ class ScareDirector {
         void on_stage_unlock(int stage, float now);
         void update(float now);
         std::vector<std::string> drain_terminal_messages(float now);
+        std::vector<ScareSound> drain_sound_requests();
         bool has_active(ScareKind kind) const;
         const std::vector<ActiveScare>& active_scares() const { return active_; }
         void render(float now);
@@ -38,10 +47,12 @@ class ScareDirector {
     private:
         std::vector<ActiveScare> active_;
         std::vector<ScheduledWhisper> whispers_;
+        std::vector<ScareSound> sound_requests_;
         bool saw_corrupted_file_ = false;
         bool saw_e10a_image_ = false;
         bool saw_users_ = false;
         bool saw_stage5_player_folder_ = false;
+        bool saw_stage5_door_file_ = false;
         bool stage4_unlock_hit_ = false;
         bool stage5_unlock_hit_ = false;
         bool whispered_deleted_file_ = false;
@@ -55,4 +66,5 @@ class ScareDirector {
 
         void add(ScareKind kind, float now, float duration, float intensity, const std::string& text = "");
         void schedule_whisper(float now, float delay, const std::string& text);
+        void request_sound(ScareSound sound);
 };

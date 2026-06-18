@@ -169,6 +169,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
         if (!node)        { print("cat: not found: " + arg); return; }
         if (node->locked) { print("cat: permission denied"); return; }
         if (node->is_dir) { print("cat: is a directory"); return; }
+        k.record_file_open(arg);
         print(node->corrupted ? Glitch::mangle(node->content) : node->content);
         return;
     }

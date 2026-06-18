@@ -60,6 +60,7 @@ class Kernel{
         float session_time_ = 0.0f;
         bool anomaly_spawned_ = false;
         int files_opened_ = 0;
+        void play_scare_sound(ScareSound sound);
         vector<ActivityEntry> activity_log_;
         int last_anomaly_terminal_id_ = -1;
         vector<AnomalyResponse> anomaly_responses_;

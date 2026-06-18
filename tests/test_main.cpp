@@ -23,6 +23,12 @@ static bool has_line_containing(const std::vector<std::string>& lines, const std
     });
 }
 
+static bool has_sound(const std::vector<ScareSound>& sounds, ScareSound sound) {
+    return std::any_of(sounds.begin(), sounds.end(), [&](ScareSound value) {
+        return value == sound;
+    });
+}
+
 int main() {
     VFS vfs;
     PuzzleState puzzle;
@@ -86,6 +92,9 @@ int main() {
     scares.on_file_open("/Pictures/0xE10A.png", 3, true, 12, 20.0f);
     if (expect(scares.has_active(ScareKind::GreenAfterimage), "0xE10A image should trigger green afterimage")) return 1;
     if (expect(scares.has_active(ScareKind::FullscreenMessage), "0xE10A image should trigger fullscreen message")) return 1;
+    if (expect(scares.has_active(ScareKind::HardJumpscare), "0xE10A image should trigger a hard jumpscare")) return 1;
+    auto e10a_sounds = scares.drain_sound_requests();
+    if (expect(has_sound(e10a_sounds, ScareSound::Impact), "0xE10A image should request impact sound")) return 1;
 
     ScareDirector users_scares;
     users_scares.on_file_open("/Users/mkato/Documents/first_week_notes.txt", 4, false, 30, 30.0f);
@@ -96,6 +105,8 @@ int main() {
 
     ScareDirector deleted_whisper_scares;
     deleted_whisper_scares.on_file_open("/Users/mkato/.deleted/transfer_second_thoughts.txt", 4, false, 42, 100.0f);
+    auto deleted_sounds = deleted_whisper_scares.drain_sound_requests();
+    if (expect(has_sound(deleted_sounds, ScareSound::Dread), "deleted file should request dread sound")) return 1;
     auto early_whispers = deleted_whisper_scares.drain_terminal_messages(105.0f);
     if (expect(early_whispers.empty(), "deleted-file whisper should wait before speaking")) return 1;
     auto late_whispers = deleted_whisper_scares.drain_terminal_messages(114.0f);
@@ -104,12 +115,29 @@ int main() {
     ScareDirector search_scares;
     search_scares.on_terminal_search("grep", "september", 4, 200.0f);
     if (expect(search_scares.has_active(ScareKind::FakeError), "september search should trigger fake profiling error")) return 1;
+    auto september_sounds = search_scares.drain_sound_requests();
+    if (expect(has_sound(september_sounds, ScareSound::Dread), "september search should request dread sound")) return 1;
     auto search_whispers = search_scares.drain_terminal_messages(209.0f);
     if (expect(has_line_containing(search_whispers, "first month"), "september search should schedule terminal whisper")) return 1;
 
     ScareDirector timeline_scares;
     timeline_scares.on_terminal_search("timeline", "/Users", 4, 300.0f);
     if (expect(timeline_scares.has_active(ScareKind::FakeError), "timeline use should trigger reconstruction warning")) return 1;
+    if (expect(timeline_scares.has_active(ScareKind::ApertureOpen), "timeline /Users should open an aperture scare")) return 1;
+    auto timeline_sounds = timeline_scares.drain_sound_requests();
+    if (expect(has_sound(timeline_sounds, ScareSound::Aperture), "timeline /Users should request aperture sound")) return 1;
+
+    ScareDirector model_scares;
+    model_scares.on_file_open("/System/models/README.txt", 5, false, 101, 400.0f);
+    if (expect(model_scares.has_active(ScareKind::ApertureOpen), "first model file should open an aperture scare")) return 1;
+    auto model_sounds = model_scares.drain_sound_requests();
+    if (expect(has_sound(model_sounds, ScareSound::Aperture), "first model file should request aperture sound")) return 1;
+
+    ScareDirector player_folder_scares;
+    player_folder_scares.on_file_open("/Desktop/you/a_door_you_did_not_open.txt", 5, false, 150, 500.0f);
+    if (expect(player_folder_scares.has_active(ScareKind::HardJumpscare), "door file should trigger hard jumpscare")) return 1;
+    auto door_sounds = player_folder_scares.drain_sound_requests();
+    if (expect(has_sound(door_sounds, ScareSound::Impact), "door file should request impact sound")) return 1;
 
     std::printf("All tests passed.\n");
     return 0;

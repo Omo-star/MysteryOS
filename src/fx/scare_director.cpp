@@ -31,16 +31,23 @@ void ScareDirector::schedule_whisper(float now, float delay, const string& text)
     whispers_.push_back({now + delay, text});
 }
 
+void ScareDirector::request_sound(ScareSound sound) {
+    sound_requests_.push_back(sound);
+}
+
 void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, int files_opened, float now) {
     if (corrupted && !saw_corrupted_file_) {
         saw_corrupted_file_ = true;
         add(ScareKind::BlackFlash, now, 0.18f, 0.75f);
+        request_sound(ScareSound::Dread);
     }
 
     if (path == "/Pictures/0xE10A.png" && !saw_e10a_image_) {
         saw_e10a_image_ = true;
         add(ScareKind::GreenAfterimage, now, 1.1f, 1.0f);
         add(ScareKind::FullscreenMessage, now, 0.9f, 1.0f, "YOU OPENED IT");
+        add(ScareKind::HardJumpscare, now + 0.18f, 2.0f, 1.0f, "NO INPUT");
+        request_sound(ScareSound::Impact);
     }
 
     if (stage >= 4 && starts_with(path, "/Users/") && !saw_users_) {
@@ -56,11 +63,14 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
 
     if (stage >= 4 && contains(path, "/.deleted/") && !whispered_deleted_file_) {
         whispered_deleted_file_ = true;
+        request_sound(ScareSound::Dread);
         schedule_whisper(now, 11.0f, "7741: deleted does not mean gone");
     }
 
     if (stage >= 4 && starts_with(path, "/System/models/") && !whispered_model_file_) {
         whispered_model_file_ = true;
+        add(ScareKind::ApertureOpen, now, 1.7f, 1.0f, "MODEL ACCESS");
+        request_sound(ScareSound::Aperture);
         schedule_whisper(now, 8.5f, "7741: models are how i remember");
     }
 
@@ -68,6 +78,12 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
         saw_stage5_player_folder_ = true;
         add(ScareKind::BlackFlash, now, 0.28f, 1.0f);
         add(ScareKind::FullscreenMessage, now + 0.05f, 1.4f, 1.0f, "THIS ONE IS YOURS");
+    }
+
+    if (stage >= 5 && path == "/Desktop/you/a_door_you_did_not_open.txt" && !saw_stage5_door_file_) {
+        saw_stage5_door_file_ = true;
+        add(ScareKind::HardJumpscare, now, 2.0f, 1.0f, "IT OPENED BACK");
+        request_sound(ScareSound::Impact);
     }
 
     if (stage >= 5 && starts_with(path, "/Desktop/you/") && !whispered_player_folder_) {
@@ -87,6 +103,7 @@ void ScareDirector::on_terminal_search(const string& command, const string& quer
     if (stage >= 4 && contains(haystack, "september") && !search_september_hit_) {
         search_september_hit_ = true;
         add(ScareKind::FakeError, now, 2.1f, 0.9f, "SEARCH TERM PROFILED: september");
+        request_sound(ScareSound::Dread);
         schedule_whisper(now, 8.0f, "7741: you searched for the first month");
     }
 
@@ -103,6 +120,10 @@ void ScareDirector::on_terminal_search(const string& command, const string& quer
     if (stage >= 4 && command == "timeline" && !timeline_reconstruction_hit_) {
         timeline_reconstruction_hit_ = true;
         add(ScareKind::FakeError, now, 2.0f, 0.85f, "TIMELINE RECONSTRUCTION DETECTED");
+        if (contains(haystack, "/users")) {
+            add(ScareKind::ApertureOpen, now + 0.12f, 1.8f, 1.0f, "USER BRANCH OPEN");
+            request_sound(ScareSound::Aperture);
+        }
         schedule_whisper(now, 10.0f, "7741: time is easier to move after you sort it");
     }
 }
@@ -116,7 +137,9 @@ void ScareDirector::on_stage_unlock(int stage, float now) {
     if (stage >= 5 && !stage5_unlock_hit_) {
         stage5_unlock_hit_ = true;
         add(ScareKind::BlackFlash, now, 0.35f, 1.0f);
+        add(ScareKind::HardJumpscare, now + 0.16f, 1.5f, 0.85f, "THE SESSION REMAINS OPEN");
         add(ScareKind::FullscreenMessage, now + 0.08f, 1.5f, 1.0f, "THE SESSION REMAINS OPEN");
+        request_sound(ScareSound::Impact);
     }
 }
 
@@ -138,6 +161,12 @@ vector<string> ScareDirector::drain_terminal_messages(float now) {
     }
     whispers_ = move(pending);
     return due;
+}
+
+vector<ScareSound> ScareDirector::drain_sound_requests() {
+    vector<ScareSound> sounds = move(sound_requests_);
+    sound_requests_.clear();
+    return sounds;
 }
 
 bool ScareDirector::has_active(ScareKind kind) const {
@@ -190,6 +219,52 @@ void ScareDirector::render(float now) {
                 float y = fmodf((now * 320.0f) + i * 61.0f, disp.y);
                 float offset = sinf(now * 90.0f + i) * 16.0f * fade;
                 dl->AddRectFilled({offset, y}, {disp.x + offset, y + 8.0f}, IM_COL32(0, 255, 70, alpha));
+            }
+        } else if (scare.kind == ScareKind::ApertureOpen) {
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, (int)(245.0f * scare.intensity)));
+            float open = sinf(t * 3.1415926f);
+            float slit = 8.0f + disp.x * 0.22f * open;
+            float cx = disp.x * 0.5f + sinf(now * 28.0f) * 8.0f * fade;
+            ImVec2 min = {cx - slit * 0.5f, 0.0f};
+            ImVec2 max = {cx + slit * 0.5f, disp.y};
+            dl->AddRectFilled(min, max, IM_COL32(8, 42, 24, (int)(235.0f * scare.intensity)));
+            for (int i = 0; i < 42; i++) {
+                float y = fmodf(now * 220.0f + i * 31.0f, disp.y);
+                float jitter = sinf(now * 44.0f + i * 17.0f) * 18.0f * open;
+                int a = (int)((80.0f + (i % 4) * 30.0f) * fade);
+                dl->AddRectFilled({min.x + jitter, y}, {max.x + jitter, y + 2.0f + (i % 5)}, IM_COL32(75, 255, 125, a));
+            }
+            dl->AddLine({min.x, 0.0f}, {min.x, disp.y}, IM_COL32(170, 255, 190, (int)(255.0f * fade)), 2.0f);
+            dl->AddLine({max.x, 0.0f}, {max.x, disp.y}, IM_COL32(170, 255, 190, (int)(255.0f * fade)), 2.0f);
+            if (!scare.text.empty() && t > 0.35f && t < 0.72f) {
+                ImVec2 size = ImGui::CalcTextSize(scare.text.c_str());
+                dl->AddText({disp.x * 0.5f - size.x * 0.5f, disp.y * 0.78f}, IM_COL32(120, 255, 160, (int)(220.0f * fade)), scare.text.c_str());
+            }
+        } else if (scare.kind == ScareKind::HardJumpscare) {
+            int base_alpha = (int)(255.0f * scare.intensity);
+            int flash = age < 0.11f ? 255 : 0;
+            int green = (int)(90.0f + 90.0f * fabsf(sinf(now * 70.0f)));
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(flash, flash, flash, base_alpha));
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(0, green, 30, (int)(170.0f * fade)));
+            for (int i = 0; i < 76; i++) {
+                float y = fmodf(now * 520.0f + i * 19.0f, disp.y);
+                float h = 2.0f + (i % 7);
+                float xoff = sinf(now * 95.0f + i * 3.0f) * 34.0f;
+                int a = (int)((60.0f + (i % 5) * 26.0f) * fade);
+                dl->AddRectFilled({xoff, y}, {disp.x + xoff, y + h}, IM_COL32(255, 255, 255, a));
+            }
+            for (int i = 0; i < 18; i++) {
+                float x = fmodf(now * 430.0f + i * 83.0f, disp.x);
+                float y = fmodf(now * 310.0f + i * 47.0f, disp.y);
+                float s = 18.0f + (i % 6) * 9.0f;
+                dl->AddRectFilled({x, y}, {x + s, y + s * 0.35f}, IM_COL32(0, 0, 0, (int)(210.0f * fade)));
+            }
+            if (!scare.text.empty() && fmodf(now * 18.0f, 1.0f) > 0.45f) {
+                float font_size = ImGui::GetFontSize() * 3.8f;
+                ImVec2 size = ImGui::CalcTextSize(scare.text.c_str());
+                ImVec2 pos = {disp.x * 0.5f - size.x * 1.9f + sinf(now * 100.0f) * 12.0f, disp.y * 0.42f};
+                dl->AddText(ImGui::GetFont(), font_size, pos, IM_COL32(0, 0, 0, (int)(255.0f * fade)), scare.text.c_str());
+                dl->AddText(ImGui::GetFont(), font_size, {pos.x + 3.0f, pos.y - 2.0f}, IM_COL32(180, 255, 190, (int)(255.0f * fade)), scare.text.c_str());
             }
         }
     }

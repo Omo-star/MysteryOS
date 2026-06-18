@@ -154,6 +154,68 @@ void Kernel::record_terminal_search(const string& command, const string& query) 
     scare_director_.on_terminal_search(command, query, puzzle_.stage(), session_time_);
 }
 
+void Kernel::play_scare_sound(ScareSound sound) {
+    const char* name = "dread";
+    if (sound == ScareSound::Impact) name = "impact";
+    else if (sound == ScareSound::Aperture) name = "aperture";
+
+    string js =
+        "if(!window._mysteryScareAudio){"
+        "window._mysteryScareAudio=(function(){"
+        "function ctx(){"
+        "var base=window._mysteryOsc&&window._mysteryOsc.ctx;"
+        "if(!base)base=new (window.AudioContext||window.webkitAudioContext)();"
+        "if(base.state==='suspended')base.resume();"
+        "return base;"
+        "}"
+        "function gainNode(c,g){var n=c.createGain();n.gain.value=g;return n;}"
+        "function noise(c,d){"
+        "var b=c.createBuffer(1,Math.max(1,Math.floor(c.sampleRate*d)),c.sampleRate);"
+        "var a=b.getChannelData(0);"
+        "for(var i=0;i<a.length;i++){a[i]=Math.random()*2-1;}"
+        "var s=c.createBufferSource();s.buffer=b;return s;"
+        "}"
+        "function playImpact(){"
+        "var c=ctx(),t=c.currentTime;"
+        "var n=noise(c,.42),f=c.createBiquadFilter(),g=gainNode(c,0);"
+        "f.type='bandpass';f.frequency.setValueAtTime(2800,t);f.Q.value=7;"
+        "g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.95,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+.38);"
+        "n.connect(f);f.connect(g);g.connect(c.destination);n.start(t);n.stop(t+.44);"
+        "var o=c.createOscillator(),og=gainNode(c,0);"
+        "o.type='sawtooth';o.frequency.setValueAtTime(72,t);o.frequency.exponentialRampToValueAtTime(31,t+.22);"
+        "og.gain.setValueAtTime(.55,t);og.gain.exponentialRampToValueAtTime(.001,t+.5);"
+        "o.connect(og);og.connect(c.destination);o.start(t);o.stop(t+.52);"
+        "}"
+        "function playDread(){"
+        "var c=ctx(),t=c.currentTime;"
+        "var o=c.createOscillator(),g=gainNode(c,0),f=c.createBiquadFilter();"
+        "o.type='sine';o.frequency.setValueAtTime(38,t);o.frequency.linearRampToValueAtTime(54,t+1.4);"
+        "f.type='lowpass';f.frequency.value=120;"
+        "g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.22,t+.45);g.gain.setValueAtTime(.22,t+1.05);g.gain.linearRampToValueAtTime(0,t+1.35);"
+        "o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.45);"
+        "var tick=noise(c,.08),tg=gainNode(c,0),tf=c.createBiquadFilter();"
+        "tf.type='highpass';tf.frequency.value=3200;"
+        "tg.gain.setValueAtTime(0,t+.72);tg.gain.linearRampToValueAtTime(.28,t+.735);tg.gain.exponentialRampToValueAtTime(.001,t+.82);"
+        "tick.connect(tf);tf.connect(tg);tg.connect(c.destination);tick.start(t+.72);tick.stop(t+.84);"
+        "}"
+        "function playAperture(){"
+        "var c=ctx(),t=c.currentTime;"
+        "var o=c.createOscillator(),g=gainNode(c,0);"
+        "o.type='triangle';o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(22,t+1.1);"
+        "g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.35,t+.08);g.gain.linearRampToValueAtTime(.08,t+.7);g.gain.exponentialRampToValueAtTime(.001,t+1.2);"
+        "o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.25);"
+        "var n=noise(c,1.2),f=c.createBiquadFilter(),ng=gainNode(c,0);"
+        "f.type='bandpass';f.frequency.setValueAtTime(900,t);f.frequency.linearRampToValueAtTime(2600,t+1.0);f.Q.value=11;"
+        "ng.gain.setValueAtTime(0,t);ng.gain.linearRampToValueAtTime(.26,t+.16);ng.gain.exponentialRampToValueAtTime(.001,t+1.15);"
+        "n.connect(f);f.connect(ng);ng.connect(c.destination);n.start(t);n.stop(t+1.2);"
+        "}"
+        "return{play:function(kind){if(kind==='impact')playImpact();else if(kind==='aperture')playAperture();else playDread();}};"
+        "})();"
+        "}"
+        "window._mysteryScareAudio.play('" + string(name) + "');";
+    emscripten_run_script(js.c_str());
+}
+
 void Kernel::request_anomaly(const string& prompt, int terminal_id) {
     last_anomaly_terminal_id_ = terminal_id;
     ostringstream payload;
@@ -242,6 +304,9 @@ void Kernel::render(){
 
     for (const auto& whisper : scare_director_.drain_terminal_messages(session_time_)) {
         anomaly_responses_.push_back({-1, whisper});
+    }
+    for (ScareSound sound : scare_director_.drain_sound_requests()) {
+        play_scare_sound(sound);
     }
 
     // Error popup
