@@ -1592,7 +1592,7 @@
                     var alpha = t < 0.04 ? t/0.04 : t > 0.93 ? (1-t)/0.07 : 1;
                     ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
 
-                    ctx.fillStyle = '#080808';
+                    ctx.fillStyle = '#050505';
                     ctx.fillRect(0, 0, w, h);
 
                     var walkProgress = t * 8;
@@ -1601,71 +1601,92 @@
                     var cx = w/2 + bobX;
                     var cy = h/2 + bobY;
 
-                    // Corridor perspective — brighter, visible walls/floor/ceiling
-                    var segs = 30;
-                    for (var i = segs; i >= 0; i--) {
-                        var depth = i / segs;
-                        var d2 = depth * depth;
-                        var rw = w * (1 - d2 * 0.9);
-                        var rh = h * (1 - d2 * 0.9);
-                        var rx = cx - rw/2;
-                        var ry = cy - rh/2;
+                    // Corridor — solid filled walls, floor, ceiling
+                    // Left wall
+                    ctx.fillStyle = '#1a1f1a';
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0); ctx.lineTo(cx - 8, cy - 8);
+                    ctx.lineTo(cx - 8, cy + 8); ctx.lineTo(0, h); ctx.fill();
+                    // Right wall
+                    ctx.fillStyle = '#181d18';
+                    ctx.beginPath();
+                    ctx.moveTo(w, 0); ctx.lineTo(cx + 8, cy - 8);
+                    ctx.lineTo(cx + 8, cy + 8); ctx.lineTo(w, h); ctx.fill();
+                    // Floor
+                    ctx.fillStyle = '#121512';
+                    ctx.beginPath();
+                    ctx.moveTo(0, h); ctx.lineTo(cx - 8, cy + 8);
+                    ctx.lineTo(cx + 8, cy + 8); ctx.lineTo(w, h); ctx.fill();
+                    // Ceiling
+                    ctx.fillStyle = '#0e110e';
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0); ctx.lineTo(cx - 8, cy - 8);
+                    ctx.lineTo(cx + 8, cy - 8); ctx.lineTo(w, 0); ctx.fill();
 
-                        // Walls — green-grey, visible
-                        var shade = 15 + Math.floor(depth * 30);
-                        ctx.strokeStyle = 'rgb(' + shade + ',' + Math.floor(shade*1.3) + ',' + shade + ')';
-                        ctx.lineWidth = 1.2 - depth * 0.8;
-                        ctx.strokeRect(rx, ry, rw, rh);
-
-                        // Floor tiles — clearly visible grid
-                        if (i % 3 === 0 && i > 0) {
-                            ctx.strokeStyle = 'rgba(30,40,30,' + (0.3 + depth*0.4) + ')';
-                            ctx.beginPath(); ctx.moveTo(rx, ry+rh); ctx.lineTo(rx+rw, ry+rh); ctx.stroke();
-                        }
-
-                        // Ceiling panels
-                        if (i % 4 === 0 && i > 0) {
-                            ctx.strokeStyle = 'rgba(25,30,25,' + (0.2 + depth*0.3) + ')';
-                            ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx+rw, ry); ctx.stroke();
+                    // Wall panel lines — thick, visible
+                    for (var i = 1; i < 14; i++) {
+                        var pd = i / 14;
+                        var pd2 = pd * pd;
+                        // Horizontal lines on walls
+                        var leftX = pd2 * (cx - 8);
+                        var rightX = w - pd2 * (w - cx - 8);
+                        var topY = pd2 * (cy - 8);
+                        var botY = h - pd2 * (h - cy - 8);
+                        var midY = topY + (botY - topY) * 0.5;
+                        // Wall edges
+                        ctx.strokeStyle = 'rgba(50,65,50,' + (0.6 - pd*0.4) + ')';
+                        ctx.lineWidth = 2 - pd * 1.5;
+                        ctx.beginPath(); ctx.moveTo(leftX, topY); ctx.lineTo(leftX, botY); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(rightX, topY); ctx.lineTo(rightX, botY); ctx.stroke();
+                        // Floor grid
+                        ctx.strokeStyle = 'rgba(40,55,40,' + (0.4 - pd*0.3) + ')';
+                        ctx.beginPath(); ctx.moveTo(leftX, botY); ctx.lineTo(rightX, botY); ctx.stroke();
+                        // Ceiling grid
+                        ctx.strokeStyle = 'rgba(30,40,30,' + (0.3 - pd*0.2) + ')';
+                        ctx.beginPath(); ctx.moveTo(leftX, topY); ctx.lineTo(rightX, topY); ctx.stroke();
+                        // Wainscoting / wall detail
+                        if (i % 2 === 0) {
+                            ctx.strokeStyle = 'rgba(45,55,40,' + (0.3 - pd*0.2) + ')';
+                            ctx.beginPath(); ctx.moveTo(leftX, midY); ctx.lineTo(leftX + 1, midY); ctx.stroke();
+                            ctx.beginPath(); ctx.moveTo(rightX - 1, midY); ctx.lineTo(rightX, midY); ctx.stroke();
                         }
                     }
 
-                    // Perspective lines — floor to vanishing point
-                    for (var i = 0; i < 6; i++) {
-                        var lx = w * (0.1 + i * 0.16);
-                        ctx.strokeStyle = 'rgba(25,35,25,0.2)';
-                        ctx.lineWidth = 0.8;
-                        ctx.beginPath(); ctx.moveTo(lx, h); ctx.lineTo(cx, cy); ctx.stroke();
-                    }
-
-                    // Ceiling lights — flickering green-white
+                    // Ceiling lights — bright, clearly visible
                     for (var i = 0; i < 8; i++) {
                         var lightDepth = ((i * 0.8 - walkProgress * 0.3) % 4 + 4) % 4;
                         if (lightDepth > 3.5) continue;
                         var ld = lightDepth / 4;
                         var ld2 = ld * ld;
-                        var lightW = 40 * (1 - ld2);
-                        var lightH = 6 * (1 - ld2);
+                        var lightW = 50 * (1 - ld2);
+                        var lightH = 8 * (1 - ld2);
                         var lightX = cx - lightW/2;
-                        var lightY = cy - h*0.45*(1 - ld2*0.9);
-                        if (lightW < 3) continue;
+                        var lightY = cy - h*0.44*(1 - ld2*0.9) - 4;
+                        if (lightW < 4) continue;
 
-                        // Flicker — some lights are broken
                         var broken = (i === 3 || i === 6);
                         var on = broken ? (Math.sin(el*0.03 + i*5) > 0.7) : true;
                         if (on) {
-                            var brightness = broken ? 0.3 + Math.random()*0.4 : 0.7;
-                            ctx.fillStyle = 'rgba(160,200,160,' + (brightness * (1-ld)) + ')';
+                            var brightness = broken ? 0.4 + Math.random()*0.4 : 0.85;
+                            // Light fixture
+                            ctx.fillStyle = 'rgba(200,240,200,' + (brightness * (1-ld)) + ')';
                             ctx.fillRect(lightX, lightY, lightW, lightH);
-                            // Light cone on floor
-                            var coneW = lightW * 3 * (1 - ld);
-                            ctx.fillStyle = 'rgba(20,35,20,' + (0.15 * brightness * (1-ld)) + ')';
+                            // Glow around fixture
+                            ctx.fillStyle = 'rgba(120,180,120,' + (0.2 * brightness * (1-ld)) + ')';
+                            ctx.fillRect(lightX - 5, lightY - 3, lightW + 10, lightH + 6);
+                            // Light cone — big visible triangle on floor
+                            var coneW = lightW * 4 * (1 - ld);
+                            var floorY = cy + h*0.44*(1-ld2*0.9);
+                            ctx.fillStyle = 'rgba(30,55,30,' + (0.2 * brightness * (1-ld)) + ')';
                             ctx.beginPath();
                             ctx.moveTo(lightX, lightY + lightH);
-                            ctx.lineTo(cx - coneW/2, cy + h*0.45*(1-ld2*0.9));
-                            ctx.lineTo(cx + coneW/2, cy + h*0.45*(1-ld2*0.9));
+                            ctx.lineTo(cx - coneW/2, floorY);
+                            ctx.lineTo(cx + coneW/2, floorY);
                             ctx.lineTo(lightX + lightW, lightY + lightH);
                             ctx.fill();
+                            // Floor light pool
+                            ctx.fillStyle = 'rgba(35,60,35,' + (0.15 * brightness * (1-ld)) + ')';
+                            ctx.fillRect(cx - coneW*0.3, floorY - 3, coneW*0.6, 6);
                         }
                     }
 
