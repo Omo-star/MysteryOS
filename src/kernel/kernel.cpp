@@ -288,6 +288,7 @@ void Kernel::play_scare_sound(ScareSound sound) {
 
 void Kernel::request_anomaly(const string& prompt, int terminal_id) {
     player_profile_.record_anomaly_talk();
+    scare_director_.on_terminal_search("talk", "7741 " + prompt, puzzle_.stage(), session_time_);
     update_living_files();
     last_anomaly_terminal_id_ = terminal_id;
     ostringstream payload;

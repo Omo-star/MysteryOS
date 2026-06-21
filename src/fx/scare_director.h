@@ -15,7 +15,10 @@ enum class ScareKind {
     ScreenMelt,
     DepthWarp,
     Hallway,
-    TheEye
+    TheEye,
+    SceneFeed,
+    SceneInterview,
+    SceneWalk
 };
 
 enum class ScareSound {
@@ -67,6 +70,13 @@ class ScareDirector {
         bool depth_warp_triggered_ = false;
         bool hallway_triggered_ = false;
         bool eye_triggered_ = false;
+        bool scene_feed_triggered_ = false;
+        bool scene_feed_launched_ = false;
+        bool scene_interview_triggered_ = false;
+        bool scene_interview_launched_ = false;
+        bool scene_walk_triggered_ = false;
+        bool scene_walk_launched_ = false;
+
         bool stage4_unlock_hit_ = false;
         bool stage5_unlock_hit_ = false;
         bool whispered_deleted_file_ = false;

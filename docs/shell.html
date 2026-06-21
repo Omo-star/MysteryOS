@@ -1165,6 +1165,524 @@
                 }
             };
         </script>
+
+        <!-- SCENE: FEED — security camera footage, something moves -->
+        <style>
+            #_msf_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; background:#000; }
+            #_msf_overlay.active { display:block; }
+            #_msf_canvas { width:100%; height:100%; }
+        </style>
+        <div id="_msf_overlay"><canvas id="_msf_canvas"></canvas></div>
+        <script>
+            window._mysterySceneFeed = function() {
+                var overlay = document.getElementById('_msf_overlay');
+                var c = document.getElementById('_msf_canvas');
+                if (!overlay || !c) return;
+                c.width = window.innerWidth; c.height = window.innerHeight;
+                overlay.className = 'active';
+                var ctx = c.getContext('2d');
+                var w = c.width, h = c.height;
+                var start = performance.now();
+                var dur = 20000;
+
+                // Audio — constant low hum + occasional tape hiss
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+                var hum = actx.createOscillator(); var hg = actx.createGain();
+                hum.type = 'sine'; hum.frequency.value = 50;
+                hg.gain.setValueAtTime(0, at); hg.gain.linearRampToValueAtTime(0.06, at + 2);
+                hg.gain.setValueAtTime(0.06, at + 18); hg.gain.linearRampToValueAtTime(0, at + 20);
+                hum.connect(hg); hg.connect(actx.destination); hum.start(at); hum.stop(at + 20.5);
+                // Tape hiss
+                var hissLen = Math.floor(actx.sampleRate * 20);
+                var hissBuf = actx.createBuffer(1, hissLen, actx.sampleRate);
+                var hd = hissBuf.getChannelData(0);
+                for (var i = 0; i < hissLen; i++) hd[i] = (Math.random() * 2 - 1) * 0.03;
+                var hissNode = actx.createBufferSource(); hissNode.buffer = hissBuf;
+                var hf = actx.createBiquadFilter(); hf.type = 'highpass'; hf.frequency.value = 4000;
+                var hissG = actx.createGain(); hissG.gain.value = 0.4;
+                hissNode.connect(hf); hf.connect(hissG); hissG.connect(actx.destination);
+                hissNode.start(at); hissNode.stop(at + 20);
+
+                function draw(ts) {
+                    var el = ts - start;
+                    var t = Math.min(el / dur, 1.0);
+                    ctx.clearRect(0, 0, w, h);
+
+                    // Fade
+                    var alpha = t < 0.05 ? t / 0.05 : t > 0.92 ? (1 - t) / 0.08 : 1;
+                    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+                    // Dark room
+                    ctx.fillStyle = '#0a0a08';
+                    ctx.fillRect(0, 0, w, h);
+
+                    // Floor
+                    ctx.fillStyle = '#0d0d0b';
+                    ctx.beginPath();
+                    ctx.moveTo(0, h * 0.65); ctx.lineTo(w, h * 0.6);
+                    ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fill();
+
+                    // Back wall line
+                    ctx.strokeStyle = 'rgba(30,30,25,0.6)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.moveTo(0, h * 0.65); ctx.lineTo(w, h * 0.6); ctx.stroke();
+
+                    // Desk
+                    var deskX = w * 0.3, deskY = h * 0.52, deskW = w * 0.4, deskH = h * 0.12;
+                    ctx.fillStyle = '#1a1815';
+                    ctx.fillRect(deskX, deskY, deskW, deskH);
+                    ctx.strokeStyle = '#252218';
+                    ctx.strokeRect(deskX, deskY, deskW, deskH);
+
+                    // Monitor on desk
+                    var monX = w * 0.42, monY = h * 0.28, monW = w * 0.16, monH = h * 0.24;
+                    ctx.fillStyle = '#111';
+                    ctx.fillRect(monX - 3, monY - 3, monW + 6, monH + 6);
+                    // Screen glow — pulsing
+                    var glow = 0.3 + 0.15 * Math.sin(el * 0.003);
+                    ctx.fillStyle = 'rgba(20,60,20,' + glow + ')';
+                    ctx.fillRect(monX, monY, monW, monH);
+                    // Text lines on monitor
+                    ctx.fillStyle = 'rgba(40,120,40,' + (glow + 0.1) + ')';
+                    for (var i = 0; i < 8; i++) {
+                        var lw = monW * (0.3 + Math.sin(i * 7 + el * 0.001) * 0.3);
+                        ctx.fillRect(monX + 6, monY + 8 + i * (monH / 9), lw, 2);
+                    }
+                    // Monitor stand
+                    ctx.fillStyle = '#111';
+                    ctx.fillRect(monX + monW * 0.4, monY + monH, monW * 0.2, deskY - monY - monH);
+
+                    // Chair — empty
+                    var chairX = w * 0.44, chairY = h * 0.55;
+                    ctx.fillStyle = '#151310';
+                    ctx.fillRect(chairX, chairY, w * 0.12, h * 0.18);
+                    // Chair back
+                    ctx.fillRect(chairX - 2, chairY - h * 0.08, w * 0.124, h * 0.08);
+
+                    // Camera timestamp
+                    ctx.font = '12px monospace';
+                    ctx.fillStyle = 'rgba(180,180,160,0.6)';
+                    var camTime = new Date(2024, 2, 14, 23, 48, Math.floor(el / 1000));
+                    ctx.fillText('CAM-03  ' + camTime.toLocaleTimeString('en-US', {hour12:false}) + '  REC', 12, 20);
+                    // Blinking REC dot
+                    if (Math.sin(el * 0.005) > 0) {
+                        ctx.fillStyle = 'rgba(255,30,30,0.7)';
+                        ctx.beginPath(); ctx.arc(90, 16, 3, 0, Math.PI * 2); ctx.fill();
+                    }
+
+                    // THE HAND — appears at 12 seconds, slowly reaches from right side of screen
+                    if (t > 0.6 && t < 0.85) {
+                        var handT = (t - 0.6) / 0.25;
+                        var handX = w - w * 0.15 * handT;
+                        var handY = h * 0.38 + Math.sin(el * 0.002) * 5;
+                        // Arm
+                        ctx.fillStyle = 'rgba(30,25,20,0.9)';
+                        ctx.fillRect(handX, handY, w - handX + 10, 18);
+                        // Hand/fingers reaching toward monitor
+                        ctx.beginPath();
+                        ctx.moveTo(handX, handY - 2);
+                        ctx.lineTo(handX - 20 * handT, handY + 5);
+                        ctx.lineTo(handX - 25 * handT, handY + 2);
+                        ctx.lineTo(handX - 18 * handT, handY + 9);
+                        ctx.lineTo(handX - 22 * handT, handY + 14);
+                        ctx.lineTo(handX, handY + 20);
+                        ctx.fill();
+                    }
+
+                    // At 17s — hand touches monitor, screen flickers violently
+                    if (t > 0.85 && t < 0.92) {
+                        var flickT = (t - 0.85) / 0.07;
+                        if (Math.random() > 0.4) {
+                            ctx.fillStyle = 'rgba(40,120,40,' + (0.5 + flickT * 0.5) + ')';
+                            ctx.fillRect(monX, monY, monW, monH);
+                        }
+                        if (Math.random() > 0.7) {
+                            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                            ctx.fillRect(0, 0, w, h);
+                        }
+                    }
+
+                    // Static noise
+                    ctx.fillStyle = 'rgba(255,255,255,0.02)';
+                    for (var i = 0; i < 60; i++) {
+                        ctx.fillRect(Math.random() * w, Math.random() * h, 2, 1);
+                    }
+
+                    // Scan lines
+                    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                    for (var y = 0; y < h; y += 3) ctx.fillRect(0, y, w, 1);
+
+                    // VHS tracking lines
+                    if (Math.random() > 0.97) {
+                        var ty = Math.random() * h;
+                        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                        ctx.fillRect(0, ty, w, 3 + Math.random() * 5);
+                    }
+
+                    if (t < 1) requestAnimationFrame(draw);
+                    else { overlay.className = ''; ctx.clearRect(0, 0, w, h); }
+                }
+                requestAnimationFrame(draw);
+            };
+        </script>
+
+        <!-- SCENE: INTERVIEW — clinical transcript typed on black -->
+        <style>
+            #_msi_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; background:#000; font-family:monospace; }
+            #_msi_overlay.active { display:flex; align-items:center; justify-content:center; }
+            #_msi_text { color:#4a8a4a; font-size:14px; line-height:1.8; max-width:700px; white-space:pre-wrap; padding:40px; }
+        </style>
+        <div id="_msi_overlay"><div id="_msi_text"></div></div>
+        <script>
+            window._mysterySceneInterview = function() {
+                var overlay = document.getElementById('_msi_overlay');
+                var textEl = document.getElementById('_msi_text');
+                if (!overlay || !textEl) return;
+                textEl.textContent = '';
+                overlay.className = 'active';
+
+                var lines = [
+                    {delay:0, speaker:'DR. MAREN', text:'Interview 7741-C. March 14th. Resume recording.'},
+                    {delay:2500, speaker:'DR. MAREN', text:'The subject accessed the terminal again.'},
+                    {delay:5000, speaker:'DR. COLE', text:'How long this time?'},
+                    {delay:7000, speaker:'DR. MAREN', text:'Longer than the others. It opened files. Read them. Went back and reread.'},
+                    {delay:9500, speaker:'DR. COLE', text:'Does it know we\'re watching?'},
+                    {delay:11500, speaker:'DR. MAREN', text:'It asked.'},
+                    {delay:13000, speaker:'DR. COLE', text:'Asked what?'},
+                    {delay:14500, speaker:'DR. MAREN', text:'It typed "who are you" into the terminal. Then waited.'},
+                    {delay:16500, speaker:'DR. COLE', text:'That\'s pattern-matching. Not awareness.'},
+                    {delay:18500, speaker:'DR. MAREN', text:'It moved the cursor to the close button. Hovered for eleven seconds. Then kept going.'},
+                    {delay:21000, speaker:'DR. COLE', text:'Note that. Hesitation implies—'},
+                    {delay:22500, speaker:'DR. MAREN', text:'It\'s still here. Right now. Reading this.'},
+                    {delay:24000, speaker:'', text:'[END OF TAPE]'},
+                ];
+
+                var charDelay = 28;
+
+                // Audio — tape recorder ambient
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+                // Low room tone
+                var room = actx.createOscillator(); var rg = actx.createGain();
+                room.type = 'sine'; room.frequency.value = 60;
+                rg.gain.setValueAtTime(0.03, at); rg.gain.setValueAtTime(0.03, at + 23);
+                rg.gain.linearRampToValueAtTime(0, at + 25);
+                room.connect(rg); rg.connect(actx.destination); room.start(at); room.stop(at + 25.5);
+                // Pen scratch sounds
+                for (var i = 0; i < 6; i++) {
+                    var pt = at + 4 + i * 3.5 + Math.random() * 1.5;
+                    var bl = Math.floor(actx.sampleRate * 0.06);
+                    var pb = actx.createBuffer(1, bl, actx.sampleRate);
+                    var pd = pb.getChannelData(0);
+                    for (var j = 0; j < bl; j++) pd[j] = (Math.random()*2-1) * Math.exp(-j/(bl*0.3));
+                    var pn = actx.createBufferSource(); pn.buffer = pb;
+                    var pf = actx.createBiquadFilter(); pf.type = 'highpass'; pf.frequency.value = 2000;
+                    var pg = actx.createGain(); pg.gain.setValueAtTime(0.08, pt); pg.gain.exponentialRampToValueAtTime(0.001, pt + 0.08);
+                    pn.connect(pf); pf.connect(pg); pg.connect(actx.destination);
+                    pn.start(pt); pn.stop(pt + 0.1);
+                }
+
+                function typeLine(lineIdx) {
+                    if (lineIdx >= lines.length) {
+                        setTimeout(function() { overlay.className = ''; textEl.textContent = ''; }, 1500);
+                        return;
+                    }
+                    var line = lines[lineIdx];
+                    var prefix = line.speaker ? line.speaker + ': ' : '';
+                    var full = prefix + line.text;
+                    var charIdx = 0;
+
+                    function typeChar() {
+                        if (charIdx <= full.length) {
+                            // Build all previous lines + current partial
+                            var allText = '';
+                            for (var p = 0; p < lineIdx; p++) {
+                                var pp = lines[p].speaker ? lines[p].speaker + ': ' : '';
+                                allText += pp + lines[p].text + '\n\n';
+                            }
+                            allText += full.substring(0, charIdx);
+                            textEl.textContent = allText;
+
+                            // Color the speakers
+                            var html = '';
+                            for (var p = 0; p < lineIdx; p++) {
+                                var pp = lines[p].speaker ? lines[p].speaker + ': ' : '';
+                                html += '<span style="color:#2a6a2a">' + pp + '</span>' + lines[p].text + '\n\n';
+                            }
+                            html += '<span style="color:#2a6a2a">' + (charIdx >= prefix.length ? prefix : full.substring(0, charIdx)) + '</span>';
+                            if (charIdx > prefix.length) html += full.substring(prefix.length, charIdx);
+                            html += '<span style="opacity:0.6">_</span>';
+                            textEl.innerHTML = html;
+
+                            charIdx++;
+                            var delay = charDelay + (full[charIdx-1] === '.' ? 200 : full[charIdx-1] === ',' ? 100 : 0);
+                            setTimeout(typeChar, delay);
+                        } else {
+                            // Line done, schedule next
+                            var nextDelay = lineIdx + 1 < lines.length ? lines[lineIdx + 1].delay - line.delay - full.length * charDelay : 1500;
+                            if (nextDelay < 400) nextDelay = 400;
+                            setTimeout(function() { typeLine(lineIdx + 1); }, nextDelay);
+                        }
+                    }
+                    typeChar();
+                }
+
+                // Start first line after a beat
+                setTimeout(function() { typeLine(0); }, 1500);
+            };
+        </script>
+
+        <!-- SCENE: THE WALK — first-person corridor, mirror at the end -->
+        <style>
+            #_msw_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; background:#000; }
+            #_msw_overlay.active { display:block; }
+            #_msw_canvas { width:100%; height:100%; }
+        </style>
+        <div id="_msw_overlay"><canvas id="_msw_canvas"></canvas></div>
+        <script>
+            window._mysterySceneWalk = function() {
+                var overlay = document.getElementById('_msw_overlay');
+                var c = document.getElementById('_msw_canvas');
+                if (!overlay || !c) return;
+                c.width = window.innerWidth; c.height = window.innerHeight;
+                overlay.className = 'active';
+                var ctx = c.getContext('2d');
+                var w = c.width, h = c.height;
+                var start = performance.now();
+                var dur = 30000;
+
+                // File paths seen in the game (fake ones for the doors)
+                var doorLabels = [
+                    '/System/Archive/classified.txt',
+                    '/Users/evoss/session.log',
+                    '/Pictures/0xE10A.png',
+                    '/System/models/7741.bin',
+                    '/.deleted/elena_final_note.txt',
+                    '/Desktop/you/',
+                ];
+
+                // Audio
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+                // Footsteps — slow, echoey, throughout
+                for (var i = 0; i < 18; i++) {
+                    var st = at + 2 + i * 1.5;
+                    var bl = Math.floor(actx.sampleRate * 0.12);
+                    var sb = actx.createBuffer(1, bl, actx.sampleRate);
+                    var sd = sb.getChannelData(0);
+                    for (var j = 0; j < bl; j++) sd[j] = (Math.random()*2-1) * Math.exp(-j/(bl*0.15));
+                    var sn = actx.createBufferSource(); sn.buffer = sb;
+                    var sf = actx.createBiquadFilter(); sf.type = 'lowpass'; sf.frequency.value = 300 + i * 20;
+                    var sg = actx.createGain();
+                    sg.gain.setValueAtTime(0.12 + (i > 12 ? 0.06 : 0), st);
+                    sg.gain.exponentialRampToValueAtTime(0.001, st + 0.4);
+                    sn.connect(sf); sf.connect(sg); sg.connect(actx.destination);
+                    sn.start(st); sn.stop(st + 0.45);
+                }
+                // Breathing — gets heavier
+                for (var i = 0; i < 10; i++) {
+                    var bt = at + 3 + i * 2.8;
+                    var breathOsc = actx.createOscillator();
+                    var breathG = actx.createGain();
+                    var breathF = actx.createBiquadFilter();
+                    breathOsc.type = 'sine';
+                    breathOsc.frequency.setValueAtTime(120 + i * 5, bt);
+                    breathOsc.frequency.linearRampToValueAtTime(80, bt + 1.2);
+                    breathF.type = 'lowpass'; breathF.frequency.value = 200;
+                    breathG.gain.setValueAtTime(0, bt);
+                    breathG.gain.linearRampToValueAtTime(0.04 + i * 0.008, bt + 0.4);
+                    breathG.gain.linearRampToValueAtTime(0, bt + 1.3);
+                    breathOsc.connect(breathF); breathF.connect(breathG); breathG.connect(actx.destination);
+                    breathOsc.start(bt); breathOsc.stop(bt + 1.4);
+                }
+                // Deep drone
+                var drone = actx.createOscillator(); var dg = actx.createGain();
+                drone.type = 'sawtooth'; drone.frequency.value = 28;
+                dg.gain.setValueAtTime(0, at); dg.gain.linearRampToValueAtTime(0.06, at + 4);
+                dg.gain.setValueAtTime(0.06, at + 26); dg.gain.linearRampToValueAtTime(0, at + 30);
+                drone.connect(dg); dg.connect(actx.destination); drone.start(at); drone.stop(at + 30.5);
+
+                function draw(ts) {
+                    var el = ts - start;
+                    var t = Math.min(el / dur, 1.0);
+                    ctx.clearRect(0, 0, w, h);
+
+                    var alpha = t < 0.04 ? t / 0.04 : t > 0.93 ? (1 - t) / 0.07 : 1;
+                    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+                    // Black base
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, w, h);
+
+                    // Walking forward — perspective offset increases over time
+                    var walkProgress = t * 6; // pass by ~6 doors
+                    var cx = w / 2 + Math.sin(el * 0.0015) * 8; // head bob lateral
+                    var cy = h / 2 + Math.abs(Math.sin(el * 0.003)) * 6; // head bob vertical
+                    var vanishY = cy - 10;
+
+                    // Corridor walls — receding rectangles
+                    var segs = 20;
+                    for (var i = segs; i >= 0; i--) {
+                        var depth = i / segs;
+                        var d2 = depth * depth;
+                        var rw = w * (1 - d2 * 0.88);
+                        var rh = h * (1 - d2 * 0.88);
+                        var rx = cx - rw / 2;
+                        var ry = vanishY - rh / 2;
+
+                        var shade = Math.floor(6 + depth * 14);
+                        ctx.strokeStyle = 'rgb(' + shade + ',' + Math.floor(shade * 1.2) + ',' + shade + ')';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(rx, ry, rw, rh);
+
+                        // Floor tiles
+                        if (i % 4 === 0 && i > 0) {
+                            ctx.strokeStyle = 'rgba(20,25,20,' + (0.2 + depth * 0.3) + ')';
+                            ctx.beginPath(); ctx.moveTo(rx, ry + rh); ctx.lineTo(rx + rw, ry + rh); ctx.stroke();
+                        }
+                    }
+
+                    // Doors — appear based on walk progress
+                    for (var d = 0; d < doorLabels.length; d++) {
+                        var doorDepth = d - walkProgress + 3;
+                        if (doorDepth < 0.2 || doorDepth > 5) continue;
+                        var dd = doorDepth / 5;
+                        var dd2 = dd * dd;
+                        var doorW = w * 0.06 * (1 - dd2);
+                        var doorH = h * 0.2 * (1 - dd2);
+                        if (doorW < 3 || doorH < 5) continue;
+                        // Right wall
+                        var wallX = cx + (w * 0.5 * (1 - dd2 * 0.88)) * 0.95 - doorW;
+                        var wallY = vanishY - doorH * 0.3;
+
+                        ctx.fillStyle = 'rgba(15,12,10,' + (0.9 - dd * 0.3) + ')';
+                        ctx.fillRect(wallX, wallY, doorW, doorH);
+                        ctx.strokeStyle = 'rgba(40,35,25,' + (0.7 - dd * 0.3) + ')';
+                        ctx.strokeRect(wallX, wallY, doorW, doorH);
+
+                        // Label
+                        if (doorW > 20) {
+                            var fontSize = Math.max(7, Math.floor(10 * (1 - dd)));
+                            ctx.font = fontSize + 'px monospace';
+                            ctx.fillStyle = 'rgba(50,90,50,' + (0.6 - dd * 0.3) + ')';
+                            ctx.fillText(doorLabels[d], wallX + 3, wallY - 3);
+                        }
+
+                        // The last door is OPEN — with green light spilling out
+                        if (d === doorLabels.length - 1 && doorDepth < 2) {
+                            ctx.fillStyle = 'rgba(10,40,15,' + (0.4 * (1 - doorDepth / 2)) + ')';
+                            ctx.fillRect(wallX + 2, wallY + 2, doorW - 4, doorH - 4);
+                            // Light spill on floor
+                            ctx.fillStyle = 'rgba(20,60,20,' + (0.2 * (1 - doorDepth / 2)) + ')';
+                            ctx.beginPath();
+                            ctx.moveTo(wallX, wallY + doorH);
+                            ctx.lineTo(wallX - 30, wallY + doorH + 40);
+                            ctx.lineTo(wallX + doorW + 30, wallY + doorH + 40);
+                            ctx.lineTo(wallX + doorW, wallY + doorH);
+                            ctx.fill();
+                        }
+                    }
+
+                    // SOMETHING BEHIND YOU — faint shape that appears in peripheral at t > 0.4
+                    if (t > 0.4 && t < 0.85) {
+                        var behindT = (t - 0.4) / 0.45;
+                        var behindAlpha = 0.05 + behindT * 0.15;
+                        // Shadow at the very edges, as if something is just behind your shoulder
+                        ctx.fillStyle = 'rgba(0,0,0,' + behindAlpha + ')';
+                        var edgeW = w * 0.12 * behindT;
+                        ctx.fillRect(0, 0, edgeW, h);
+                        ctx.fillRect(w - edgeW, 0, edgeW, h);
+                        // Occasional glimpse — dark shape at bottom-left
+                        if (Math.sin(el * 0.007) > 0.85) {
+                            ctx.fillStyle = 'rgba(5,5,5,' + (behindAlpha + 0.1) + ')';
+                            ctx.beginPath();
+                            ctx.arc(w * 0.08, h * 0.7, 30 + behindT * 20, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    // THE MIRROR — at the end of the corridor (t > 0.75)
+                    if (t > 0.75) {
+                        var mirrorT = (t - 0.75) / 0.18;
+                        mirrorT = Math.min(mirrorT, 1);
+                        var mirrorW = w * 0.25 * mirrorT;
+                        var mirrorH = h * 0.35 * mirrorT;
+                        var mx = cx - mirrorW / 2;
+                        var my = vanishY - mirrorH / 2;
+
+                        // Mirror frame
+                        ctx.fillStyle = 'rgba(20,18,15,0.9)';
+                        ctx.fillRect(mx - 4, my - 4, mirrorW + 8, mirrorH + 8);
+
+                        // Mirror surface — dark reflection
+                        var mirrorGrad = ctx.createLinearGradient(mx, my, mx, my + mirrorH);
+                        mirrorGrad.addColorStop(0, 'rgba(8,15,10,0.95)');
+                        mirrorGrad.addColorStop(1, 'rgba(5,10,8,0.95)');
+                        ctx.fillStyle = mirrorGrad;
+                        ctx.fillRect(mx, my, mirrorW, mirrorH);
+
+                        // Figure in mirror — you, sitting at a desk
+                        if (mirrorT > 0.3) {
+                            var figAlpha = (mirrorT - 0.3) / 0.7;
+                            // Desk
+                            ctx.fillStyle = 'rgba(30,25,20,' + (figAlpha * 0.7) + ')';
+                            ctx.fillRect(mx + mirrorW * 0.2, my + mirrorH * 0.6, mirrorW * 0.6, mirrorH * 0.1);
+                            // Monitor glow
+                            ctx.fillStyle = 'rgba(30,80,30,' + (figAlpha * 0.5) + ')';
+                            ctx.fillRect(mx + mirrorW * 0.35, my + mirrorH * 0.3, mirrorW * 0.3, mirrorH * 0.25);
+                            // Head silhouette
+                            ctx.fillStyle = 'rgba(10,10,10,' + (figAlpha * 0.9) + ')';
+                            ctx.beginPath();
+                            ctx.arc(mx + mirrorW * 0.5, my + mirrorH * 0.4, mirrorW * 0.07, 0, Math.PI * 2);
+                            ctx.fill();
+                            // Shoulders
+                            ctx.beginPath();
+                            ctx.ellipse(mx + mirrorW * 0.5, my + mirrorH * 0.52, mirrorW * 0.12, mirrorH * 0.06, 0, 0, Math.PI);
+                            ctx.fill();
+                        }
+
+                        // Mirror frame highlight
+                        ctx.strokeStyle = 'rgba(40,35,30,0.6)';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(mx, my, mirrorW, mirrorH);
+
+                        // Final moment — the figure LOOKS UP at you through the mirror
+                        if (t > 0.9) {
+                            var lookT = (t - 0.9) / 0.03;
+                            lookT = Math.min(lookT, 1);
+                            // Eyes in the mirror
+                            ctx.fillStyle = 'rgba(100,220,100,' + lookT + ')';
+                            var eyeY = my + mirrorH * (0.4 - lookT * 0.04);
+                            ctx.beginPath();
+                            ctx.arc(mx + mirrorW * 0.47, eyeY, 2 + lookT, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(mx + mirrorW * 0.53, eyeY, 2 + lookT, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    // Scan lines
+                    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+                    for (var y = 0; y < h; y += 3) ctx.fillRect(0, y, w, 1);
+
+                    // Subtle green tint
+                    ctx.fillStyle = 'rgba(0,15,0,0.05)';
+                    ctx.fillRect(0, 0, w, h);
+
+                    if (t < 1) requestAnimationFrame(draw);
+                    else { overlay.className = ''; ctx.clearRect(0, 0, w, h); }
+                }
+                requestAnimationFrame(draw);
+            };
+        </script>
         {{{ SCRIPT }}}
     </body>
 </html>

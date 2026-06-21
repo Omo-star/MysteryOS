@@ -57,10 +57,15 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
         request_sound(ScareSound::Impact);
     }
 
+    if (stage >= 4 && starts_with(path, "/Users/") && !scene_feed_triggered_) {
+        scene_feed_triggered_ = true;
+        add(ScareKind::SceneFeed, now, 20.0f, 1.0f);
+    }
+
     if (stage >= 4 && starts_with(path, "/Users/") && !saw_users_) {
         saw_users_ = true;
-        add(ScareKind::FakeError, now, 2.4f, 1.0f, "CROSS-CONTAMINATION ACCELERATING");
-        add(ScareKind::WindowShake, now, 1.0f, 0.8f);
+        add(ScareKind::FakeError, now + 20.5f, 2.4f, 1.0f, "CROSS-CONTAMINATION ACCELERATING");
+        add(ScareKind::WindowShake, now + 20.5f, 1.0f, 0.8f);
         request_sound(ScareSound::Dread);
     }
 
@@ -145,6 +150,11 @@ void ScareDirector::on_terminal_search(const string& command, const string& quer
         schedule_whisper(now, 7.0f, "7741: searching a name teaches it shape");
     }
 
+    if (contains(haystack, "talk") && contains(haystack, "7741") && !scene_interview_triggered_) {
+        scene_interview_triggered_ = true;
+        add(ScareKind::SceneInterview, now + 2.0f, 25.0f, 1.0f);
+    }
+
     if (stage >= 4 && command == "timeline" && !timeline_reconstruction_hit_) {
         timeline_reconstruction_hit_ = true;
         add(ScareKind::FakeError, now, 2.0f, 0.85f, "TIMELINE RECONSTRUCTION DETECTED");
@@ -168,6 +178,11 @@ void ScareDirector::on_stage_unlock(int stage, float now) {
         add(ScareKind::HardJumpscare, now + 0.16f, 1.5f, 0.85f, "THE SESSION REMAINS OPEN");
         add(ScareKind::FullscreenMessage, now + 0.08f, 1.5f, 1.0f, "THE SESSION REMAINS OPEN");
         request_sound(ScareSound::Impact);
+    }
+
+    if (stage >= 5 && !scene_walk_triggered_) {
+        scene_walk_triggered_ = true;
+        add(ScareKind::SceneWalk, now + 3.0f, 30.0f, 1.0f);
     }
 }
 
@@ -349,6 +364,24 @@ void ScareDirector::render(float now) {
                 int flash = (int)(120.0f * (1.0f - age / 0.3f));
                 dl->AddRectFilled({0, 0}, disp, IM_COL32(255, 255, 255, flash));
             }
+        } else if (scare.kind == ScareKind::SceneFeed) {
+            if (!scene_feed_launched_) {
+                scene_feed_launched_ = true;
+                emscripten_run_script("window._mysterySceneFeed && window._mysterySceneFeed()");
+            }
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
+        } else if (scare.kind == ScareKind::SceneInterview) {
+            if (!scene_interview_launched_) {
+                scene_interview_launched_ = true;
+                emscripten_run_script("window._mysterySceneInterview && window._mysterySceneInterview()");
+            }
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
+        } else if (scare.kind == ScareKind::SceneWalk) {
+            if (!scene_walk_launched_) {
+                scene_walk_launched_ = true;
+                emscripten_run_script("window._mysterySceneWalk && window._mysterySceneWalk()");
+            }
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
         }
     }
 }
