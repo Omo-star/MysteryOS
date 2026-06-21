@@ -1418,16 +1418,55 @@
 
         <!-- SCENE: INTERVIEW — clinical transcript typed on black -->
         <style>
-            #_msi_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; background:#000; font-family:monospace; }
+            #_msi_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; background:#000; font-family:monospace; overflow:hidden; }
             #_msi_overlay.active { display:flex; align-items:center; justify-content:center; }
-            #_msi_text { color:#4a8a4a; font-size:14px; line-height:1.8; max-width:700px; white-space:pre-wrap; padding:40px; }
+            #_msi_overlay.flicker { animation:_msi_flicker 0.4s linear 1; }
+            @keyframes _msi_flicker {
+                0%   { filter:brightness(1); }
+                8%   { filter:brightness(0.35); }
+                16%  { filter:brightness(1); }
+                24%  { filter:brightness(0.65); }
+                32%  { filter:brightness(1); }
+                100% { filter:brightness(1); }
+            }
+            #_msi_text { position:relative; color:#4a8a4a; font-size:14px; line-height:1.8; max-width:700px; white-space:pre-wrap; padding:40px; text-shadow:0 0 4px rgba(74,138,74,0.3); }
+            #_msi_text.glitch::before, #_msi_text.glitch::after {
+                content:attr(data-text); position:absolute; left:40px; top:40px; right:40px;
+                white-space:pre-wrap; overflow:hidden; pointer-events:none;
+            }
+            #_msi_text.glitch::before { color:#ff3b3b; clip-path:inset(0 0 60% 0); transform:translate(-2px,-1px); opacity:0.6; }
+            #_msi_text.glitch::after { color:#3bd8ff; clip-path:inset(45% 0 0 0); transform:translate(2px,1px); opacity:0.55; }
+            #_msi_scan { position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,30,0,0.28) 2px, rgba(0,30,0,0.28) 3px); opacity:0.5; }
+            #_msi_vig { position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at center, rgba(0,0,0,0) 38%, rgba(0,0,0,0.9) 100%); }
+            #_msi_static { position:absolute; inset:0; pointer-events:none; background:repeating-conic-gradient(from 0deg, #fff 0deg 1deg, #000 1deg 2deg); opacity:0; mix-blend-mode:overlay; }
+            #_msi_static.flash { animation:_msi_staticFlash 0.55s steps(3,end) 1; }
+            @keyframes _msi_staticFlash {
+                0% { opacity:0; } 15% { opacity:0.55; } 30% { opacity:0.05; } 45% { opacity:0.4; } 60% { opacity:0; } 75% { opacity:0.3; } 100% { opacity:0; }
+            }
+            #_msi_phantom { position:absolute; font-family:monospace; font-size:14px; color:rgba(150,45,45,0.55); text-shadow:0 0 6px rgba(150,45,45,0.4); opacity:0; transition:opacity 0.35s ease; pointer-events:none; }
+            #_msi_close { position:absolute; top:24px; right:28px; width:20px; height:20px; border:1px solid rgba(74,138,74,0.3); color:rgba(74,138,74,0.35); font-size:13px; line-height:18px; text-align:center; transition:border-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease; }
+            #_msi_close.hovered { border-color:rgba(150,45,45,0.6); color:rgba(200,70,70,0.75); box-shadow:0 0 8px rgba(150,45,45,0.35); }
+            #_msi_pointer { position:absolute; width:0; height:0; border-left:5px solid rgba(74,138,74,0.55); border-bottom:8px solid transparent; transform-origin:top left; opacity:0; transition:top 2.1s cubic-bezier(.4,0,.2,1), left 2.1s cubic-bezier(.4,0,.2,1), opacity 0.4s ease; pointer-events:none; }
+            #_msi_pointer.show { opacity:0.8; }
         </style>
-        <div id="_msi_overlay"><div id="_msi_text"></div></div>
+        <div id="_msi_overlay">
+            <div id="_msi_scan"></div>
+            <div id="_msi_vig"></div>
+            <div id="_msi_static"></div>
+            <div id="_msi_close">&times;</div>
+            <div id="_msi_pointer"></div>
+            <div id="_msi_phantom">_</div>
+            <div id="_msi_text"></div>
+        </div>
         <script>
             window._mysterySceneInterview = function() {
                 if (window._mysterySceneLock) return; window._mysterySceneLock = true;
                 var overlay = document.getElementById('_msi_overlay');
                 var textEl = document.getElementById('_msi_text');
+                var phantom = document.getElementById('_msi_phantom');
+                var closeBtn = document.getElementById('_msi_close');
+                var pointer = document.getElementById('_msi_pointer');
+                var staticLayer = document.getElementById('_msi_static');
                 if (!overlay || !textEl) { window._mysterySceneLock = false; return; }
                 textEl.textContent = '';
                 overlay.className = 'active';
@@ -1437,47 +1476,104 @@
                     {delay:2500, speaker:'DR. MAREN', text:'The subject accessed the terminal again.'},
                     {delay:5000, speaker:'DR. COLE', text:'How long this time?'},
                     {delay:7000, speaker:'DR. MAREN', text:'Longer than the others. It opened files. Read them. Went back and reread.'},
-                    {delay:9500, speaker:'DR. COLE', text:'Does it know we\'re watching?'},
+                    {delay:9500, speaker:'DR. COLE', text:'Does it know we\'re watching?', glitch:true},
                     {delay:11500, speaker:'DR. MAREN', text:'It asked.'},
                     {delay:13000, speaker:'DR. COLE', text:'Asked what?'},
-                    {delay:14500, speaker:'DR. MAREN', text:'It typed "who are you" into the terminal. Then waited.'},
+                    {delay:14500, speaker:'DR. MAREN', text:'It typed "who are you" into the terminal. Then waited.', glitch:true},
                     {delay:16500, speaker:'DR. COLE', text:'That\'s pattern-matching. Not awareness.'},
-                    {delay:18500, speaker:'DR. MAREN', text:'It moved the cursor to the close button. Hovered for eleven seconds. Then kept going.'},
-                    {delay:21000, speaker:'DR. COLE', text:'Note that. Hesitation implies—'},
-                    {delay:22500, speaker:'DR. MAREN', text:'It\'s still here. Right now. Reading this.'},
-                    {delay:24000, speaker:'', text:'[END OF TAPE]'},
+                    {delay:18500, speaker:'DR. MAREN', text:'It moved the cursor to the close button. Hovered for eleven seconds. Then kept going.', special:'closebutton'},
+                    {delay:24500, speaker:'DR. COLE', text:'Note that. Hesitation implies—'},
+                    {delay:27000, speaker:'DR. MAREN', text:'It\'s still here. Right now. Reading this.', glitch:true, special:'phantom-close'},
+                    {delay:29500, speaker:'', text:'[END OF TAPE]', special:'static'},
                 ];
 
                 var charDelay = 28;
 
-                // Audio — tape recorder ambient
-                var base = window._mysteryOsc && window._mysteryOsc.ctx;
-                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
-                if (actx.state === 'suspended') actx.resume();
-                var at = actx.currentTime;
-                // Low room tone
-                var room = actx.createOscillator(); var rg = actx.createGain();
-                room.type = 'sine'; room.frequency.value = 60;
-                rg.gain.setValueAtTime(0.03, at); rg.gain.setValueAtTime(0.03, at + 23);
-                rg.gain.linearRampToValueAtTime(0, at + 25);
-                room.connect(rg); rg.connect(actx.destination); room.start(at); room.stop(at + 25.5);
-                // Pen scratch sounds
-                for (var i = 0; i < 6; i++) {
-                    var pt = at + 4 + i * 3.5 + Math.random() * 1.5;
-                    var bl = Math.floor(actx.sampleRate * 0.06);
-                    var pb = actx.createBuffer(1, bl, actx.sampleRate);
-                    var pd = pb.getChannelData(0);
-                    for (var j = 0; j < bl; j++) pd[j] = (Math.random()*2-1) * Math.exp(-j/(bl*0.3));
-                    var pn = actx.createBufferSource(); pn.buffer = pb;
-                    var pf = actx.createBiquadFilter(); pf.type = 'highpass'; pf.frequency.value = 2000;
-                    var pg = actx.createGain(); pg.gain.setValueAtTime(0.08, pt); pg.gain.exponentialRampToValueAtTime(0.001, pt + 0.08);
-                    pn.connect(pf); pf.connect(pg); pg.connect(actx.destination);
-                    pn.start(pt); pn.stop(pt + 0.1);
+                // Ambient screen instability — jitter + occasional flicker. No audio.
+                var jitterId = setInterval(function() {
+                    var jx = (Math.random() * 1.6 - 0.8).toFixed(2);
+                    var jy = (Math.random() * 1.6 - 0.8).toFixed(2);
+                    textEl.style.transform = 'translate(' + jx + 'px,' + jy + 'px)';
+                }, 140);
+                var flickerId = setInterval(function() {
+                    if (Math.random() < 0.35) {
+                        overlay.classList.remove('flicker');
+                        void overlay.offsetWidth;
+                        overlay.classList.add('flicker');
+                    }
+                }, 4000 + Math.random() * 2500);
+
+                function placePhantom() {
+                    var margin = 60;
+                    var top = margin + Math.random() * (window.innerHeight - margin * 2);
+                    var left = margin + Math.random() * (window.innerWidth - margin * 2);
+                    var cx = window.innerWidth / 2;
+                    if (Math.abs(left - cx) < 160) left = left < cx ? cx - 200 : cx + 200;
+                    phantom.style.top = top + 'px';
+                    phantom.style.left = left + 'px';
+                }
+
+                // The other cursor — appears only in the gaps between lines, never while typing.
+                function showPhantom(holdMs, force) {
+                    if (!force && Math.random() < 0.3) return;
+                    placePhantom();
+                    phantom.style.opacity = '1';
+                    setTimeout(function() {
+                        phantom.style.opacity = '0';
+                    }, Math.max(holdMs - 500, 150));
+                }
+
+                // Final appearance — right next to the player's own cursor.
+                function showPhantomBesideCursor() {
+                    var cursorEl = document.getElementById('_msi_cursor');
+                    var rect = cursorEl ? cursorEl.getBoundingClientRect() : { top: window.innerHeight / 2, right: window.innerWidth / 2 };
+                    phantom.style.top = rect.top + 'px';
+                    phantom.style.left = (rect.right + 14) + 'px';
+                    phantom.style.opacity = '1';
+                    setTimeout(function() { phantom.style.opacity = '0'; }, 900);
+                }
+
+                // Synced to the "hovered over the close button" line.
+                function runCloseButtonSequence() {
+                    var textRect = textEl.getBoundingClientRect();
+                    var btnRect = closeBtn.getBoundingClientRect();
+                    pointer.style.top = (textRect.bottom - 10) + 'px';
+                    pointer.style.left = (textRect.left + textRect.width * 0.4) + 'px';
+                    pointer.classList.add('show');
+                    setTimeout(function() {
+                        pointer.style.top = (btnRect.top + 8) + 'px';
+                        pointer.style.left = (btnRect.left + 8) + 'px';
+                    }, 50);
+                    setTimeout(function() { closeBtn.classList.add('hovered'); }, 2250);
+                    setTimeout(function() {
+                        closeBtn.classList.remove('hovered');
+                        pointer.style.top = (textRect.bottom + 30) + 'px';
+                        pointer.style.left = (textRect.left + textRect.width * 0.6) + 'px';
+                    }, 3950);
+                    setTimeout(function() { pointer.classList.remove('show'); }, 4850);
+                }
+
+                function triggerGlitch() {
+                    textEl.setAttribute('data-text', textEl.textContent);
+                    textEl.classList.add('glitch');
+                    setTimeout(function() { textEl.classList.remove('glitch'); }, 450);
+                }
+
+                function endScene() {
+                    clearInterval(jitterId);
+                    clearInterval(flickerId);
+                    overlay.className = '';
+                    textEl.textContent = '';
+                    textEl.style.transform = '';
+                    phantom.style.opacity = '0';
+                    pointer.classList.remove('show');
+                    closeBtn.classList.remove('hovered');
+                    window._mysterySceneLock = false;
                 }
 
                 function typeLine(lineIdx) {
                     if (lineIdx >= lines.length) {
-                        setTimeout(function() { overlay.className = ''; textEl.textContent = ''; window._mysterySceneLock = false; }, 1500);
+                        setTimeout(endScene, 1500);
                         return;
                     }
                     var line = lines[lineIdx];
@@ -1485,18 +1581,10 @@
                     var full = prefix + line.text;
                     var charIdx = 0;
 
+                    if (line.special === 'closebutton') runCloseButtonSequence();
+
                     function typeChar() {
                         if (charIdx <= full.length) {
-                            // Build all previous lines + current partial
-                            var allText = '';
-                            for (var p = 0; p < lineIdx; p++) {
-                                var pp = lines[p].speaker ? lines[p].speaker + ': ' : '';
-                                allText += pp + lines[p].text + '\n\n';
-                            }
-                            allText += full.substring(0, charIdx);
-                            textEl.textContent = allText;
-
-                            // Color the speakers
                             var html = '';
                             for (var p = 0; p < lineIdx; p++) {
                                 var pp = lines[p].speaker ? lines[p].speaker + ': ' : '';
@@ -1504,16 +1592,28 @@
                             }
                             html += '<span style="color:#2a6a2a">' + (charIdx >= prefix.length ? prefix : full.substring(0, charIdx)) + '</span>';
                             if (charIdx > prefix.length) html += full.substring(prefix.length, charIdx);
-                            html += '<span style="opacity:0.6">_</span>';
+                            html += '<span id="_msi_cursor" style="opacity:0.6">_</span>';
                             textEl.innerHTML = html;
 
                             charIdx++;
-                            var delay = charDelay + (full[charIdx-1] === '.' ? 200 : full[charIdx-1] === ',' ? 100 : 0);
-                            setTimeout(typeChar, delay);
+                            var d = charDelay + (full[charIdx-1] === '.' ? 200 : full[charIdx-1] === ',' ? 100 : 0);
+                            setTimeout(typeChar, d);
                         } else {
-                            // Line done, schedule next
+                            if (line.glitch) triggerGlitch();
+                            if (line.special === 'static') {
+                                staticLayer.classList.add('flash');
+                                setTimeout(function() { staticLayer.classList.remove('flash'); }, 550);
+                            }
+
                             var nextDelay = lineIdx + 1 < lines.length ? lines[lineIdx + 1].delay - line.delay - full.length * charDelay : 1500;
                             if (nextDelay < 400) nextDelay = 400;
+
+                            if (line.special === 'phantom-close') {
+                                showPhantomBesideCursor();
+                            } else {
+                                showPhantom(nextDelay, !!line.glitch);
+                            }
+
                             setTimeout(function() { typeLine(lineIdx + 1); }, nextDelay);
                         }
                     }
