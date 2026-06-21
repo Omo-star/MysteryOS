@@ -923,16 +923,36 @@
                     }
 
                     // Eye dimensions
-                    var eyeW = w * 0.35;
-                    var eyeH = h * 0.28 * lidOpen;
+                    var eyeW = w * 0.38;
+                    var eyeH = h * 0.3 * lidOpen;
 
-                    // Iris tracks mouse
+                    // Mid-stare blink at ~55% through
+                    var blinkT = 0.55;
+                    var blinkDur = 0.06;
+                    if (t > blinkT && t < blinkT + blinkDur) {
+                        var blinkPhase = (t - blinkT) / blinkDur;
+                        var blinkClose = Math.sin(blinkPhase * Math.PI);
+                        eyeH *= (1 - blinkClose * 0.9);
+                    }
+
+                    // Iris tracks mouse with anticipation (moves AHEAD of cursor)
                     var dx = (mouseX - cx) / (w * 0.5);
                     var dy = (mouseY - cy) / (h * 0.5);
                     var dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist > 1) { dx /= dist; dy /= dist; }
-                    var irisOffX = dx * eyeW * 0.12;
-                    var irisOffY = dy * eyeH * 0.15;
+                    // Anticipate — overshoot toward cursor direction
+                    var anticipate = 1.3 + Math.sin(elapsed * 0.005) * 0.2;
+                    var irisOffX = dx * eyeW * 0.14 * anticipate;
+                    var irisOffY = dy * eyeH * 0.18 * anticipate;
+
+                    // Micro-saccades — rapid tiny involuntary jitters
+                    var saccadeX = 0, saccadeY = 0;
+                    if (Math.sin(elapsed * 0.047) > 0.92) {
+                        saccadeX = (Math.random() - 0.5) * 6;
+                        saccadeY = (Math.random() - 0.5) * 4;
+                    }
+                    irisOffX += saccadeX;
+                    irisOffY += saccadeY;
 
                     // Subtle twitch
                     var twitch = Math.sin(elapsed * 0.02) * 2 * lidOpen;
@@ -954,19 +974,28 @@
                     ctx2d.fillStyle = scleraGrad;
                     ctx2d.fillRect(-eyeW, -eyeH, eyeW * 2, eyeH * 2);
 
-                    // Blood vessels
-                    ctx2d.strokeStyle = 'rgba(180,30,30,0.3)';
-                    ctx2d.lineWidth = 0.8;
-                    for (var i = 0; i < 8; i++) {
-                        var angle = (i / 8) * Math.PI * 2 + elapsed * 0.0003;
+                    // Blood vessels — pulsing, branching
+                    var pulse = 0.5 + 0.5 * Math.sin(elapsed * 0.008);
+                    for (var i = 0; i < 12; i++) {
+                        var angle = (i / 12) * Math.PI * 2 + elapsed * 0.0002;
+                        var veinAlpha = 0.2 + pulse * 0.25;
+                        var veinWidth = 0.6 + pulse * 0.8;
+                        ctx2d.strokeStyle = 'rgba(180,20,20,' + veinAlpha + ')';
+                        ctx2d.lineWidth = veinWidth;
                         ctx2d.beginPath();
-                        ctx2d.moveTo(Math.cos(angle) * eyeW * 0.45, Math.sin(angle) * eyeH * 0.4);
-                        ctx2d.quadraticCurveTo(
-                            Math.cos(angle + 0.3) * eyeW * 0.25,
-                            Math.sin(angle + 0.3) * eyeH * 0.2,
-                            irisOffX, irisOffY
-                        );
+                        ctx2d.moveTo(Math.cos(angle) * eyeW * 0.46, Math.sin(angle) * eyeH * 0.44);
+                        var midX = Math.cos(angle + 0.2) * eyeW * 0.28;
+                        var midY = Math.sin(angle + 0.2) * eyeH * 0.25;
+                        ctx2d.quadraticCurveTo(midX, midY, irisOffX, irisOffY);
                         ctx2d.stroke();
+                        // Branch
+                        if (i % 3 === 0) {
+                            ctx2d.lineWidth = veinWidth * 0.5;
+                            ctx2d.beginPath();
+                            ctx2d.moveTo(midX, midY);
+                            ctx2d.lineTo(midX + Math.cos(angle + 1) * eyeW * 0.1, midY + Math.sin(angle + 1) * eyeH * 0.08);
+                            ctx2d.stroke();
+                        }
                     }
 
                     // Iris
@@ -993,17 +1022,43 @@
                         ctx2d.stroke();
                     }
 
-                    // Pupil
-                    var pupilR = irisR * (0.4 + Math.sin(elapsed * 0.004) * 0.08);
+                    // Pupil — dilates when tracking (closer to center = more dilated)
+                    var trackDist = Math.sqrt(dx * dx + dy * dy);
+                    var dilate = 0.42 + (1 - trackDist) * 0.2 + Math.sin(elapsed * 0.004) * 0.05;
+                    var pupilR = irisR * dilate;
                     ctx2d.beginPath();
                     ctx2d.arc(irisOffX, irisOffY, pupilR, 0, Math.PI * 2);
                     ctx2d.fillStyle = '#000';
                     ctx2d.fill();
 
-                    // Pupil reflection
+                    // Something inside the pupil — a faint silhouette (you)
+                    if (t > 0.35 && t < 0.75) {
+                        var figAlpha = 0.15 + Math.sin(elapsed * 0.003) * 0.05;
+                        ctx2d.fillStyle = 'rgba(40,70,50,' + figAlpha + ')';
+                        // Head
+                        ctx2d.beginPath();
+                        ctx2d.arc(irisOffX, irisOffY - pupilR * 0.2, pupilR * 0.18, 0, Math.PI * 2);
+                        ctx2d.fill();
+                        // Shoulders
+                        ctx2d.beginPath();
+                        ctx2d.ellipse(irisOffX, irisOffY + pupilR * 0.15, pupilR * 0.3, pupilR * 0.2, 0, 0, Math.PI);
+                        ctx2d.fill();
+                        // Screen glow behind figure
+                        ctx2d.fillStyle = 'rgba(100,200,120,' + (figAlpha * 0.5) + ')';
+                        ctx2d.fillRect(irisOffX - pupilR * 0.25, irisOffY - pupilR * 0.4, pupilR * 0.5, pupilR * 0.55);
+                    }
+
+                    // Wet reflection — moves with a slight lag
+                    var refX = irisOffX - pupilR * 0.3 + Math.sin(elapsed * 0.002) * 2;
+                    var refY = irisOffY - pupilR * 0.35 + Math.cos(elapsed * 0.0015) * 1.5;
                     ctx2d.beginPath();
-                    ctx2d.arc(irisOffX - pupilR * 0.3, irisOffY - pupilR * 0.3, pupilR * 0.2, 0, Math.PI * 2);
-                    ctx2d.fillStyle = 'rgba(255,255,255,0.4)';
+                    ctx2d.arc(refX, refY, pupilR * 0.15, 0, Math.PI * 2);
+                    ctx2d.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx2d.fill();
+                    // Secondary smaller reflection
+                    ctx2d.beginPath();
+                    ctx2d.arc(refX + pupilR * 0.3, refY + pupilR * 0.25, pupilR * 0.07, 0, Math.PI * 2);
+                    ctx2d.fillStyle = 'rgba(255,255,255,0.3)';
                     ctx2d.fill();
 
                     ctx2d.restore(); // end sclera clip
@@ -1017,6 +1072,43 @@
                     ctx2d.ellipse(0, 0, eyeW / 2, eyeH / 2, 0, 0, Math.PI * 2);
                     ctx2d.stroke();
                     ctx2d.shadowBlur = 0;
+
+                    // Veins spreading BEYOND the eye onto the screen
+                    if (t > 0.3) {
+                        var spreadT = (t - 0.3) / 0.7;
+                        var veinCount = Math.floor(8 + spreadT * 10);
+                        for (var i = 0; i < veinCount; i++) {
+                            var angle = (i / veinCount) * Math.PI * 2 + i * 0.7;
+                            var startR = eyeW * 0.52;
+                            var endR = startR + spreadT * eyeW * (0.4 + (i % 3) * 0.2);
+                            var vAlpha = 0.15 + pulse * 0.2;
+                            ctx2d.strokeStyle = 'rgba(120,15,15,' + (vAlpha * (1 - spreadT * 0.5)) + ')';
+                            ctx2d.lineWidth = 1.5 - spreadT * 0.5;
+                            ctx2d.beginPath();
+                            var sx = Math.cos(angle) * startR;
+                            var sy = Math.sin(angle) * (startR * eyeH / eyeW);
+                            ctx2d.moveTo(sx, sy);
+                            // Organic wobble
+                            var cp1x = Math.cos(angle + 0.15) * (startR + endR) * 0.4;
+                            var cp1y = Math.sin(angle + 0.15) * (startR + endR) * 0.4 * (eyeH / eyeW);
+                            var ex = Math.cos(angle - 0.1) * endR;
+                            var ey = Math.sin(angle - 0.1) * endR * (eyeH / eyeW);
+                            ctx2d.quadraticCurveTo(cp1x, cp1y, ex, ey);
+                            ctx2d.stroke();
+                            // Tiny branches at the tips
+                            if (spreadT > 0.4 && i % 2 === 0) {
+                                ctx2d.lineWidth = 0.7;
+                                ctx2d.beginPath();
+                                ctx2d.moveTo(ex, ey);
+                                ctx2d.lineTo(ex + Math.cos(angle + 0.5) * 15 * spreadT, ey + Math.sin(angle + 0.5) * 12 * spreadT);
+                                ctx2d.stroke();
+                                ctx2d.beginPath();
+                                ctx2d.moveTo(ex, ey);
+                                ctx2d.lineTo(ex + Math.cos(angle - 0.6) * 12 * spreadT, ey + Math.sin(angle - 0.6) * 10 * spreadT);
+                                ctx2d.stroke();
+                            }
+                        }
+                    }
 
                     ctx2d.restore();
 
