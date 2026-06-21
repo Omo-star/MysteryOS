@@ -215,6 +215,7 @@
             };
         </script>
         <script>
+            window._mysterySceneLock = false;
             document.addEventListener('click', function() {
                 if (window._mysteryOsc && window._mysteryOsc.ctx.state === 'suspended') {
                     window._mysteryOsc.ctx.resume();
@@ -347,9 +348,10 @@
         </div>
         <script>
             window._mysteryBunnyScare = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
                 var overlay = document.getElementById('_mbs_overlay');
                 var img = document.getElementById('_mbs_img');
-                if (!overlay || !img) return;
+                if (!overlay || !img) { window._mysterySceneLock = false; return; }
 
                 // Read GIF from Emscripten VFS and create object URL
                 try {
@@ -377,6 +379,7 @@
                     overlay.className = '';
                     img.src = '';
                     if (img._blobUrl) { URL.revokeObjectURL(img._blobUrl); img._blobUrl = null; }
+                    window._mysterySceneLock = false;
                 }, 5400);
             };
 
@@ -510,9 +513,10 @@
         </div>
         <script>
             window._mysteryScreenMelt = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
                 var overlay = document.getElementById('_msm_overlay');
                 var canvas = document.getElementById('canvas');
-                if (!overlay || !canvas) return;
+                if (!overlay || !canvas) { window._mysterySceneLock = false; return; }
 
                 // Clear old drip columns
                 var old = overlay.querySelectorAll('._msm_drip_col');
@@ -549,6 +553,7 @@
                     canvas.style.opacity = '';
                     var cols = overlay.querySelectorAll('._msm_drip_col');
                     for (var i = 0; i < cols.length; i++) cols[i].remove();
+                    window._mysterySceneLock = false;
                 }, 3500);
             };
 
@@ -689,9 +694,10 @@
         <div id="_mhw_overlay"><canvas id="_mhw_canvas"></canvas></div>
         <script>
             window._mysteryHallway = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
                 var overlay = document.getElementById('_mhw_overlay');
                 var c = document.getElementById('_mhw_canvas');
-                if (!overlay || !c) return;
+                if (!overlay || !c) { window._mysterySceneLock = false; return; }
 
                 c.width = window.innerWidth;
                 c.height = window.innerHeight;
@@ -813,6 +819,7 @@
                     } else {
                         overlay.className = '';
                         ctx2d.clearRect(0, 0, w, h);
+                        window._mysterySceneLock = false;
                     }
                 }
 
@@ -875,10 +882,10 @@
         <div id="_mey_overlay"><canvas id="_mey_canvas"></canvas></div>
         <script>
             window._mysteryTheEye = function() {
-                console.log('[MysteryOS] TheEye triggered');
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
                 var overlay = document.getElementById('_mey_overlay');
                 var c = document.getElementById('_mey_canvas');
-                if (!overlay || !c) { console.warn('[MysteryOS] TheEye: overlay elements not found'); return; }
+                if (!overlay || !c) { window._mysterySceneLock = false; return; }
 
                 c.width = window.innerWidth;
                 c.height = window.innerHeight;
@@ -916,6 +923,7 @@
                         if (t >= 1.0) {
                             overlay.className = '';
                             document.removeEventListener('mousemove', onMove);
+                            window._mysterySceneLock = false;
                             return;
                         }
                         requestAnimationFrame(drawFrame);
@@ -1122,6 +1130,7 @@
                         overlay.className = '';
                         document.removeEventListener('mousemove', onMove);
                         ctx2d.clearRect(0, 0, w, h);
+                        window._mysterySceneLock = false;
                     }
                 }
 
@@ -1175,9 +1184,10 @@
         <div id="_msf_overlay"><canvas id="_msf_canvas"></canvas></div>
         <script>
             window._mysterySceneFeed = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
                 var overlay = document.getElementById('_msf_overlay');
                 var c = document.getElementById('_msf_canvas');
-                if (!overlay || !c) return;
+                if (!overlay || !c) { window._mysterySceneLock = false; return; }
                 c.width = window.innerWidth; c.height = window.innerHeight;
                 overlay.className = 'active';
                 var ctx = c.getContext('2d');
@@ -1400,7 +1410,7 @@
                     }
 
                     if (t < 1) requestAnimationFrame(draw);
-                    else { overlay.className = ''; ctx.clearRect(0, 0, w, h); }
+                    else { overlay.className = ''; ctx.clearRect(0, 0, w, h); window._mysterySceneLock = false; }
                 }
                 requestAnimationFrame(draw);
             };
@@ -1415,9 +1425,10 @@
         <div id="_msi_overlay"><div id="_msi_text"></div></div>
         <script>
             window._mysterySceneInterview = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
                 var overlay = document.getElementById('_msi_overlay');
                 var textEl = document.getElementById('_msi_text');
-                if (!overlay || !textEl) return;
+                if (!overlay || !textEl) { window._mysterySceneLock = false; return; }
                 textEl.textContent = '';
                 overlay.className = 'active';
 
@@ -1466,7 +1477,7 @@
 
                 function typeLine(lineIdx) {
                     if (lineIdx >= lines.length) {
-                        setTimeout(function() { overlay.className = ''; textEl.textContent = ''; }, 1500);
+                        setTimeout(function() { overlay.className = ''; textEl.textContent = ''; window._mysterySceneLock = false; }, 1500);
                         return;
                     }
                     var line = lines[lineIdx];
@@ -1625,12 +1636,13 @@
                 }
             }
             window._mysterySceneWalk = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
                 var overlay = document.getElementById('_msw_overlay');
                 var walls = document.getElementById('_msw_walls');
                 var walkVid = document.getElementById('_msw_walk_vid');
                 var eyesVid = document.getElementById('_msw_eyes_vid');
                 var flash = document.getElementById('_msw_flash');
-                if (!overlay || !walkVid || !eyesVid) return;
+                if (!overlay || !walkVid || !eyesVid) { window._mysterySceneLock = false; return; }
 
                 walls.width = window.innerWidth; walls.height = window.innerHeight;
                 overlay.className = 'active';
@@ -1818,6 +1830,7 @@
                     if (walkVid._url) { URL.revokeObjectURL(walkVid._url); walkVid._url = null; }
                     if (eyesVid._url) { URL.revokeObjectURL(eyesVid._url); eyesVid._url = null; }
                     wctx.clearRect(0,0,W,H);
+                    window._mysterySceneLock = false;
                 }
 
                 walkVid.className = 'msw_vid show';

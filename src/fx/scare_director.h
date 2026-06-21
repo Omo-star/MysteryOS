@@ -33,6 +33,7 @@ struct ActiveScare {
     float duration = 0.0f;
     float intensity = 1.0f;
     std::string text;
+    bool launched = false;
 };
 
 struct ScheduledWhisper {
@@ -62,20 +63,12 @@ class ScareDirector {
         bool saw_stage5_player_folder_ = false;
         bool saw_stage5_door_file_ = false;
         bool saw_do_not_open_file_ = false;
-        bool bunny_launched_ = false;
-        bool melt_launched_ = false;
-        bool depth_warp_launched_ = false;
-        bool hallway_launched_ = false;
-        bool eye_launched_ = false;
         bool depth_warp_triggered_ = false;
         bool hallway_triggered_ = false;
         bool eye_triggered_ = false;
         bool scene_feed_triggered_ = false;
-        bool scene_feed_launched_ = false;
         bool scene_interview_triggered_ = false;
-        bool scene_interview_launched_ = false;
         bool scene_walk_triggered_ = false;
-        bool scene_walk_launched_ = false;
         bool false_memory_triggered_ = false;
         bool camera_checks_triggered_ = false;
         bool one_byte_triggered_ = false;

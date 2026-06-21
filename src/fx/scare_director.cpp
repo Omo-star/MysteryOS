@@ -246,7 +246,7 @@ void ScareDirector::render(float now) {
     ImDrawList* dl = ImGui::GetForegroundDrawList();
     ImVec2 disp = ImGui::GetIO().DisplaySize;
 
-    for (const ActiveScare& scare : active_) {
+    for (ActiveScare& scare : active_) {
         float age = now - scare.start_time;
         if (age < 0.0f || age > scare.duration) continue;
         float t = scare.duration <= 0.0f ? 1.0f : age / scare.duration;
@@ -330,8 +330,8 @@ void ScareDirector::render(float now) {
                 dl->AddText(ImGui::GetFont(), font_size, {pos.x + 3.0f, pos.y - 2.0f}, IM_COL32(180, 255, 190, (int)(255.0f * fade)), scare.text.c_str());
             }
         } else if (scare.kind == ScareKind::BunnyJumpscare) {
-            if (!bunny_launched_) {
-                bunny_launched_ = true;
+            if (!scare.launched) {
+                scare.launched = true;
                 emscripten_run_script("window._mysteryBunnyScare && window._mysteryBunnyScare()");
             }
             dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, (int)(220.0f * fade)));
@@ -346,8 +346,8 @@ void ScareDirector::render(float now) {
                 dl->AddRectFilled({0, y}, {disp.x, y + h}, IM_COL32(255, 255, 255, a));
             }
         } else if (scare.kind == ScareKind::ScreenMelt) {
-            if (!melt_launched_) {
-                melt_launched_ = true;
+            if (!scare.launched) {
+                scare.launched = true;
                 emscripten_run_script("window._mysteryScreenMelt && window._mysteryScreenMelt()");
             }
             int drip_alpha = (int)(60.0f * t * scare.intensity);
@@ -362,13 +362,13 @@ void ScareDirector::render(float now) {
                 dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, fog > 255 ? 255 : fog));
             }
         } else if (scare.kind == ScareKind::DepthWarp) {
-            if (!depth_warp_launched_) {
-                depth_warp_launched_ = true;
+            if (!scare.launched) {
+                scare.launched = true;
                 emscripten_run_script("window._mysteryDepthWarp && window._mysteryDepthWarp()");
             }
         } else if (scare.kind == ScareKind::Hallway) {
-            if (!hallway_launched_) {
-                hallway_launched_ = true;
+            if (!scare.launched) {
+                scare.launched = true;
                 emscripten_run_script("window._mysteryHallway && window._mysteryHallway()");
             }
             if (t > 0.7f) {
@@ -376,8 +376,8 @@ void ScareDirector::render(float now) {
                 dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, fog));
             }
         } else if (scare.kind == ScareKind::TheEye) {
-            if (!eye_launched_) {
-                eye_launched_ = true;
+            if (!scare.launched) {
+                scare.launched = true;
                 emscripten_run_script("window._mysteryTheEye && window._mysteryTheEye()");
             }
             if (age < 0.3f) {
@@ -385,20 +385,20 @@ void ScareDirector::render(float now) {
                 dl->AddRectFilled({0, 0}, disp, IM_COL32(255, 255, 255, flash));
             }
         } else if (scare.kind == ScareKind::SceneFeed) {
-            if (!scene_feed_launched_) {
-                scene_feed_launched_ = true;
+            if (!scare.launched) {
+                scare.launched = true;
                 emscripten_run_script("window._mysterySceneFeed && window._mysterySceneFeed()");
             }
             dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
         } else if (scare.kind == ScareKind::SceneInterview) {
-            if (!scene_interview_launched_) {
-                scene_interview_launched_ = true;
+            if (!scare.launched) {
+                scare.launched = true;
                 emscripten_run_script("window._mysterySceneInterview && window._mysterySceneInterview()");
             }
             dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
         } else if (scare.kind == ScareKind::SceneWalk) {
-            if (!scene_walk_launched_) {
-                scene_walk_launched_ = true;
+            if (!scare.launched) {
+                scare.launched = true;
                 emscripten_run_script("window._mysterySceneWalk && window._mysterySceneWalk()");
             }
             dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));

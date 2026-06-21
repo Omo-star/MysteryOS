@@ -260,6 +260,7 @@ void Terminal::execute(const string& raw, Kernel& k) {
         VFSNode* node = k.vfs().get(arg);
         if (!node)        { print("decode: not found: " + arg); return; }
         if (node->locked) { print("decode: permission denied"); return; }
+        k.record_file_open(arg, "terminal");
         if (arg == "/Users/cshin/Documents/response_1byte.bin") {
             print("Decoding " + arg + "...");
             print("Content (1 byte):");
