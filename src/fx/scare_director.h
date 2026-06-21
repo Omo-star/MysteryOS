@@ -12,7 +12,10 @@ enum class ScareKind {
     ApertureOpen,
     HardJumpscare,
     BunnyJumpscare,
-    ScreenMelt
+    ScreenMelt,
+    DepthWarp,
+    Hallway,
+    TheEye
 };
 
 enum class ScareSound {
@@ -58,6 +61,12 @@ class ScareDirector {
         bool saw_do_not_open_file_ = false;
         bool bunny_launched_ = false;
         bool melt_launched_ = false;
+        bool depth_warp_launched_ = false;
+        bool hallway_launched_ = false;
+        bool eye_launched_ = false;
+        bool depth_warp_triggered_ = false;
+        bool hallway_triggered_ = false;
+        bool eye_triggered_ = false;
         bool stage4_unlock_hit_ = false;
         bool stage5_unlock_hit_ = false;
         bool whispered_deleted_file_ = false;

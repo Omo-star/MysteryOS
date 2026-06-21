@@ -606,6 +606,489 @@
                 ns.start(t); ns.stop(t + 3.5);
             }
         </script>
+
+        <!-- 3D DEPTH WARP: screen curves inward like being watched through a peephole -->
+        <style>
+            @keyframes _mdw_warp {
+                0%   { transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1); }
+                20%  { transform: perspective(600px) rotateX(1.5deg) rotateY(-1deg) scale(0.97); }
+                50%  { transform: perspective(400px) rotateX(2.5deg) rotateY(1.5deg) scale(0.93); }
+                70%  { transform: perspective(350px) rotateX(-1deg) rotateY(-2deg) scale(0.91); }
+                85%  { transform: perspective(500px) rotateX(0.5deg) rotateY(0.5deg) scale(0.95); }
+                100% { transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1); }
+            }
+            @keyframes _mdw_vignette {
+                0%   { box-shadow: inset 0 0 40px 20px rgba(0,0,0,0); }
+                30%  { box-shadow: inset 0 0 120px 80px rgba(0,0,0,0.7); }
+                60%  { box-shadow: inset 0 0 180px 130px rgba(0,0,0,0.85); }
+                100% { box-shadow: inset 0 0 40px 20px rgba(0,0,0,0); }
+            }
+            #_mdw_ring {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99997;
+                pointer-events: none;
+                border-radius: 50%;
+                margin: -5%;
+                animation: _mdw_vignette 3s ease-in-out forwards;
+            }
+            #_mdw_ring.active { display: block; }
+        </style>
+        <div id="_mdw_ring"></div>
+        <script>
+            window._mysteryDepthWarp = function() {
+                var canvas = document.getElementById('canvas');
+                var ring = document.getElementById('_mdw_ring');
+                if (!canvas) return;
+
+                canvas.style.transformOrigin = 'center center';
+                canvas.style.animation = '_mdw_warp 3s ease-in-out forwards';
+                if (ring) ring.className = 'active';
+
+                // Subtle audio: low distant hum
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                var t = ctx.currentTime;
+                var osc = ctx.createOscillator();
+                var g = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(55, t);
+                osc.frequency.linearRampToValueAtTime(42, t + 3);
+                g.gain.setValueAtTime(0, t);
+                g.gain.linearRampToValueAtTime(0.12, t + 0.8);
+                g.gain.setValueAtTime(0.12, t + 2.2);
+                g.gain.exponentialRampToValueAtTime(0.001, t + 3);
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start(t); osc.stop(t + 3.1);
+
+                setTimeout(function() {
+                    canvas.style.animation = '';
+                    canvas.style.transform = '';
+                    if (ring) ring.className = '';
+                }, 3000);
+            };
+        </script>
+
+        <!-- 3D HALLWAY: dark corridor receding into screen with something moving at the end -->
+        <style>
+            #_mhw_overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99998;
+                pointer-events: none;
+            }
+            #_mhw_overlay.active { display: block; }
+            #_mhw_canvas {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        <div id="_mhw_overlay"><canvas id="_mhw_canvas"></canvas></div>
+        <script>
+            window._mysteryHallway = function() {
+                var overlay = document.getElementById('_mhw_overlay');
+                var c = document.getElementById('_mhw_canvas');
+                if (!overlay || !c) return;
+
+                c.width = window.innerWidth;
+                c.height = window.innerHeight;
+                overlay.className = 'active';
+
+                var ctx2d = c.getContext('2d');
+                var w = c.width, h = c.height;
+                var startTime = performance.now();
+                var duration = 4500;
+
+                function drawFrame(timestamp) {
+                    var elapsed = timestamp - startTime;
+                    var t = Math.min(elapsed / duration, 1.0);
+
+                    ctx2d.clearRect(0, 0, w, h);
+
+                    // Fade in/out
+                    var alpha = t < 0.15 ? t / 0.15 : t > 0.8 ? (1 - t) / 0.2 : 1.0;
+                    alpha = Math.max(0, Math.min(1, alpha));
+                    ctx2d.globalAlpha = alpha;
+
+                    // Dark background
+                    ctx2d.fillStyle = '#000';
+                    ctx2d.fillRect(0, 0, w, h);
+
+                    // Perspective hallway
+                    var cx = w / 2;
+                    var cy = h / 2;
+                    var vanishX = cx + Math.sin(elapsed * 0.001) * 20;
+                    var vanishY = cy + Math.cos(elapsed * 0.0008) * 15;
+
+                    // Floor/ceiling/walls converging to vanishing point
+                    var segments = 12;
+                    for (var i = segments; i >= 0; i--) {
+                        var depth = i / segments;
+                        var d2 = depth * depth;
+                        var rectW = w * (1 - d2 * 0.85);
+                        var rectH = h * (1 - d2 * 0.85);
+                        var rx = vanishX - rectW / 2;
+                        var ry = vanishY - rectH / 2;
+
+                        // Walls
+                        var shade = Math.floor(8 + depth * 18);
+                        ctx2d.strokeStyle = 'rgb(' + shade + ',' + Math.floor(shade * 1.4) + ',' + shade + ')';
+                        ctx2d.lineWidth = 1.5 - depth;
+                        ctx2d.strokeRect(rx, ry, rectW, rectH);
+
+                        // Floor lines
+                        if (i % 3 === 0 && i > 0) {
+                            ctx2d.beginPath();
+                            ctx2d.moveTo(rx, ry + rectH);
+                            ctx2d.lineTo(rx + rectW, ry + rectH);
+                            ctx2d.strokeStyle = 'rgba(0,' + Math.floor(40 + depth * 30) + ',0,' + (0.3 + depth * 0.3) + ')';
+                            ctx2d.stroke();
+                        }
+                    }
+
+                    // The figure at the end — starts as a dark shape, moves
+                    if (t > 0.25) {
+                        var figT = (t - 0.25) / 0.75;
+                        var figH = 40 + figT * 30;
+                        var figW = 12 + figT * 8;
+                        var figX = vanishX - figW / 2 + Math.sin(elapsed * 0.003) * (5 + figT * 15);
+                        var figY = vanishY - figH / 2 + Math.cos(elapsed * 0.002) * 5;
+
+                        // Body
+                        ctx2d.fillStyle = 'rgba(0,0,0,0.9)';
+                        ctx2d.fillRect(figX, figY, figW, figH);
+
+                        // Eyes — appear after a moment
+                        if (t > 0.45) {
+                            var eyeAlpha = Math.min(1, (t - 0.45) * 4);
+                            var eyeY = figY + figH * 0.2;
+                            var eyeSpread = figW * 0.3;
+                            ctx2d.fillStyle = 'rgba(120,255,120,' + eyeAlpha + ')';
+                            ctx2d.beginPath();
+                            ctx2d.arc(figX + figW / 2 - eyeSpread, eyeY, 2.5, 0, Math.PI * 2);
+                            ctx2d.fill();
+                            ctx2d.beginPath();
+                            ctx2d.arc(figX + figW / 2 + eyeSpread, eyeY, 2.5, 0, Math.PI * 2);
+                            ctx2d.fill();
+                        }
+
+                        // Lurch forward at 70%
+                        if (t > 0.7 && t < 0.78) {
+                            var lurchT = (t - 0.7) / 0.08;
+                            var scale = 1 + lurchT * 3;
+                            ctx2d.save();
+                            ctx2d.translate(vanishX, vanishY);
+                            ctx2d.scale(scale, scale);
+                            ctx2d.fillStyle = 'rgba(0,0,0,0.95)';
+                            ctx2d.fillRect(-figW/2, -figH/2, figW, figH);
+                            ctx2d.fillStyle = 'rgba(120,255,120,' + (1 - lurchT) + ')';
+                            ctx2d.beginPath();
+                            ctx2d.arc(-figW*0.3, -figH*0.3, 3 + lurchT * 4, 0, Math.PI * 2);
+                            ctx2d.fill();
+                            ctx2d.beginPath();
+                            ctx2d.arc(figW*0.3, -figH*0.3, 3 + lurchT * 4, 0, Math.PI * 2);
+                            ctx2d.fill();
+                            ctx2d.restore();
+                        }
+                    }
+
+                    // Scan lines over hallway
+                    ctx2d.fillStyle = 'rgba(0,0,0,0.15)';
+                    for (var y = 0; y < h; y += 3) {
+                        ctx2d.fillRect(0, y, w, 1);
+                    }
+
+                    // Fog at edges
+                    var grad = ctx2d.createRadialGradient(cx, cy, w * 0.15, cx, cy, w * 0.6);
+                    grad.addColorStop(0, 'rgba(0,0,0,0)');
+                    grad.addColorStop(1, 'rgba(0,0,0,0.8)');
+                    ctx2d.fillStyle = grad;
+                    ctx2d.fillRect(0, 0, w, h);
+
+                    if (t < 1.0) {
+                        requestAnimationFrame(drawFrame);
+                    } else {
+                        overlay.className = '';
+                        ctx2d.clearRect(0, 0, w, h);
+                    }
+                }
+
+                requestAnimationFrame(drawFrame);
+
+                // Audio: distant footsteps + reverb
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+
+                // Echoing footsteps
+                for (var i = 0; i < 5; i++) {
+                    var stepT = at + 0.8 + i * 0.7;
+                    var bufLen = Math.floor(actx.sampleRate * 0.08);
+                    var stepBuf = actx.createBuffer(1, bufLen, actx.sampleRate);
+                    var sd = stepBuf.getChannelData(0);
+                    for (var j = 0; j < bufLen; j++) sd[j] = (Math.random() * 2 - 1) * Math.exp(-j / (bufLen * 0.2));
+                    var stepNode = actx.createBufferSource();
+                    stepNode.buffer = stepBuf;
+                    var sf = actx.createBiquadFilter();
+                    sf.type = 'lowpass'; sf.frequency.value = 400 + i * 80;
+                    var sg = actx.createGain();
+                    sg.gain.setValueAtTime(0.15 + i * 0.03, stepT);
+                    sg.gain.exponentialRampToValueAtTime(0.001, stepT + 0.3);
+                    stepNode.connect(sf); sf.connect(sg); sg.connect(actx.destination);
+                    stepNode.start(stepT); stepNode.stop(stepT + 0.35);
+                }
+
+                // Deep ambient drone
+                var drone = actx.createOscillator();
+                var dg = actx.createGain();
+                drone.type = 'sawtooth';
+                drone.frequency.setValueAtTime(32, at);
+                drone.frequency.linearRampToValueAtTime(28, at + 4.5);
+                dg.gain.setValueAtTime(0, at);
+                dg.gain.linearRampToValueAtTime(0.08, at + 1);
+                dg.gain.setValueAtTime(0.08, at + 3.5);
+                dg.gain.exponentialRampToValueAtTime(0.001, at + 4.5);
+                drone.connect(dg); dg.connect(actx.destination);
+                drone.start(at); drone.stop(at + 4.6);
+            };
+        </script>
+
+        <!-- THE EYE: 3D eyeball opens, tracks cursor, blinks shut -->
+        <style>
+            #_mey_overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99998;
+                pointer-events: none;
+            }
+            #_mey_overlay.active { display: block; }
+            #_mey_canvas {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        <div id="_mey_overlay"><canvas id="_mey_canvas"></canvas></div>
+        <script>
+            window._mysteryTheEye = function() {
+                var overlay = document.getElementById('_mey_overlay');
+                var c = document.getElementById('_mey_canvas');
+                if (!overlay || !c) return;
+
+                c.width = window.innerWidth;
+                c.height = window.innerHeight;
+                overlay.className = 'active';
+
+                var ctx2d = c.getContext('2d');
+                var w = c.width, h = c.height;
+                var cx = w / 2, cy = h / 2;
+                var startTime = performance.now();
+                var duration = 4000;
+                var mouseX = cx, mouseY = cy;
+
+                function onMove(e) { mouseX = e.clientX; mouseY = e.clientY; }
+                document.addEventListener('mousemove', onMove);
+
+                function drawFrame(timestamp) {
+                    var elapsed = timestamp - startTime;
+                    var t = Math.min(elapsed / duration, 1.0);
+
+                    ctx2d.clearRect(0, 0, w, h);
+
+                    // Eyelid opening: 0-0.3 opening, 0.3-0.75 open, 0.75-1.0 closing
+                    var lidOpen;
+                    if (t < 0.3) lidOpen = t / 0.3;
+                    else if (t < 0.75) lidOpen = 1.0;
+                    else lidOpen = 1.0 - (t - 0.75) / 0.25;
+                    lidOpen = Math.max(0, Math.min(1, lidOpen));
+
+                    // Background darken
+                    var bgAlpha = lidOpen * 0.7;
+                    ctx2d.fillStyle = 'rgba(0,0,0,' + bgAlpha + ')';
+                    ctx2d.fillRect(0, 0, w, h);
+
+                    if (lidOpen < 0.01) {
+                        if (t >= 1.0) {
+                            overlay.className = '';
+                            document.removeEventListener('mousemove', onMove);
+                            return;
+                        }
+                        requestAnimationFrame(drawFrame);
+                        return;
+                    }
+
+                    // Eye dimensions
+                    var eyeW = w * 0.35;
+                    var eyeH = h * 0.28 * lidOpen;
+
+                    // Iris tracks mouse
+                    var dx = (mouseX - cx) / (w * 0.5);
+                    var dy = (mouseY - cy) / (h * 0.5);
+                    var dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 1) { dx /= dist; dy /= dist; }
+                    var irisOffX = dx * eyeW * 0.12;
+                    var irisOffY = dy * eyeH * 0.15;
+
+                    // Subtle twitch
+                    var twitch = Math.sin(elapsed * 0.02) * 2 * lidOpen;
+
+                    ctx2d.save();
+                    ctx2d.translate(cx + twitch, cy);
+
+                    // Sclera (white of eye) — clipped by eyelid shape
+                    ctx2d.save();
+                    ctx2d.beginPath();
+                    ctx2d.ellipse(0, 0, eyeW / 2, eyeH / 2, 0, 0, Math.PI * 2);
+                    ctx2d.clip();
+
+                    // Sclera fill
+                    var scleraGrad = ctx2d.createRadialGradient(0, 0, eyeW * 0.05, 0, 0, eyeW * 0.5);
+                    scleraGrad.addColorStop(0, '#e8e0d8');
+                    scleraGrad.addColorStop(0.7, '#c8b8a8');
+                    scleraGrad.addColorStop(1, '#6a5040');
+                    ctx2d.fillStyle = scleraGrad;
+                    ctx2d.fillRect(-eyeW, -eyeH, eyeW * 2, eyeH * 2);
+
+                    // Blood vessels
+                    ctx2d.strokeStyle = 'rgba(180,30,30,0.3)';
+                    ctx2d.lineWidth = 0.8;
+                    for (var i = 0; i < 8; i++) {
+                        var angle = (i / 8) * Math.PI * 2 + elapsed * 0.0003;
+                        ctx2d.beginPath();
+                        ctx2d.moveTo(Math.cos(angle) * eyeW * 0.45, Math.sin(angle) * eyeH * 0.4);
+                        ctx2d.quadraticCurveTo(
+                            Math.cos(angle + 0.3) * eyeW * 0.25,
+                            Math.sin(angle + 0.3) * eyeH * 0.2,
+                            irisOffX, irisOffY
+                        );
+                        ctx2d.stroke();
+                    }
+
+                    // Iris
+                    var irisR = eyeW * 0.18;
+                    var irisGrad = ctx2d.createRadialGradient(irisOffX, irisOffY, irisR * 0.1, irisOffX, irisOffY, irisR);
+                    irisGrad.addColorStop(0, '#000');
+                    irisGrad.addColorStop(0.3, '#0a2a0a');
+                    irisGrad.addColorStop(0.6, '#1a5a2a');
+                    irisGrad.addColorStop(0.8, '#0d3d1a');
+                    irisGrad.addColorStop(1, '#061a08');
+                    ctx2d.beginPath();
+                    ctx2d.arc(irisOffX, irisOffY, irisR, 0, Math.PI * 2);
+                    ctx2d.fillStyle = irisGrad;
+                    ctx2d.fill();
+
+                    // Iris texture — radial lines
+                    ctx2d.strokeStyle = 'rgba(60,180,80,0.3)';
+                    ctx2d.lineWidth = 0.5;
+                    for (var i = 0; i < 24; i++) {
+                        var a = (i / 24) * Math.PI * 2;
+                        ctx2d.beginPath();
+                        ctx2d.moveTo(irisOffX + Math.cos(a) * irisR * 0.35, irisOffY + Math.sin(a) * irisR * 0.35);
+                        ctx2d.lineTo(irisOffX + Math.cos(a) * irisR * 0.95, irisOffY + Math.sin(a) * irisR * 0.95);
+                        ctx2d.stroke();
+                    }
+
+                    // Pupil
+                    var pupilR = irisR * (0.4 + Math.sin(elapsed * 0.004) * 0.08);
+                    ctx2d.beginPath();
+                    ctx2d.arc(irisOffX, irisOffY, pupilR, 0, Math.PI * 2);
+                    ctx2d.fillStyle = '#000';
+                    ctx2d.fill();
+
+                    // Pupil reflection
+                    ctx2d.beginPath();
+                    ctx2d.arc(irisOffX - pupilR * 0.3, irisOffY - pupilR * 0.3, pupilR * 0.2, 0, Math.PI * 2);
+                    ctx2d.fillStyle = 'rgba(255,255,255,0.4)';
+                    ctx2d.fill();
+
+                    ctx2d.restore(); // end sclera clip
+
+                    // Eyelid edges
+                    ctx2d.strokeStyle = 'rgba(60,30,20,0.9)';
+                    ctx2d.lineWidth = 3;
+                    ctx2d.beginPath();
+                    ctx2d.ellipse(0, 0, eyeW / 2, eyeH / 2, 0, 0, Math.PI * 2);
+                    ctx2d.stroke();
+
+                    // Upper/lower eyelid skin (covers the clipped area edges)
+                    var skinColor = '#1a1008';
+                    ctx2d.fillStyle = skinColor;
+                    // Upper lid
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(-eyeW, 0);
+                    ctx2d.lineTo(-eyeW, -eyeH * 1.5);
+                    ctx2d.lineTo(eyeW, -eyeH * 1.5);
+                    ctx2d.lineTo(eyeW, 0);
+                    ctx2d.ellipse(0, 0, eyeW / 2, eyeH / 2, 0, Math.PI, 0, true);
+                    ctx2d.fill();
+                    // Lower lid
+                    ctx2d.beginPath();
+                    ctx2d.moveTo(-eyeW, 0);
+                    ctx2d.lineTo(-eyeW, eyeH * 1.5);
+                    ctx2d.lineTo(eyeW, eyeH * 1.5);
+                    ctx2d.lineTo(eyeW, 0);
+                    ctx2d.ellipse(0, 0, eyeW / 2, eyeH / 2, 0, 0, Math.PI, true);
+                    ctx2d.fill();
+
+                    ctx2d.restore();
+
+                    // Scan lines
+                    ctx2d.fillStyle = 'rgba(0,0,0,0.08)';
+                    for (var y = 0; y < h; y += 2) ctx2d.fillRect(0, y, w, 1);
+
+                    if (t < 1.0) {
+                        requestAnimationFrame(drawFrame);
+                    } else {
+                        overlay.className = '';
+                        document.removeEventListener('mousemove', onMove);
+                        ctx2d.clearRect(0, 0, w, h);
+                    }
+                }
+
+                requestAnimationFrame(drawFrame);
+
+                // Audio: wet organic sound
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+
+                // Wet squelch on open
+                var bufLen = Math.floor(actx.sampleRate * 0.4);
+                var sqBuf = actx.createBuffer(1, bufLen, actx.sampleRate);
+                var sqd = sqBuf.getChannelData(0);
+                for (var i = 0; i < bufLen; i++) {
+                    sqd[i] = Math.sin(i * 0.05) * Math.exp(-i / (bufLen * 0.15)) * (Math.random() * 0.5 + 0.5);
+                }
+                var sqNode = actx.createBufferSource();
+                sqNode.buffer = sqBuf;
+                var sqf = actx.createBiquadFilter();
+                sqf.type = 'bandpass'; sqf.frequency.value = 600; sqf.Q.value = 3;
+                var sqg = actx.createGain();
+                sqg.gain.setValueAtTime(0.3, at);
+                sqg.gain.exponentialRampToValueAtTime(0.001, at + 0.4);
+                sqNode.connect(sqf); sqf.connect(sqg); sqg.connect(actx.destination);
+                sqNode.start(at); sqNode.stop(at + 0.45);
+
+                // Heartbeat-like throb while open
+                for (var i = 0; i < 4; i++) {
+                    var beatT = at + 0.8 + i * 0.9;
+                    var beat = actx.createOscillator();
+                    var bg = actx.createGain();
+                    beat.type = 'sine';
+                    beat.frequency.setValueAtTime(40, beatT);
+                    beat.frequency.exponentialRampToValueAtTime(25, beatT + 0.3);
+                    bg.gain.setValueAtTime(0.2, beatT);
+                    bg.gain.exponentialRampToValueAtTime(0.001, beatT + 0.35);
+                    beat.connect(bg); bg.connect(actx.destination);
+                    beat.start(beatT); beat.stop(beatT + 0.4);
+                }
+            };
+        </script>
         {{{ SCRIPT }}}
     </body>
 </html>

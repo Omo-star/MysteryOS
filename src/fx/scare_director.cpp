@@ -43,11 +43,17 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
         request_sound(ScareSound::Dread);
     }
 
+    if (stage >= 2 && corrupted && !depth_warp_triggered_) {
+        depth_warp_triggered_ = true;
+        add(ScareKind::DepthWarp, now + 0.5f, 3.0f, 1.0f);
+    }
+
     if (path == "/Pictures/0xE10A.png" && !saw_e10a_image_) {
         saw_e10a_image_ = true;
         add(ScareKind::GreenAfterimage, now, 1.1f, 1.0f);
         add(ScareKind::FullscreenMessage, now, 0.9f, 1.0f, "YOU OPENED IT");
-        add(ScareKind::HardJumpscare, now + 0.18f, 2.0f, 1.0f, "NO INPUT");
+        add(ScareKind::TheEye, now + 0.5f, 4.0f, 1.0f);
+        add(ScareKind::HardJumpscare, now + 4.5f, 2.0f, 1.0f, "NO INPUT");
         request_sound(ScareSound::Impact);
     }
 
@@ -55,6 +61,12 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
         saw_users_ = true;
         add(ScareKind::FakeError, now, 2.4f, 1.0f, "CROSS-CONTAMINATION ACCELERATING");
         add(ScareKind::WindowShake, now, 1.0f, 0.8f);
+        request_sound(ScareSound::Dread);
+    }
+
+    if (stage >= 3 && starts_with(path, "/Users/") && !hallway_triggered_) {
+        hallway_triggered_ = true;
+        add(ScareKind::Hallway, now, 4.5f, 1.0f);
         request_sound(ScareSound::Dread);
     }
 
@@ -72,6 +84,10 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
     if (stage >= 4 && starts_with(path, "/System/models/") && !whispered_model_file_) {
         whispered_model_file_ = true;
         add(ScareKind::ApertureOpen, now, 1.7f, 1.0f, "MODEL ACCESS");
+        if (!eye_triggered_) {
+            eye_triggered_ = true;
+            add(ScareKind::TheEye, now + 1.8f, 4.0f, 1.0f);
+        }
         request_sound(ScareSound::Aperture);
         schedule_whisper(now, 8.5f, "7741: models are how i remember");
     }
@@ -309,6 +325,29 @@ void ScareDirector::render(float now) {
             if (t > 0.6f) {
                 int fog = (int)(180.0f * (t - 0.6f) * 2.5f * scare.intensity);
                 dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, fog > 255 ? 255 : fog));
+            }
+        } else if (scare.kind == ScareKind::DepthWarp) {
+            if (!depth_warp_launched_) {
+                depth_warp_launched_ = true;
+                emscripten_run_script("window._mysteryDepthWarp && window._mysteryDepthWarp()");
+            }
+        } else if (scare.kind == ScareKind::Hallway) {
+            if (!hallway_launched_) {
+                hallway_launched_ = true;
+                emscripten_run_script("window._mysteryHallway && window._mysteryHallway()");
+            }
+            if (t > 0.7f) {
+                int fog = (int)(80.0f * (1.0f - t) * scare.intensity);
+                dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, fog));
+            }
+        } else if (scare.kind == ScareKind::TheEye) {
+            if (!eye_launched_) {
+                eye_launched_ = true;
+                emscripten_run_script("window._mysteryTheEye && window._mysteryTheEye()");
+            }
+            if (age < 0.3f) {
+                int flash = (int)(120.0f * (1.0f - age / 0.3f));
+                dl->AddRectFilled({0, 0}, disp, IM_COL32(255, 255, 255, flash));
             }
         }
     }
