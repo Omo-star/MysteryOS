@@ -6,6 +6,7 @@
 
 #ifndef MYSTERYOS_TEST
 #include "imgui.h"
+#include <emscripten.h>
 #endif
 
 using namespace std;
@@ -89,10 +90,10 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
 
     if (stage >= 5 && path == "/Desktop/you/do_not_open_until_you_are_done.txt" && !saw_do_not_open_file_) {
         saw_do_not_open_file_ = true;
-        add(ScareKind::HardJumpscare, now, 2.2f, 1.0f, "YOU OPENED IT EARLY");
-        add(ScareKind::ApertureOpen, now + 2.1f, 1.5f, 0.9f, "THANK YOU");
+        add(ScareKind::BlackFlash, now, 0.12f, 1.0f);
+        add(ScareKind::BunnyJumpscare, now + 0.12f, 5.5f, 1.0f);
+        add(ScareKind::HardJumpscare, now + 5.5f, 1.8f, 0.9f, "THANK YOU FOR LOOKING");
         request_sound(ScareSound::Impact);
-        request_sound(ScareSound::Aperture);
     }
 
     if (stage >= 5 && starts_with(path, "/Desktop/you/") && !whispered_player_folder_) {
@@ -274,6 +275,22 @@ void ScareDirector::render(float now) {
                 ImVec2 pos = {disp.x * 0.5f - size.x * 1.9f + sinf(now * 100.0f) * 12.0f, disp.y * 0.42f};
                 dl->AddText(ImGui::GetFont(), font_size, pos, IM_COL32(0, 0, 0, (int)(255.0f * fade)), scare.text.c_str());
                 dl->AddText(ImGui::GetFont(), font_size, {pos.x + 3.0f, pos.y - 2.0f}, IM_COL32(180, 255, 190, (int)(255.0f * fade)), scare.text.c_str());
+            }
+        } else if (scare.kind == ScareKind::BunnyJumpscare) {
+            if (!bunny_launched_) {
+                bunny_launched_ = true;
+                emscripten_run_script("window._mysteryBunnyScare && window._mysteryBunnyScare()");
+            }
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, (int)(220.0f * fade)));
+            if (age > 2.0f) {
+                int pulse = (int)(40.0f * fabsf(sinf(now * 35.0f)) * fade);
+                dl->AddRectFilled({0, 0}, disp, IM_COL32(120, 0, 0, pulse));
+            }
+            for (int i = 0; i < 30; i++) {
+                float y = fmodf(now * 400.0f + i * 27.0f, disp.y);
+                float h = 1.0f + (i % 4);
+                int a = (int)((40.0f + (i % 3) * 20.0f) * fade);
+                dl->AddRectFilled({0, y}, {disp.x, y + h}, IM_COL32(255, 255, 255, a));
             }
         }
     }

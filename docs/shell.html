@@ -221,6 +221,249 @@
                 }
             }, { once: true });
         </script>
+        <style>
+            @keyframes _mbs_shake {
+                0%  { transform: translate(0,0) scale(1.05); }
+                10% { transform: translate(-8px, 5px) scale(1.06); }
+                20% { transform: translate(6px, -4px) scale(1.05); }
+                30% { transform: translate(-12px, -6px) scale(1.07); }
+                40% { transform: translate(10px, 8px) scale(1.05); }
+                50% { transform: translate(-6px, -10px) scale(1.08); }
+                60% { transform: translate(14px, 4px) scale(1.06); }
+                70% { transform: translate(-10px, 12px) scale(1.07); }
+                80% { transform: translate(8px, -8px) scale(1.05); }
+                90% { transform: translate(-14px, 6px) scale(1.08); }
+                100%{ transform: translate(0,0) scale(1.05); }
+            }
+            @keyframes _mbs_flicker {
+                0%   { opacity: 1; }
+                3%   { opacity: 0.1; }
+                6%   { opacity: 0.95; }
+                15%  { opacity: 1; }
+                18%  { opacity: 0.05; }
+                20%  { opacity: 1; }
+                48%  { opacity: 1; }
+                50%  { opacity: 0.15; }
+                52%  { opacity: 0.9; }
+                53%  { opacity: 0.05; }
+                55%  { opacity: 1; }
+                78%  { opacity: 1; }
+                80%  { opacity: 0; }
+                81%  { opacity: 1; }
+                100% { opacity: 1; }
+            }
+            @keyframes _mbs_hue {
+                0%   { filter: hue-rotate(0deg) contrast(1.2) brightness(1); }
+                25%  { filter: hue-rotate(40deg) contrast(1.8) brightness(0.7); }
+                50%  { filter: hue-rotate(-30deg) contrast(2.2) brightness(1.3); }
+                75%  { filter: hue-rotate(80deg) contrast(1.5) brightness(0.5); }
+                100% { filter: hue-rotate(0deg) contrast(1.2) brightness(1); }
+            }
+            @keyframes _mbs_vignette {
+                0%   { box-shadow: inset 0 0 80px 40px rgba(0,0,0,0.7); }
+                40%  { box-shadow: inset 0 0 150px 80px rgba(0,0,0,0.9); }
+                70%  { box-shadow: inset 0 0 200px 120px rgba(0,0,0,0.95); }
+                100% { box-shadow: inset 0 0 300px 200px rgba(0,0,0,1); }
+            }
+            @keyframes _mbs_noise {
+                0%   { background-position: 0 0; }
+                25%  { background-position: -30% 40%; }
+                50%  { background-position: 60% -20%; }
+                75%  { background-position: -50% 70%; }
+                100% { background-position: 20% -40%; }
+            }
+            @keyframes _mbs_fadein {
+                0%   { opacity: 0; }
+                8%   { opacity: 1; }
+                100% { opacity: 1; }
+            }
+            #_mbs_overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99999;
+                background: #000;
+                animation: _mbs_fadein 0.3s ease-out, _mbs_shake 0.15s infinite linear;
+                overflow: hidden;
+            }
+            #_mbs_overlay.active { display: block; }
+            #_mbs_img {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                animation: _mbs_flicker 1.8s infinite steps(1), _mbs_hue 3s infinite linear;
+            }
+            #_mbs_vignette {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                animation: _mbs_vignette 5.5s ease-in forwards;
+            }
+            #_mbs_noise {
+                position: absolute;
+                inset: -50%;
+                width: 200%;
+                height: 200%;
+                pointer-events: none;
+                opacity: 0.08;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+                animation: _mbs_noise 0.1s infinite steps(3);
+            }
+            #_mbs_scanlines {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: repeating-linear-gradient(
+                    transparent 0px, transparent 2px,
+                    rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px
+                );
+            }
+            #_mbs_bloodframe {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                border: 6px solid transparent;
+                animation: none;
+            }
+            #_mbs_overlay.phase2 #_mbs_bloodframe {
+                border-color: rgba(180, 0, 0, 0.6);
+                box-shadow: inset 0 0 60px rgba(180, 0, 0, 0.4);
+            }
+            #_mbs_overlay.phase2 #_mbs_img {
+                animation: _mbs_flicker 0.4s infinite steps(1), _mbs_hue 0.8s infinite linear;
+            }
+            #_mbs_overlay.phase2 {
+                animation: _mbs_fadein 0.3s ease-out, _mbs_shake 0.08s infinite linear;
+            }
+        </style>
+        <div id="_mbs_overlay">
+            <img id="_mbs_img" />
+            <div id="_mbs_scanlines"></div>
+            <div id="_mbs_noise"></div>
+            <div id="_mbs_vignette"></div>
+            <div id="_mbs_bloodframe"></div>
+        </div>
+        <script>
+            window._mysteryBunnyScare = function() {
+                var overlay = document.getElementById('_mbs_overlay');
+                var img = document.getElementById('_mbs_img');
+                if (!overlay || !img) return;
+
+                // Read GIF from Emscripten VFS and create object URL
+                try {
+                    var data = Module.FS.readFile('/data/scare_bunny.gif');
+                    var blob = new Blob([data], {type: 'image/gif'});
+                    img.src = URL.createObjectURL(blob);
+                } catch(e) {
+                    // Fallback: try direct path (if served statically)
+                    img.src = 'data/scare_bunny.gif';
+                }
+
+                overlay.className = 'active';
+
+                // Play horrifying audio
+                _mysteryBunnyAudio();
+
+                // Phase 2: intensify after the bunny transforms (roughly 2.5s in)
+                setTimeout(function() {
+                    overlay.className = 'active phase2';
+                    _mysteryBunnyAudioPhase2();
+                }, 2500);
+
+                // End the overlay
+                setTimeout(function() {
+                    overlay.className = '';
+                    img.src = '';
+                    if (img._blobUrl) { URL.revokeObjectURL(img._blobUrl); img._blobUrl = null; }
+                }, 5400);
+            };
+
+            function _mysteryBunnyAudio() {
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                var t = ctx.currentTime;
+
+                // Deep rumble
+                var rumble = ctx.createOscillator();
+                var rumbleGain = ctx.createGain();
+                rumble.type = 'sawtooth';
+                rumble.frequency.setValueAtTime(28, t);
+                rumble.frequency.linearRampToValueAtTime(18, t + 5);
+                rumbleGain.gain.setValueAtTime(0, t);
+                rumbleGain.gain.linearRampToValueAtTime(0.4, t + 0.5);
+                rumbleGain.gain.setValueAtTime(0.4, t + 4.5);
+                rumbleGain.gain.linearRampToValueAtTime(0, t + 5.4);
+                rumble.connect(rumbleGain); rumbleGain.connect(ctx.destination);
+                rumble.start(t); rumble.stop(t + 5.5);
+
+                // High-frequency screech (delayed)
+                var screech = ctx.createOscillator();
+                var screechGain = ctx.createGain();
+                var screechFilter = ctx.createBiquadFilter();
+                screech.type = 'square';
+                screech.frequency.setValueAtTime(3200, t + 0.8);
+                screech.frequency.exponentialRampToValueAtTime(1800, t + 2);
+                screechFilter.type = 'bandpass'; screechFilter.frequency.value = 2400; screechFilter.Q.value = 8;
+                screechGain.gain.setValueAtTime(0, t);
+                screechGain.gain.setValueAtTime(0, t + 0.75);
+                screechGain.gain.linearRampToValueAtTime(0.25, t + 0.85);
+                screechGain.gain.exponentialRampToValueAtTime(0.01, t + 2.5);
+                screech.connect(screechFilter); screechFilter.connect(screechGain); screechGain.connect(ctx.destination);
+                screech.start(t + 0.75); screech.stop(t + 2.6);
+
+                // White noise burst on initial appearance
+                var bufLen = Math.floor(ctx.sampleRate * 0.3);
+                var noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+                var noiseData = noiseBuf.getChannelData(0);
+                for (var i = 0; i < bufLen; i++) noiseData[i] = Math.random() * 2 - 1;
+                var noiseNode = ctx.createBufferSource();
+                noiseNode.buffer = noiseBuf;
+                var noiseGain = ctx.createGain();
+                noiseGain.gain.setValueAtTime(0.7, t);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.28);
+                noiseNode.connect(noiseGain); noiseGain.connect(ctx.destination);
+                noiseNode.start(t); noiseNode.stop(t + 0.3);
+            }
+
+            function _mysteryBunnyAudioPhase2() {
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                var t = ctx.currentTime;
+
+                // Distorted scream-like oscillator cluster
+                for (var i = 0; i < 4; i++) {
+                    var osc = ctx.createOscillator();
+                    var g = ctx.createGain();
+                    osc.type = i % 2 === 0 ? 'sawtooth' : 'square';
+                    var freq = 200 + i * 380 + Math.random() * 200;
+                    osc.frequency.setValueAtTime(freq, t);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 0.3, t + 2.8);
+                    g.gain.setValueAtTime(0.18, t);
+                    g.gain.linearRampToValueAtTime(0.08, t + 1.5);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 2.9);
+                    osc.connect(g); g.connect(ctx.destination);
+                    osc.start(t); osc.stop(t + 3);
+                }
+
+                // Noise burst
+                var bufLen = Math.floor(ctx.sampleRate * 0.6);
+                var noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+                var noiseData = noiseBuf.getChannelData(0);
+                for (var i = 0; i < bufLen; i++) noiseData[i] = Math.random() * 2 - 1;
+                var noiseNode = ctx.createBufferSource();
+                noiseNode.buffer = noiseBuf;
+                var noiseGain = ctx.createGain();
+                var noiseFilter = ctx.createBiquadFilter();
+                noiseFilter.type = 'highpass'; noiseFilter.frequency.value = 1800;
+                noiseGain.gain.setValueAtTime(0.5, t);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.55);
+                noiseNode.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(ctx.destination);
+                noiseNode.start(t); noiseNode.stop(t + 0.6);
+            }
+        </script>
         {{{ SCRIPT }}}
     </body>
 </html>

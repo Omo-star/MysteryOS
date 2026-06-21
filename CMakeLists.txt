@@ -42,7 +42,7 @@ if(EMSCRIPTEN)
         -sFULL_ES3=1
         -sALLOW_MEMORY_GROWTH=1
         "-sEXPORTED_FUNCTIONS=['_main','_mysteryos_anomaly_response','_mysteryos_anomaly_response_to','_mysteryos_anomaly_artifact','_mysteryos_anomaly_artifact_to']"
-        "-sEXPORTED_RUNTIME_METHODS=['ccall']"
+        "-sEXPORTED_RUNTIME_METHODS=['ccall','FS']"
         "SHELL:--embed-file ${CMAKE_SOURCE_DIR}/data@/data"
         "SHELL:--shell-file ${CMAKE_SOURCE_DIR}/docs/shell.html"
     )
