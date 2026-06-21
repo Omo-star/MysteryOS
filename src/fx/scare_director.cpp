@@ -69,9 +69,9 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
         request_sound(ScareSound::Dread);
     }
 
-    if (stage >= 3 && starts_with(path, "/Users/") && !hallway_triggered_) {
+    if (stage >= 4 && starts_with(path, "/Users/") && !hallway_triggered_) {
         hallway_triggered_ = true;
-        add(ScareKind::Hallway, now, 4.5f, 1.0f);
+        add(ScareKind::Hallway, now + 23.2f, 4.5f, 1.0f);
         request_sound(ScareSound::Dread);
     }
 

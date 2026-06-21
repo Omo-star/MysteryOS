@@ -133,9 +133,21 @@ int main() {
     ScareDirector users_scares;
     users_scares.on_file_open("/Users/mkato/Documents/first_week_notes.txt", 4, false, 30, 30.0f);
     if (expect(users_scares.has_active(ScareKind::FakeError), "first /Users file should trigger fake error")) return 1;
+    auto feed_scare = std::find_if(users_scares.active_scares().begin(), users_scares.active_scares().end(), [](const ActiveScare& scare) {
+        return scare.kind == ScareKind::SceneFeed;
+    });
+    auto hallway_scare = std::find_if(users_scares.active_scares().begin(), users_scares.active_scares().end(), [](const ActiveScare& scare) {
+        return scare.kind == ScareKind::Hallway;
+    });
+    if (expect(feed_scare != users_scares.active_scares().end(), "first /Users file should schedule the feed scene")) return 1;
+    if (expect(hallway_scare != users_scares.active_scares().end(), "first /Users file should schedule the hallway scene")) return 1;
+    if (expect(hallway_scare->start_time >= feed_scare->start_time + feed_scare->duration, "hallway should start after the feed scene ends")) return 1;
     users_scares.update(40.0f);
     users_scares.on_file_open("/Users/cshin/Documents/final_day.txt", 4, false, 31, 40.0f);
-    if (expect(!users_scares.has_active(ScareKind::FakeError), "/Users fake error should only happen once")) return 1;
+    int users_fake_errors = (int)std::count_if(users_scares.active_scares().begin(), users_scares.active_scares().end(), [](const ActiveScare& scare) {
+        return scare.kind == ScareKind::FakeError;
+    });
+    if (expect(users_fake_errors == 1, "/Users fake error should only be scheduled once")) return 1;
 
     ScareDirector deleted_whisper_scares;
     deleted_whisper_scares.on_file_open("/Users/mkato/.deleted/transfer_second_thoughts.txt", 4, false, 42, 100.0f);
