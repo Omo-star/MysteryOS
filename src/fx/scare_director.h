@@ -18,7 +18,8 @@ enum class ScareKind {
     TheEye,
     SceneFeed,
     SceneInterview,
-    SceneWalk
+    SceneWalk,
+    NightmareFlash
 };
 
 enum class ScareSound {

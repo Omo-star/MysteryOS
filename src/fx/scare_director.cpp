@@ -60,6 +60,7 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
     if (stage >= 4 && path == "/Users/mkato/Desktop/observation_log.txt" && !scene_feed_triggered_) {
         scene_feed_triggered_ = true;
         add(ScareKind::SceneFeed, now, 20.0f, 1.0f);
+        add(ScareKind::NightmareFlash, now + 14.0f, 0.18f, 1.0f);
         add(ScareKind::FakeError, now + 20.5f, 2.4f, 1.0f, "CROSS-CONTAMINATION ACCELERATING");
         add(ScareKind::WindowShake, now + 20.5f, 1.0f, 0.8f);
         request_sound(ScareSound::Dread);
@@ -85,6 +86,7 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
     if (stage >= 4 && path == "/Users/cshin/Documents/response_1byte.bin" && !one_byte_triggered_) {
         one_byte_triggered_ = true;
         add(ScareKind::BlackFlash, now, 0.18f, 1.0f);
+        add(ScareKind::NightmareFlash, now + 0.1f, 0.35f, 1.0f);
         add(ScareKind::HardJumpscare, now + 0.2f, 1.8f, 1.0f, "THE ANSWER IS WAITING");
         request_sound(ScareSound::Impact);
     }
@@ -126,6 +128,7 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
     if (stage >= 5 && path == "/Desktop/you/a_door_you_did_not_open.txt" && !saw_stage5_door_file_) {
         saw_stage5_door_file_ = true;
         add(ScareKind::ScreenMelt, now, 3.5f, 1.0f);
+        add(ScareKind::NightmareFlash, now + 2.8f, 0.3f, 1.0f);
         add(ScareKind::HardJumpscare, now + 3.0f, 2.0f, 1.0f, "IT OPENED BACK");
         request_sound(ScareSound::Dread);
         request_sound(ScareSound::Impact);
@@ -135,6 +138,7 @@ void ScareDirector::on_file_open(const string& path, int stage, bool corrupted, 
         saw_do_not_open_file_ = true;
         add(ScareKind::BlackFlash, now, 0.12f, 1.0f);
         add(ScareKind::BunnyJumpscare, now + 0.12f, 5.5f, 1.0f);
+        add(ScareKind::NightmareFlash, now + 5.3f, 0.25f, 1.0f);
         add(ScareKind::HardJumpscare, now + 5.5f, 1.8f, 0.9f, "THANK YOU FOR LOOKING");
         request_sound(ScareSound::Impact);
     }
@@ -195,6 +199,7 @@ void ScareDirector::on_stage_unlock(int stage, float now) {
     if (stage >= 5 && !stage5_unlock_hit_) {
         stage5_unlock_hit_ = true;
         add(ScareKind::BlackFlash, now, 0.35f, 1.0f);
+        add(ScareKind::NightmareFlash, now + 0.05f, 0.2f, 1.0f);
         add(ScareKind::HardJumpscare, now + 0.16f, 1.5f, 0.85f, "THE SESSION REMAINS OPEN");
         add(ScareKind::FullscreenMessage, now + 0.08f, 1.5f, 1.0f, "THE SESSION REMAINS OPEN");
         request_sound(ScareSound::Impact);
@@ -402,6 +407,13 @@ void ScareDirector::render(float now) {
                 emscripten_run_script("window._mysterySceneWalk && window._mysterySceneWalk()");
             }
             dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
+        } else if (scare.kind == ScareKind::NightmareFlash) {
+            if (!scare.launched) {
+                scare.launched = true;
+                char buf[128];
+                snprintf(buf, sizeof(buf), "window._mysteryNightmareFlash && window._mysteryNightmareFlash(%d)", (int)(scare.duration * 1000));
+                emscripten_run_script(buf);
+            }
         }
     }
 }

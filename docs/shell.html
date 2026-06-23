@@ -1940,6 +1940,105 @@
                 setTimeout(toEyes, 10300);
             };
         </script>
+        <!-- NIGHTMARE FACE FLASH — subliminal face flash with heavy glitch -->
+        <style>
+            #_mnf_overlay {
+                display:none; position:fixed; inset:0; z-index:999999;
+                pointer-events:none; background:rgba(0,0,0,0.92);
+                align-items:center; justify-content:center;
+            }
+            #_mnf_overlay.active {
+                display:flex;
+                animation:_mnf_shake 0.06s infinite steps(2);
+            }
+            #_mnf_img {
+                max-width:70vmin; max-height:70vmin;
+                filter:brightness(1.6) contrast(1.8) saturate(1.4)
+                    drop-shadow(8px 0 0 rgba(255,0,0,0.7))
+                    drop-shadow(-8px 0 0 rgba(0,255,255,0.7));
+                animation:_mnf_pulse 0.09s infinite steps(2);
+            }
+            @keyframes _mnf_shake {
+                0%  { transform:translate(0,0); }
+                25% { transform:translate(-12px,8px); }
+                50% { transform:translate(14px,-6px); }
+                75% { transform:translate(-8px,-10px); }
+                100%{ transform:translate(10px,5px); }
+            }
+            @keyframes _mnf_pulse {
+                0%   { filter:brightness(1.6) contrast(1.8) saturate(1.4) hue-rotate(0deg)
+                        drop-shadow(8px 0 0 rgba(255,0,0,0.7)) drop-shadow(-8px 0 0 rgba(0,255,255,0.7)); }
+                33%  { filter:brightness(2.2) contrast(2.0) saturate(1.8) hue-rotate(30deg)
+                        drop-shadow(-12px 0 0 rgba(255,0,0,0.85)) drop-shadow(12px 0 0 rgba(0,255,255,0.85)); }
+                66%  { filter:brightness(1.4) contrast(2.2) saturate(1.2) hue-rotate(-20deg)
+                        drop-shadow(10px 0 0 rgba(255,0,0,0.75)) drop-shadow(-10px 0 0 rgba(0,255,255,0.75)); }
+                100% { filter:brightness(1.6) contrast(1.8) saturate(1.4) hue-rotate(0deg)
+                        drop-shadow(8px 0 0 rgba(255,0,0,0.7)) drop-shadow(-8px 0 0 rgba(0,255,255,0.7)); }
+            }
+            #_mnf_scanlines {
+                position:absolute; inset:0; pointer-events:none;
+                background:repeating-linear-gradient(transparent 0 1px, rgba(0,0,0,0.4) 1px 2px);
+            }
+            #_mnf_vignette {
+                position:absolute; inset:0; pointer-events:none;
+                background:radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.95) 100%);
+            }
+        </style>
+        <div id="_mnf_overlay">
+            <img id="_mnf_img" />
+            <div id="_mnf_scanlines"></div>
+            <div id="_mnf_vignette"></div>
+        </div>
+        <script>
+            window._mysteryNightmareFlash = function(durationMs) {
+                var dur = durationMs || 350;
+                var overlay = document.getElementById('_mnf_overlay');
+                var img = document.getElementById('_mnf_img');
+                if (!overlay || !img) return;
+                if (overlay.className === 'active') return;
+
+                try {
+                    var data = Module.FS.readFile('/data/nightmare_face.png');
+                    var blob = new Blob([data], {type:'image/png'});
+                    if (img._url) URL.revokeObjectURL(img._url);
+                    img._url = URL.createObjectURL(blob);
+                    img.src = img._url;
+                } catch(e) {
+                    img.src = 'data/nightmare_face.png';
+                }
+
+                overlay.className = 'active';
+
+                // stinger audio
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                var t = ctx.currentTime;
+                // harsh screech
+                var o = ctx.createOscillator(); var g = ctx.createGain();
+                o.type = 'sawtooth'; o.frequency.setValueAtTime(1200, t);
+                o.frequency.exponentialRampToValueAtTime(3200, t + dur/1000 * 0.6);
+                o.frequency.exponentialRampToValueAtTime(800, t + dur/1000);
+                g.gain.setValueAtTime(0.35, t);
+                g.gain.exponentialRampToValueAtTime(0.001, t + dur/1000 + 0.05);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(t); o.stop(t + dur/1000 + 0.1);
+                // impact thud
+                var o2 = ctx.createOscillator(); var g2 = ctx.createGain();
+                o2.type = 'sine'; o2.frequency.setValueAtTime(60, t);
+                o2.frequency.exponentialRampToValueAtTime(25, t + 0.15);
+                g2.gain.setValueAtTime(0.5, t);
+                g2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+                o2.connect(g2); g2.connect(ctx.destination);
+                o2.start(t); o2.stop(t + 0.25);
+
+                setTimeout(function() {
+                    overlay.className = '';
+                    img.src = '';
+                    if (img._url) { URL.revokeObjectURL(img._url); img._url = null; }
+                }, dur);
+            };
+        </script>
         {{{ SCRIPT }}}
     </body>
 </html>
