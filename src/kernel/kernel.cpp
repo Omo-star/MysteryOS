@@ -55,7 +55,7 @@ static const char* BOOT_LINES[] = {
     "Copyright (c) 2019-2024 Meridian Research Group",
     "",
     "[  0.000] Initializing kernel...",
-    "[  0.041] Memory: 8192MB available",
+    "[  0.041] Memory check: ",
     "[  0.089] Loading filesystem drivers...",
     "[  0.134] Mounting /data ... OK",
     "[  0.201] Loading user profile: evoss",
@@ -75,6 +75,13 @@ static const char* BOOT_LINES[] = {
     "[  0.634] Session ready.",
 };
 static const int BOOT_LINE_COUNT = 22;
+
+// Boot phase timing
+static const float BOOT_CRT_ON_DURATION = 0.8f;
+static const float BOOT_CHAR_SPEED = 800.0f; // chars per second
+static const float BOOT_LINE_PAUSE = 0.06f;
+static const float BOOT_ANOMALY_GLITCH_DURATION = 0.25f;
+static const float BOOT_FADEOUT_DURATION = 0.6f;
 
 static string quoted_js_string(const string& value) {
     ostringstream out;
@@ -98,28 +105,272 @@ static bool is_allowed_anomaly_path(const string& path) {
     return path.rfind("/Desktop/", 0) == 0 || path.rfind("/System/logs/", 0) == 0;
 }
 
-void Kernel::render_boot() {
-    boot_timer_ += ImGui::GetIO().DeltaTime;
-    int target = (int)(boot_timer_ / 0.12f);
-    if (target > boot_line_) boot_line_ = target;
-    if (boot_timer_ > (BOOT_LINE_COUNT + 8) * 0.12f) { booting_ = false; return; }
+static bool boot_line_is_anomalous(const char* line) {
+    return strstr(line, "MODIFIED") || strstr(line, "[no name]") || strstr(line, "[unknown]");
+}
 
-    ImGui::SetNextWindowPos({0, 0});
-    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-    ImGui::Begin("##boot", nullptr,
-        ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground);
-    int show = min(boot_line_, BOOT_LINE_COUNT);
-    for (int i = 0; i < show; i++) {
-        const char* line = BOOT_LINES[i];
-        if (strstr(line, "MODIFIED") || strstr(line, "[no name]") || strstr(line, "[unknown]"))
-            ImGui::TextColored({1.0f, 0.35f, 0.35f, 1.0f}, "%s", line);
-        else if (i < 3)
-            ImGui::TextColored({0.55f, 0.55f, 0.55f, 1.0f}, "%s", line);
-        else
-            ImGui::TextColored({0.6f, 0.85f, 0.6f, 1.0f}, "%s", line);
+void Kernel::render_boot() {
+    float dt = ImGui::GetIO().DeltaTime;
+    boot_timer_ += dt;
+    ImDrawList* dl = ImGui::GetBackgroundDrawList();
+    ImVec2 disp = ImGui::GetIO().DisplaySize;
+
+    static bool boot_sfx_fired = false;
+    if (!boot_sfx_fired) {
+        boot_sfx_fired = true;
+        emscripten_run_script("window._mysteryBootSfx && window._mysteryBootSfx()");
     }
-    ImGui::End();
+
+    // Phase 0: CRT power-on effect
+    if (boot_phase_ == 0) {
+        float t = boot_timer_ / BOOT_CRT_ON_DURATION;
+        if (t >= 1.0f) {
+            boot_phase_ = 1;
+            boot_timer_ = 0.0f;
+        } else {
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
+            if (t < 0.3f) {
+                // thin white horizontal line appears at center
+                float brightness = t / 0.3f;
+                float cy = disp.y * 0.5f;
+                int alpha = (int)(brightness * 255);
+                dl->AddRectFilled({0, cy - 1}, {disp.x, cy + 1}, IM_COL32(180, 255, 200, alpha));
+                // glow around the line
+                dl->AddRectFilled({0, cy - 4}, {disp.x, cy + 4}, IM_COL32(100, 200, 120, alpha / 3));
+            } else {
+                // line expands to fill screen
+                float expand = (t - 0.3f) / 0.7f;
+                expand = expand * expand * (3.0f - 2.0f * expand); // smoothstep
+                float half = disp.y * 0.5f * expand;
+                float cy = disp.y * 0.5f;
+                // phosphor green fill expanding from center
+                int alpha = (int)(40 + expand * 20);
+                dl->AddRectFilled({0, cy - half}, {disp.x, cy + half}, IM_COL32(0, 20, 0, alpha));
+                // bright edge lines
+                int edge_alpha = (int)((1.0f - expand) * 200);
+                dl->AddRectFilled({0, cy - half - 2}, {disp.x, cy - half + 1}, IM_COL32(150, 255, 170, edge_alpha));
+                dl->AddRectFilled({0, cy + half - 1}, {disp.x, cy + half + 2}, IM_COL32(150, 255, 170, edge_alpha));
+            }
+            // subtle scanlines during CRT on
+            for (float y = 0; y < disp.y; y += 3.0f)
+                dl->AddLine({0, y}, {disp.x, y}, IM_COL32(0, 0, 0, 50));
+        }
+        return;
+    }
+
+    // Phase 1: Typewriter boot text
+    if (boot_phase_ == 1) {
+        // advance typing
+        if (boot_line_ < BOOT_LINE_COUNT) {
+            if (boot_line_pause_ > 0.0f) {
+                boot_line_pause_ -= dt;
+            } else {
+                boot_char_accum_ += dt * BOOT_CHAR_SPEED;
+                int chars_to_add = (int)boot_char_accum_;
+                boot_char_accum_ -= chars_to_add;
+                int old_char = boot_char_;
+                boot_char_ += chars_to_add;
+                // typing clicks (~every 8 chars to avoid spam)
+                if (boot_char_ / 8 != old_char / 8)
+                    emscripten_run_script("window._mysteryBootClick && window._mysteryBootClick()");
+
+                const char* current = BOOT_LINES[boot_line_];
+                int line_len = (int)strlen(current);
+
+                // memory counter special case (line 4: "Memory check: ")
+                if (boot_line_ == 4 && boot_char_ >= line_len) {
+                    int mem_target = 8192;
+                    int step = 256;
+                    int ticks = (boot_char_ - line_len);
+                    boot_mem_counter_ = min(ticks * step, mem_target);
+                    if (boot_mem_counter_ >= mem_target) {
+                        boot_char_ = 0;
+                        boot_char_accum_ = 0.0f;
+                        boot_line_++;
+                        boot_line_pause_ = BOOT_LINE_PAUSE;
+                    }
+                }
+                else if (boot_char_ >= line_len) {
+                    // check if this line triggers a glitch
+                    if (boot_line_is_anomalous(current)) {
+                        boot_glitch_timer_ = BOOT_ANOMALY_GLITCH_DURATION;
+                        emscripten_run_script("window._mysteryBootGlitch && window._mysteryBootGlitch()");
+                    }
+                    boot_char_ = 0;
+                    boot_char_accum_ = 0.0f;
+                    boot_line_++;
+                    // longer pause after anomalous lines
+                    boot_line_pause_ = boot_line_is_anomalous(current) ? 0.35f : BOOT_LINE_PAUSE;
+                }
+            }
+        } else {
+            // all lines printed, wait a beat then fadeout
+            boot_line_pause_ -= dt;
+            if (boot_line_pause_ <= -0.5f) {
+                boot_phase_ = 2;
+                boot_fadeout_timer_ = 0.0f;
+            }
+        }
+
+        // decrement glitch timer
+        if (boot_glitch_timer_ > 0.0f) boot_glitch_timer_ -= dt;
+
+        // draw
+        dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
+
+        // scanlines (always during boot)
+        for (float y = 0; y < disp.y; y += 3.0f)
+            dl->AddLine({0, y}, {disp.x, y}, IM_COL32(0, 0, 0, 40));
+
+        // vignette (dark edges)
+        {
+            int v = 60;
+            float corner = disp.x * 0.35f;
+            dl->AddRectFilledMultiColor({0, 0}, {corner, disp.y},
+                IM_COL32(0, 0, 0, v), IM_COL32(0, 0, 0, 0), IM_COL32(0, 0, 0, 0), IM_COL32(0, 0, 0, v));
+            dl->AddRectFilledMultiColor({disp.x - corner, 0}, disp,
+                IM_COL32(0, 0, 0, 0), IM_COL32(0, 0, 0, v), IM_COL32(0, 0, 0, v), IM_COL32(0, 0, 0, 0));
+        }
+
+        // anomaly glitch overlay
+        if (boot_glitch_timer_ > 0.0f) {
+            float g = boot_glitch_timer_ / BOOT_ANOMALY_GLITCH_DURATION;
+            int ga = (int)(g * 40);
+            dl->AddRectFilled({0, 0}, disp, IM_COL32(255, 50, 50, ga));
+            // horizontal tear bands
+            for (int i = 0; i < 4; i++) {
+                float y = (float)(rand() % (int)disp.y);
+                float h = 2.0f + (float)(rand() % 6);
+                float off = (float)((rand() % 20) - 10);
+                dl->AddRectFilled({off, y}, {disp.x + off, y + h}, IM_COL32(255, 60, 60, (int)(g * 100)));
+            }
+        }
+
+        // render text
+        ImGui::SetNextWindowPos({20, 20});
+        ImGui::SetNextWindowSize({disp.x - 40, disp.y - 40});
+        ImGui::Begin("##boot", nullptr,
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground);
+
+        int lines_to_show = min(boot_line_, BOOT_LINE_COUNT);
+        for (int i = 0; i < lines_to_show; i++) {
+            const char* line = BOOT_LINES[i];
+            ImVec4 color;
+            if (boot_line_is_anomalous(line))
+                color = {1.0f, 0.3f, 0.3f, 1.0f};
+            else if (i < 3)
+                color = {0.5f, 0.5f, 0.5f, 1.0f};
+            else
+                color = {0.55f, 0.85f, 0.55f, 1.0f};
+
+            // completed lines: draw full text
+            if (i == 4) {
+                // memory check line: show with counter result
+                char buf[80];
+                snprintf(buf, sizeof(buf), "%s8192MB available ... OK", line);
+                ImGui::TextColored(color, "%s", buf);
+            } else {
+                ImGui::TextColored(color, "%s", line);
+            }
+
+            // subtle glow on anomalous lines (draw again slightly offset with low alpha)
+            if (boot_line_is_anomalous(line)) {
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+                pos.y -= ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y;
+                float glow_alpha = 0.15f + 0.1f * sinf(boot_timer_ * 6.0f);
+                dl->AddText(ImGui::GetFont(), ImGui::GetFontSize(),
+                    {pos.x + 1, pos.y + 1}, IM_COL32(255, 80, 80, (int)(glow_alpha * 255)), line);
+            }
+        }
+
+        // current line being typed
+        if (boot_line_ < BOOT_LINE_COUNT && boot_line_pause_ <= 0.0f) {
+            const char* current = BOOT_LINES[boot_line_];
+            int len = (int)strlen(current);
+            int show_chars = min(boot_char_, len);
+
+            ImVec4 color;
+            if (boot_line_is_anomalous(current))
+                color = {1.0f, 0.3f, 0.3f, 1.0f};
+            else if (boot_line_ < 3)
+                color = {0.5f, 0.5f, 0.5f, 1.0f};
+            else
+                color = {0.55f, 0.85f, 0.55f, 1.0f};
+
+            char partial[256];
+            int copy_len = min(show_chars, 255);
+            memcpy(partial, current, copy_len);
+            partial[copy_len] = '\0';
+
+            // memory counter inline
+            if (boot_line_ == 4 && boot_char_ >= len) {
+                char mem_buf[80];
+                snprintf(mem_buf, sizeof(mem_buf), "%s%dMB", partial, boot_mem_counter_);
+                if (boot_mem_counter_ >= 8192) {
+                    strncat(mem_buf, " available ... OK", sizeof(mem_buf) - strlen(mem_buf) - 1);
+                }
+                ImGui::TextColored(color, "%s", mem_buf);
+            } else {
+                // blinking cursor
+                bool cursor_on = fmodf(boot_timer_ * 4.0f, 1.0f) < 0.6f;
+                if (cursor_on) {
+                    char with_cursor[258];
+                    snprintf(with_cursor, sizeof(with_cursor), "%s_", partial);
+                    ImGui::TextColored(color, "%s", with_cursor);
+                } else {
+                    ImGui::TextColored(color, "%s", partial);
+                }
+            }
+        }
+
+        ImGui::End();
+        return;
+    }
+
+    // Phase 2: Fade out to black
+    if (boot_phase_ == 2) {
+        boot_fadeout_timer_ += dt;
+        float t = boot_fadeout_timer_ / BOOT_FADEOUT_DURATION;
+        if (t >= 1.0f) {
+            booting_ = false;
+            return;
+        }
+        dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
+
+        // re-draw the final boot text, fading out
+        int alpha_text = (int)((1.0f - t) * 255);
+        ImGui::SetNextWindowPos({20, 20});
+        ImGui::SetNextWindowSize({disp.x - 40, disp.y - 40});
+        ImGui::Begin("##boot_fade", nullptr,
+            ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoBackground);
+
+        for (int i = 0; i < BOOT_LINE_COUNT; i++) {
+            const char* line = BOOT_LINES[i];
+            ImVec4 color;
+            float a = alpha_text / 255.0f;
+            if (boot_line_is_anomalous(line))
+                color = {1.0f, 0.3f, 0.3f, a};
+            else if (i < 3)
+                color = {0.5f, 0.5f, 0.5f, a};
+            else
+                color = {0.55f, 0.85f, 0.55f, a};
+
+            if (i == 4) {
+                char buf[80];
+                snprintf(buf, sizeof(buf), "%s8192MB available ... OK", line);
+                ImGui::TextColored(color, "%s", buf);
+            } else {
+                ImGui::TextColored(color, "%s", line);
+            }
+        }
+        ImGui::End();
+
+        // scanlines fade too
+        for (float y = 0; y < disp.y; y += 3.0f)
+            dl->AddLine({0, y}, {disp.x, y}, IM_COL32(0, 0, 0, (int)(40 * (1.0f - t))));
+    }
 }
 
 void Kernel::record_file_open(const string& path, const string& source) {

@@ -62,6 +62,13 @@ class Kernel{
         bool booting_ = true;
         float boot_timer_ = 0.0f;
         int boot_line_ = 0;
+        int boot_char_ = 0;
+        float boot_char_accum_ = 0.0f;
+        float boot_line_pause_ = 0.0f;
+        float boot_glitch_timer_ = 0.0f;
+        float boot_fadeout_timer_ = -1.0f;
+        int boot_phase_ = 0; // 0=CRT on, 1=typing, 2=fadeout, 3=done
+        int boot_mem_counter_ = 0;
         void render_boot();
         int next_id_ = 0;
         void render_taskbar();

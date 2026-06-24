@@ -221,6 +221,92 @@
                     window._mysteryOsc.ctx.resume();
                 }
             }, { once: true });
+
+            window._mysteryBootSfx = function() {
+                try {
+                    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // CRT power-on: rising electrical hum
+                    var hum = ctx.createOscillator();
+                    var humGain = ctx.createGain();
+                    hum.type = 'sawtooth';
+                    hum.frequency.setValueAtTime(40, ctx.currentTime);
+                    hum.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.4);
+                    hum.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.8);
+                    humGain.gain.setValueAtTime(0, ctx.currentTime);
+                    humGain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.15);
+                    humGain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.5);
+                    humGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.9);
+                    hum.connect(humGain);
+                    humGain.connect(ctx.destination);
+                    hum.start(ctx.currentTime);
+                    hum.stop(ctx.currentTime + 1.0);
+
+                    // CRT degauss thump
+                    var thump = ctx.createOscillator();
+                    var thumpGain = ctx.createGain();
+                    thump.type = 'sine';
+                    thump.frequency.setValueAtTime(80, ctx.currentTime + 0.05);
+                    thump.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.25);
+                    thumpGain.gain.setValueAtTime(0.12, ctx.currentTime + 0.05);
+                    thumpGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    thump.connect(thumpGain);
+                    thumpGain.connect(ctx.destination);
+                    thump.start(ctx.currentTime + 0.05);
+                    thump.stop(ctx.currentTime + 0.35);
+
+                    // high-frequency CRT whine (subtle)
+                    var whine = ctx.createOscillator();
+                    var whineGain = ctx.createGain();
+                    whine.type = 'sine';
+                    whine.frequency.value = 15700;
+                    whineGain.gain.setValueAtTime(0, ctx.currentTime + 0.3);
+                    whineGain.gain.linearRampToValueAtTime(0.008, ctx.currentTime + 0.6);
+                    whineGain.gain.setValueAtTime(0.008, ctx.currentTime + 4.0);
+                    whineGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 5.0);
+                    whine.connect(whineGain);
+                    whineGain.connect(ctx.destination);
+                    whine.start(ctx.currentTime + 0.3);
+                    whine.stop(ctx.currentTime + 5.0);
+
+                    // store ctx for typing clicks
+                    window._bootAudioCtx = ctx;
+                } catch(e) {}
+            };
+
+            window._mysteryBootClick = function() {
+                try {
+                    var ctx = window._bootAudioCtx;
+                    if (!ctx) return;
+                    var buf = ctx.createBuffer(1, 120, ctx.sampleRate);
+                    var data = buf.getChannelData(0);
+                    for (var i = 0; i < 120; i++) {
+                        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / 20) * 0.06;
+                    }
+                    var src = ctx.createBufferSource();
+                    src.buffer = buf;
+                    src.connect(ctx.destination);
+                    src.start();
+                } catch(e) {}
+            };
+
+            window._mysteryBootGlitch = function() {
+                try {
+                    var ctx = window._bootAudioCtx;
+                    if (!ctx) return;
+                    // short burst of noise + low rumble
+                    var buf = ctx.createBuffer(1, 4800, ctx.sampleRate);
+                    var data = buf.getChannelData(0);
+                    for (var i = 0; i < 4800; i++) {
+                        var env = Math.exp(-i / 1500);
+                        data[i] = (Math.random() * 2 - 1) * env * 0.15;
+                    }
+                    var src = ctx.createBufferSource();
+                    src.buffer = buf;
+                    src.connect(ctx.destination);
+                    src.start();
+                } catch(e) {}
+            };
         </script>
         <style>
             @keyframes _mbs_shake {
