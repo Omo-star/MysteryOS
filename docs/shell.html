@@ -2082,11 +2082,11 @@
 
                     var engine = new BABYLON.Engine(cvs, true);
                     var scene = new BABYLON.Scene(engine);
-                    scene.clearColor = new BABYLON.Color3(0.01, 0.02, 0.01);
-                    scene.ambientColor = new BABYLON.Color3(0.03, 0.06, 0.03);
+                    scene.clearColor = new BABYLON.Color3(0.005, 0.005, 0.005);
+                    scene.ambientColor = new BABYLON.Color3(0.01, 0.01, 0.01);
                     scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-                    scene.fogDensity = 0.035;
-                    scene.fogColor = new BABYLON.Color3(0.01, 0.015, 0.01);
+                    scene.fogDensity = 0.045;
+                    scene.fogColor = new BABYLON.Color3(0.005, 0.008, 0.005);
                     scene.collisionsEnabled = true;
                     scene.gravity = new BABYLON.Vector3(0, -0.15, 0);
 
@@ -2094,7 +2094,7 @@
                     camera.setTarget(new BABYLON.Vector3(0, 1.7, 5));
                     camera.speed = 0.12;
                     camera.angularSensibility = 3000;
-                    camera.minZ = 0.1;
+                    camera.minZ = 0.05;
                     camera.keysUp = [87]; camera.keysDown = [83];
                     camera.keysLeft = [65]; camera.keysRight = [68];
                     camera.checkCollisions = true;
@@ -2105,34 +2105,39 @@
                     cvs.addEventListener('click', function() { cvs.requestPointerLock(); });
 
                     var light = new BABYLON.HemisphericLight('hl', new BABYLON.Vector3(0.1, 1, 0.1), scene);
-                    light.intensity = 0.06;
-                    light.diffuse = new BABYLON.Color3(0.2, 0.35, 0.2);
-                    light.groundColor = new BABYLON.Color3(0.02, 0.04, 0.02);
+                    light.intensity = 0.015;
+                    light.diffuse = new BABYLON.Color3(0.1, 0.15, 0.1);
+                    light.groundColor = new BABYLON.Color3(0.01, 0.02, 0.01);
 
                     // --- Flashlight (SpotLight) ---
                     var flashSpot = new BABYLON.SpotLight('flash',
                         camera.position.clone(),
-                        camera.getForwardRay().direction,
-                        Math.PI / 5, 12, scene);
-                    flashSpot.intensity = 2.5;
-                    flashSpot.diffuse = new BABYLON.Color3(0.95, 0.92, 0.8);
-                    flashSpot.range = 45;
+                        new BABYLON.Vector3(0, 0, 1),
+                        Math.PI / 4.5, 8, scene);
+                    flashSpot.intensity = 3.5;
+                    flashSpot.diffuse = new BABYLON.Color3(0.95, 0.9, 0.75);
+                    flashSpot.range = 35;
 
                     // Flashlight 3D model in player's hand
                     BABYLON.SceneLoader.ImportMesh('', 'data/', 'Flashlight.obj', scene, function(meshes) {
                         var flRoot = new BABYLON.TransformNode('flRoot', scene);
                         flRoot.parent = camera;
-                        flRoot.position.set(0.35, -0.35, 0.6);
-                        flRoot.rotation.set(0, Math.PI, 0);
-                        flRoot.scaling.setAll(0.035);
-                        meshes.forEach(function(m) { m.parent = flRoot; });
+                        flRoot.position.set(0.28, -0.28, 0.4);
+                        flRoot.rotation.set(Math.PI * 0.5, 0, 0);
+                        flRoot.scaling.setAll(0.028);
+                        meshes.forEach(function(m) {
+                            m.parent = flRoot;
+                            if (m.material) {
+                                m.material.emissiveColor = new BABYLON.Color3(0.15, 0.15, 0.15);
+                            }
+                        });
                     });
 
                     // --- Materials ---
                     var groundMat = new BABYLON.StandardMaterial('groundMat', scene);
                     groundMat.diffuseColor = new BABYLON.Color3(0.12, 0.15, 0.06);
                     groundMat.specularColor = BABYLON.Color3.Black();
-                    groundMat.emissiveColor = new BABYLON.Color3(0.02, 0.03, 0.01);
+                    groundMat.emissiveColor = BABYLON.Color3.Black();
 
                     var ground = BABYLON.MeshBuilder.CreateGround('ground', {width: 120, height: 120}, scene);
                     ground.material = groundMat;
@@ -2182,7 +2187,7 @@
                                 m.parent = root; m.isVisible = false;
                                 // Darken materials for horror
                                 if (m.material) {
-                                    m.material.emissiveColor = new BABYLON.Color3(0.08, 0.06, 0.04);
+                                    m.material.emissiveColor = BABYLON.Color3.Black();
                                     m.material.specularColor = BABYLON.Color3.Black();
                                 }
                             });
@@ -2200,41 +2205,39 @@
                         });
                     }
 
+                    var sharedPostMat = new BABYLON.StandardMaterial('postMat', scene);
+                    sharedPostMat.diffuseColor = new BABYLON.Color3(0.35, 0.2, 0.1);
+                    sharedPostMat.emissiveColor = new BABYLON.Color3(0.08, 0.05, 0.02);
+                    sharedPostMat.specularColor = BABYLON.Color3.Black();
+                    var sharedPlankMat = new BABYLON.StandardMaterial('plankMat', scene);
+                    sharedPlankMat.diffuseColor = new BABYLON.Color3(0.4, 0.25, 0.12);
+                    sharedPlankMat.emissiveColor = new BABYLON.Color3(0.1, 0.06, 0.03);
+                    sharedPlankMat.specularColor = BABYLON.Color3.Black();
+
                     function createSign(text, x, y, z, rotY, w, h) {
                         var id = 'sgn' + (signId++);
                         w = w || 2.0; h = h || 0.5;
                         var signH = y || 1.3;
 
-                        var parent = new BABYLON.TransformNode(id + 'p', scene);
-                        parent.position.set(x, 0, z);
-                        parent.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y;
-
                         // Wooden post from ground up to sign
                         var postH = signH + h * 0.5;
-                        var post = BABYLON.MeshBuilder.CreateCylinder(id + 'post', {diameter: 0.1, height: postH, tessellation: 8}, scene);
-                        post.parent = parent;
-                        post.position.y = postH * 0.5;
-                        var postMat = new BABYLON.StandardMaterial(id + 'postm', scene);
-                        postMat.diffuseColor = new BABYLON.Color3(0.3, 0.18, 0.08);
-                        postMat.emissiveColor = new BABYLON.Color3(0.1, 0.06, 0.02);
-                        postMat.specularColor = BABYLON.Color3.Black();
-                        post.material = postMat;
+                        var post = BABYLON.MeshBuilder.CreateCylinder(id + 'post', {diameter: 0.18, height: postH, tessellation: 8}, scene);
+                        post.position.set(x, postH * 0.5, z);
+                        post.material = sharedPostMat;
 
                         // Wooden plank
-                        var plank = BABYLON.MeshBuilder.CreateBox(id + 'b', {width: w, height: h, depth: 0.05}, scene);
-                        plank.parent = parent;
-                        plank.position.y = signH;
-                        var plankMat = new BABYLON.StandardMaterial(id + 'pm', scene);
-                        plankMat.diffuseColor = new BABYLON.Color3(0.38, 0.24, 0.11);
-                        plankMat.emissiveColor = new BABYLON.Color3(0.14, 0.09, 0.04);
-                        plankMat.specularColor = new BABYLON.Color3(0.05, 0.03, 0.01);
-                        plank.material = plankMat;
+                        var plank = BABYLON.MeshBuilder.CreateBox(id + 'b', {width: w, height: h, depth: 0.06}, scene);
+                        plank.position.set(x, signH, z);
+                        plank.rotation.y = rotY || 0;
+                        plank.material = sharedPlankMat;
 
-                        // Text face
+                        // Text face — offset slightly in front of plank
                         var face = BABYLON.MeshBuilder.CreatePlane(id, {width: w * 0.92, height: h * 0.8}, scene);
-                        face.parent = parent;
-                        face.position.y = signH;
-                        face.position.z = -0.03;
+                        face.position.set(x, signH, z);
+                        face.rotation.y = rotY || 0;
+                        var rr = rotY || 0;
+                        face.position.x -= Math.sin(rr) * 0.035;
+                        face.position.z -= Math.cos(rr) * 0.035;
                         var tw = 512, th = 128;
                         var dt = new BABYLON.DynamicTexture(id + 'dt', {width: tw, height: th}, scene, false);
                         var mat = new BABYLON.StandardMaterial(id + 'mat', scene);
@@ -2261,7 +2264,7 @@
                         }
                         draw(text);
 
-                        var s = {mesh: parent, setText: function(t, c) { draw(t, c); }};
+                        var s = {mesh: plank, setText: function(t, c) { draw(t, c); }};
                         allSigns.push(s);
                         return s;
                     }
