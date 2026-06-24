@@ -2183,22 +2183,29 @@
 
                     function createSign(text, x, y, z, rotY, w, h) {
                         var id = 'sgn' + (signId++);
-                        w = w || 2.2; h = h || 0.55;
+                        w = w || 3.0; h = h || 0.7;
                         var plane = BABYLON.MeshBuilder.CreatePlane(id, {width: w, height: h}, scene);
                         plane.position.set(x, y, z);
-                        plane.rotation.y = rotY || 0;
+                        plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y;
                         var tw = 512, th = 128;
                         var dt = new BABYLON.DynamicTexture(id + 'dt', {width: tw, height: th}, scene, false);
                         var mat = new BABYLON.StandardMaterial(id + 'mat', scene);
                         mat.diffuseTexture = dt; mat.emissiveTexture = dt;
+                        mat.emissiveColor = new BABYLON.Color3(0.15, 0.4, 0.15);
                         mat.backFaceCulling = false; mat.alpha = 0.95;
+                        mat.disableLighting = true;
                         plane.material = mat;
                         function draw(txt, color) {
                             var c = dt.getContext();
-                            c.fillStyle = '#080808'; c.fillRect(0, 0, tw, th);
-                            c.font = 'bold 24px monospace';
-                            c.fillStyle = color || '#4a9a4a';
-                            c.fillText(txt, 14, 76);
+                            c.fillStyle = '#0a0f0a'; c.fillRect(0, 0, tw, th);
+                            c.strokeStyle = '#1a3a1a'; c.lineWidth = 3;
+                            c.strokeRect(4, 4, tw - 8, th - 8);
+                            c.font = 'bold 28px monospace';
+                            c.fillStyle = color || '#44ee88';
+                            c.shadowColor = color || '#44ee88';
+                            c.shadowBlur = 12;
+                            c.fillText(txt, 14, 78);
+                            c.shadowBlur = 0;
                             dt.update();
                         }
                         draw(text);
