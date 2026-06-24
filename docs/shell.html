@@ -2348,8 +2348,10 @@
                             var gz = Math.random() * 70 - 5;
                             gm.forEach(function(m) {
                                 var inst = m.createInstance('grass_' + gi + '_' + m.name);
-                                inst.position.set(gx, 0, gz);
-                                inst.scaling.setAll(0.018 + Math.random() * 0.008);
+                                inst.position.set(gx, 0.02, gz);
+                                var gs = 0.018 + Math.random() * 0.008;
+                                inst.scaling.set(gs, gs, gs);
+                                inst.rotation.x = -Math.PI / 2;
                                 inst.rotation.y = Math.random() * Math.PI * 2;
                             });
                         }
@@ -2607,9 +2609,15 @@
                     // --- Render loop ---
                     var lastPos = camera.position.clone();
                     engine.runRenderLoop(function() {
-                        // Update flashlight to follow camera
-                        flashSpot.position.copyFrom(camera.position);
-                        flashSpot.direction.copyFrom(camera.getForwardRay().direction);
+                        // Update flashlight to hand position (down + right + forward from camera)
+                        var fwd = camera.getForwardRay().direction;
+                        var right = BABYLON.Vector3.Cross(fwd, BABYLON.Vector3.Up()).normalize();
+                        flashSpot.position.set(
+                            camera.position.x + right.x * 0.3 - 0 * fwd.x,
+                            camera.position.y - 0.5,
+                            camera.position.z + right.z * 0.3 - 0 * fwd.z
+                        );
+                        flashSpot.direction.copyFrom(fwd);
 
                         scene.render();
                         var moved = BABYLON.Vector3.Distance(camera.position, lastPos);
