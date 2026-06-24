@@ -1,6 +1,6 @@
 # MysteryOS
 
-![MysteryOS desktop showing the fake OS interface](docs/screenshot.png)
+![MysteryOS desktop showing the fake OS interface](screenshot.png)
 
 [![Play MysteryOS](https://img.shields.io/badge/play-GitHub%20Pages-111111?style=for-the-badge&logo=github)](https://overcharged-coder.github.io/MysteryOS/)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=for-the-badge&logo=cplusplus)

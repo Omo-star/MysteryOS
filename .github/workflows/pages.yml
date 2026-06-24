@@ -46,7 +46,7 @@ jobs:
             } | ConvertTo-Json
             Set-Content -Path docs/anomaly-config.js -Value "window.MYSTERYOS_ANOMALY = $config;"
           } else {
-            Copy-Item docs/anomaly-config.example.js docs/anomaly-config.js
+            Copy-Item anomaly-config.example.js docs/anomaly-config.js
           }
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}

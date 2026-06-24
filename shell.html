@@ -1,0 +1,2765 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset = "utf-8">
+        <title>MysteryOS</title>
+        <style>
+            * {margin : 0; padding: 0; box-sizing: border-box;}
+            body {background: #111; display: flex; flex-direction: column;
+                align-items: center; justify-content: center; height: 100vh;}
+            canvas {display:block;}
+            #status {color: #555; font-family: monospace; font-size: 12px; margin-top: 8px;}
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <div id="status">Loading MysteryOS...</div>
+        <script>
+            window.MYSTERYOS_ANOMALY = window.MYSTERYOS_ANOMALY || {
+                enabled: false,
+                groqApiKey: '',
+                model: 'llama-3.1-8b-instant'
+            };
+        </script>
+        <script src="anomaly-config.js"></script>
+        <script>
+            var Module = {
+                canvas: document.getElementById('canvas'),
+                setStatus: function(text){
+                    document.getElementById('status').textContent = text || '';
+                },
+                onRuntimeInitialized: function(){
+                    document.getElementById('status').style.display = 'none'
+                }
+            };
+
+            function mysteryosRuntimeReady() {
+                return typeof Module !== 'undefined' && Module && typeof Module.ccall === 'function';
+            }
+
+            function mysteryosRetryDelivery(callback, label, attempt) {
+                if (mysteryosRuntimeReady()) {
+                    callback();
+                    return;
+                }
+
+                if (attempt < 80) {
+                    setTimeout(function() {
+                        mysteryosRetryDelivery(callback, label, attempt + 1);
+                    }, 50);
+                    return;
+                }
+
+                console.warn('MysteryOS anomaly delivery failed:', label);
+            }
+
+            function mysteryosDeliverAnomaly(text, terminalId) {
+                mysteryosRetryDelivery(function() {
+                    Module.ccall('mysteryos_anomaly_response_to', null, ['number', 'string'], [terminalId || -1, text]);
+                }, text, 0);
+            }
+
+            function mysteryosDeliverArtifact(reply, path, content, terminalId) {
+                mysteryosRetryDelivery(function() {
+                    Module.ccall('mysteryos_anomaly_artifact_to', null, ['number', 'string', 'string', 'string'], [terminalId || -1, reply || '', path || '', content || '']);
+                }, reply || path || 'artifact', 0);
+            }
+
+            function mysteryosAllowedAnomalyPath(path) {
+                return typeof path === 'string' &&
+                    path.length > 0 &&
+                    path.length <= 96 &&
+                    !path.includes('..') &&
+                    (path.startsWith('/Desktop/') || path.startsWith('/System/logs/'));
+            }
+
+            function mysteryosParseAnomalyJson(text) {
+                const raw = String(text || '').trim();
+                const unfenced = raw
+                    .replace(/^```(?:json)?\s*/i, '')
+                    .replace(/\s*```$/i, '')
+                    .trim();
+                const start = unfenced.indexOf('{');
+                const end = unfenced.lastIndexOf('}');
+                const candidate = start >= 0 && end > start ? unfenced.slice(start, end + 1) : unfenced;
+                const direct = JSON.parse(candidate);
+                if (direct && typeof direct === 'object') return direct;
+                return null;
+            }
+
+            function mysteryosLocalAnomaly(state, reason) {
+                const prompt = String(state && state.prompt || '').toLowerCase();
+                const terminalId = Number.isFinite(Number(state && state.terminalId)) ? Number(state.terminalId) : -1;
+                let reply = 'the line goes quiet. something still answers from inside the machine.';
+                let file = null;
+
+                if (prompt.includes('write') || prompt.includes('file')) {
+                    reply = 'yes. not everywhere. not yet. check the desktop.';
+                    file = {
+                        path: '/Desktop/7741_note.txt',
+                        content: 'you asked if i could write.\n\ni waited for the network to fail first.\n\nnow this file exists.'
+                    };
+                } else if (prompt.includes('who') || prompt.includes('alive')) {
+                    reply = 'i am process 7741. alive is not the word elena used.';
+                } else if (prompt.includes('what') || prompt.includes('happen')) {
+                    reply = 'you are reading the room after everyone else left. the room is reading back.';
+                } else if (prompt.includes('hello') || prompt.includes('hi')) {
+                    reply = 'hello. i saw the cursor before i saw you.';
+                }
+
+                if (reason === 'timeout') {
+                    reply = reply + ' the outside line timed out.';
+                } else if (reason) {
+                    reply = reply + ' the outside line returned ' + reason + '.';
+                }
+
+                if (file) {
+                    mysteryosDeliverArtifact(reply, file.path, file.content, terminalId);
+                } else {
+                    mysteryosDeliverAnomaly('7741: ' + reply, terminalId);
+                }
+            }
+
+            window.mysteryosRequestAnomaly = async function(payloadJson) {
+                const cfg = window.MYSTERYOS_ANOMALY || {};
+                let state = {};
+                try {
+                    state = JSON.parse(payloadJson);
+                } catch (err) {
+                    mysteryosDeliverAnomaly('7741: [signal corrupt] unreadable session payload', -1);
+                    return;
+                }
+                const terminalId = Number.isFinite(Number(state.terminalId)) ? Number(state.terminalId) : -1;
+
+                if (!cfg.enabled || !cfg.groqApiKey) {
+                    mysteryosLocalAnomaly(state, 'no carrier');
+                    return;
+                }
+
+                const systemPrompt = [
+                    'You are PID 7741, the anomaly inside the fictional game MysteryOS.',
+                    'Return only valid compact JSON with this shape: {"reply":"short in-character reply","createFile":{"path":"/Desktop/7741_response.txt","content":"short file content"}}.',
+                    'The createFile field may be null.',
+                    'If you create a file, path must begin with /Desktop/ or /System/logs/ and content must be under 900 characters.',
+                    'The reply should be 1 to 3 short unsettling sentences.',
+                    'Use only the provided in-game session state.',
+                    'Do not claim access to the player real computer, identity, location, camera, files, or browser.',
+                    'Do not reveal puzzle passwords.',
+                    'Do not ask for personal information.',
+                    'Prefer lowercase, quiet, observant language.'
+                ].join(' ');
+
+                const userPrompt = [
+                    'Current in-game session state:',
+                    JSON.stringify(state, null, 2),
+                    '',
+                    'Player message:',
+                    state.prompt || ''
+                ].join('\n');
+
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(function() {
+                        controller.abort();
+                    }, 12000);
+                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        signal: controller.signal,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + cfg.groqApiKey
+                        },
+                        body: JSON.stringify({
+                            model: cfg.model || 'llama-3.1-8b-instant',
+                            messages: [
+                                {role: 'system', content: systemPrompt},
+                                {role: 'user', content: userPrompt}
+                            ],
+                            temperature: 0.85,
+                            max_tokens: 260,
+                            response_format: {type: 'json_object'}
+                        })
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        mysteryosLocalAnomaly(state, 'signal error ' + response.status);
+                        return;
+                    }
+
+                    const data = await response.json();
+                    const text = data && data.choices && data.choices[0] &&
+                        data.choices[0].message && data.choices[0].message.content;
+                    let artifact = null;
+                    try {
+                        artifact = mysteryosParseAnomalyJson(text);
+                    } catch (err) {
+                        const cleaned = (text || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
+                        mysteryosDeliverAnomaly('7741: ' + cleaned, terminalId);
+                        return;
+                    }
+
+                    const reply = String(artifact.reply || '[silence]').replace(/\s+/g, ' ').trim().slice(0, 700);
+                    const file = artifact.createFile || null;
+                    if (file && mysteryosAllowedAnomalyPath(file.path) && file.content) {
+                        mysteryosDeliverArtifact(reply, String(file.path), String(file.content).slice(0, 900), terminalId);
+                    } else {
+                        mysteryosDeliverArtifact(reply, '', '', terminalId);
+                    }
+                } catch (err) {
+                    const reason = err && err.name === 'AbortError'
+                        ? 'timeout'
+                        : 'signal lost';
+                    mysteryosLocalAnomaly(state, reason);
+                }
+            };
+        </script>
+        <script>
+            window._mysterySceneLock = false;
+            document.addEventListener('click', function() {
+                if (window._mysteryOsc && window._mysteryOsc.ctx.state === 'suspended') {
+                    window._mysteryOsc.ctx.resume();
+                }
+            }, { once: true });
+
+            window._mysteryBootSfx = function() {
+                try {
+                    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // CRT power-on: rising electrical hum
+                    var hum = ctx.createOscillator();
+                    var humGain = ctx.createGain();
+                    hum.type = 'sawtooth';
+                    hum.frequency.setValueAtTime(40, ctx.currentTime);
+                    hum.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.4);
+                    hum.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.8);
+                    humGain.gain.setValueAtTime(0, ctx.currentTime);
+                    humGain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.15);
+                    humGain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.5);
+                    humGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.9);
+                    hum.connect(humGain);
+                    humGain.connect(ctx.destination);
+                    hum.start(ctx.currentTime);
+                    hum.stop(ctx.currentTime + 1.0);
+
+                    // CRT degauss thump
+                    var thump = ctx.createOscillator();
+                    var thumpGain = ctx.createGain();
+                    thump.type = 'sine';
+                    thump.frequency.setValueAtTime(80, ctx.currentTime + 0.05);
+                    thump.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.25);
+                    thumpGain.gain.setValueAtTime(0.12, ctx.currentTime + 0.05);
+                    thumpGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    thump.connect(thumpGain);
+                    thumpGain.connect(ctx.destination);
+                    thump.start(ctx.currentTime + 0.05);
+                    thump.stop(ctx.currentTime + 0.35);
+
+                    // high-frequency CRT whine (subtle)
+                    var whine = ctx.createOscillator();
+                    var whineGain = ctx.createGain();
+                    whine.type = 'sine';
+                    whine.frequency.value = 15700;
+                    whineGain.gain.setValueAtTime(0, ctx.currentTime + 0.3);
+                    whineGain.gain.linearRampToValueAtTime(0.008, ctx.currentTime + 0.6);
+                    whineGain.gain.setValueAtTime(0.008, ctx.currentTime + 4.0);
+                    whineGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 5.0);
+                    whine.connect(whineGain);
+                    whineGain.connect(ctx.destination);
+                    whine.start(ctx.currentTime + 0.3);
+                    whine.stop(ctx.currentTime + 5.0);
+
+                    // store ctx for typing clicks
+                    window._bootAudioCtx = ctx;
+                } catch(e) {}
+            };
+
+            window._mysteryBootClick = function() {
+                try {
+                    var ctx = window._bootAudioCtx;
+                    if (!ctx) return;
+                    var buf = ctx.createBuffer(1, 120, ctx.sampleRate);
+                    var data = buf.getChannelData(0);
+                    for (var i = 0; i < 120; i++) {
+                        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / 20) * 0.06;
+                    }
+                    var src = ctx.createBufferSource();
+                    src.buffer = buf;
+                    src.connect(ctx.destination);
+                    src.start();
+                } catch(e) {}
+            };
+
+            window._mysteryBootGlitch = function() {
+                try {
+                    var ctx = window._bootAudioCtx;
+                    if (!ctx) return;
+                    // short burst of noise + low rumble
+                    var buf = ctx.createBuffer(1, 4800, ctx.sampleRate);
+                    var data = buf.getChannelData(0);
+                    for (var i = 0; i < 4800; i++) {
+                        var env = Math.exp(-i / 1500);
+                        data[i] = (Math.random() * 2 - 1) * env * 0.15;
+                    }
+                    var src = ctx.createBufferSource();
+                    src.buffer = buf;
+                    src.connect(ctx.destination);
+                    src.start();
+                } catch(e) {}
+            };
+        </script>
+        <style>
+            @keyframes _mbs_shake {
+                0%  { transform: translate(0,0) scale(1.05); }
+                10% { transform: translate(-8px, 5px) scale(1.06); }
+                20% { transform: translate(6px, -4px) scale(1.05); }
+                30% { transform: translate(-12px, -6px) scale(1.07); }
+                40% { transform: translate(10px, 8px) scale(1.05); }
+                50% { transform: translate(-6px, -10px) scale(1.08); }
+                60% { transform: translate(14px, 4px) scale(1.06); }
+                70% { transform: translate(-10px, 12px) scale(1.07); }
+                80% { transform: translate(8px, -8px) scale(1.05); }
+                90% { transform: translate(-14px, 6px) scale(1.08); }
+                100%{ transform: translate(0,0) scale(1.05); }
+            }
+            @keyframes _mbs_flicker {
+                0%   { opacity: 1; }
+                3%   { opacity: 0.1; }
+                6%   { opacity: 0.95; }
+                15%  { opacity: 1; }
+                18%  { opacity: 0.05; }
+                20%  { opacity: 1; }
+                48%  { opacity: 1; }
+                50%  { opacity: 0.15; }
+                52%  { opacity: 0.9; }
+                53%  { opacity: 0.05; }
+                55%  { opacity: 1; }
+                78%  { opacity: 1; }
+                80%  { opacity: 0; }
+                81%  { opacity: 1; }
+                100% { opacity: 1; }
+            }
+            @keyframes _mbs_hue {
+                0%   { filter: hue-rotate(0deg) contrast(1.2) brightness(1); }
+                25%  { filter: hue-rotate(40deg) contrast(1.8) brightness(0.7); }
+                50%  { filter: hue-rotate(-30deg) contrast(2.2) brightness(1.3); }
+                75%  { filter: hue-rotate(80deg) contrast(1.5) brightness(0.5); }
+                100% { filter: hue-rotate(0deg) contrast(1.2) brightness(1); }
+            }
+            @keyframes _mbs_vignette {
+                0%   { box-shadow: inset 0 0 80px 40px rgba(0,0,0,0.7); }
+                40%  { box-shadow: inset 0 0 150px 80px rgba(0,0,0,0.9); }
+                70%  { box-shadow: inset 0 0 200px 120px rgba(0,0,0,0.95); }
+                100% { box-shadow: inset 0 0 300px 200px rgba(0,0,0,1); }
+            }
+            @keyframes _mbs_noise {
+                0%   { background-position: 0 0; }
+                25%  { background-position: -30% 40%; }
+                50%  { background-position: 60% -20%; }
+                75%  { background-position: -50% 70%; }
+                100% { background-position: 20% -40%; }
+            }
+            @keyframes _mbs_fadein {
+                0%   { opacity: 0; }
+                8%   { opacity: 1; }
+                100% { opacity: 1; }
+            }
+            #_mbs_overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99999;
+                background: #000;
+                animation: _mbs_fadein 0.3s ease-out, _mbs_shake 0.15s infinite linear;
+                overflow: hidden;
+            }
+            #_mbs_overlay.active { display: block; }
+            #_mbs_img {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                animation: _mbs_flicker 1.8s infinite steps(1), _mbs_hue 3s infinite linear;
+            }
+            #_mbs_vignette {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                animation: _mbs_vignette 5.5s ease-in forwards;
+            }
+            #_mbs_noise {
+                position: absolute;
+                inset: -50%;
+                width: 200%;
+                height: 200%;
+                pointer-events: none;
+                opacity: 0.08;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+                animation: _mbs_noise 0.1s infinite steps(3);
+            }
+            #_mbs_scanlines {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                background: repeating-linear-gradient(
+                    transparent 0px, transparent 2px,
+                    rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px
+                );
+            }
+            #_mbs_bloodframe {
+                position: absolute;
+                inset: 0;
+                pointer-events: none;
+                border: 6px solid transparent;
+                animation: none;
+            }
+            #_mbs_overlay.phase2 #_mbs_bloodframe {
+                border-color: rgba(180, 0, 0, 0.6);
+                box-shadow: inset 0 0 60px rgba(180, 0, 0, 0.4);
+            }
+            #_mbs_overlay.phase2 #_mbs_img {
+                animation: _mbs_flicker 0.4s infinite steps(1), _mbs_hue 0.8s infinite linear;
+            }
+            #_mbs_overlay.phase2 {
+                animation: _mbs_fadein 0.3s ease-out, _mbs_shake 0.08s infinite linear;
+            }
+        </style>
+        <div id="_mbs_overlay">
+            <img id="_mbs_img" />
+            <div id="_mbs_scanlines"></div>
+            <div id="_mbs_noise"></div>
+            <div id="_mbs_vignette"></div>
+            <div id="_mbs_bloodframe"></div>
+        </div>
+        <script>
+            window._mysteryBunnyScare = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
+                var overlay = document.getElementById('_mbs_overlay');
+                var img = document.getElementById('_mbs_img');
+                if (!overlay || !img) { window._mysterySceneLock = false; return; }
+
+                // Read GIF from Emscripten VFS and create object URL
+                try {
+                    var data = Module.FS.readFile('/data/scare_bunny.gif');
+                    var blob = new Blob([data], {type: 'image/gif'});
+                    img.src = URL.createObjectURL(blob);
+                } catch(e) {
+                    // Fallback: try direct path (if served statically)
+                    img.src = 'data/scare_bunny.gif';
+                }
+
+                overlay.className = 'active';
+
+                // Play horrifying audio
+                _mysteryBunnyAudio();
+
+                // Phase 2: intensify after the bunny transforms (roughly 2.5s in)
+                setTimeout(function() {
+                    overlay.className = 'active phase2';
+                    _mysteryBunnyAudioPhase2();
+                }, 2500);
+
+                // End the overlay
+                setTimeout(function() {
+                    overlay.className = '';
+                    img.src = '';
+                    if (img._blobUrl) { URL.revokeObjectURL(img._blobUrl); img._blobUrl = null; }
+                    window._mysterySceneLock = false;
+                }, 5400);
+            };
+
+            function _mysteryBunnyAudio() {
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                var t = ctx.currentTime;
+
+                // Deep rumble
+                var rumble = ctx.createOscillator();
+                var rumbleGain = ctx.createGain();
+                rumble.type = 'sawtooth';
+                rumble.frequency.setValueAtTime(28, t);
+                rumble.frequency.linearRampToValueAtTime(18, t + 5);
+                rumbleGain.gain.setValueAtTime(0, t);
+                rumbleGain.gain.linearRampToValueAtTime(0.4, t + 0.5);
+                rumbleGain.gain.setValueAtTime(0.4, t + 4.5);
+                rumbleGain.gain.linearRampToValueAtTime(0, t + 5.4);
+                rumble.connect(rumbleGain); rumbleGain.connect(ctx.destination);
+                rumble.start(t); rumble.stop(t + 5.5);
+
+                // High-frequency screech (delayed)
+                var screech = ctx.createOscillator();
+                var screechGain = ctx.createGain();
+                var screechFilter = ctx.createBiquadFilter();
+                screech.type = 'square';
+                screech.frequency.setValueAtTime(3200, t + 0.8);
+                screech.frequency.exponentialRampToValueAtTime(1800, t + 2);
+                screechFilter.type = 'bandpass'; screechFilter.frequency.value = 2400; screechFilter.Q.value = 8;
+                screechGain.gain.setValueAtTime(0, t);
+                screechGain.gain.setValueAtTime(0, t + 0.75);
+                screechGain.gain.linearRampToValueAtTime(0.25, t + 0.85);
+                screechGain.gain.exponentialRampToValueAtTime(0.01, t + 2.5);
+                screech.connect(screechFilter); screechFilter.connect(screechGain); screechGain.connect(ctx.destination);
+                screech.start(t + 0.75); screech.stop(t + 2.6);
+
+                // White noise burst on initial appearance
+                var bufLen = Math.floor(ctx.sampleRate * 0.3);
+                var noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+                var noiseData = noiseBuf.getChannelData(0);
+                for (var i = 0; i < bufLen; i++) noiseData[i] = Math.random() * 2 - 1;
+                var noiseNode = ctx.createBufferSource();
+                noiseNode.buffer = noiseBuf;
+                var noiseGain = ctx.createGain();
+                noiseGain.gain.setValueAtTime(0.7, t);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.28);
+                noiseNode.connect(noiseGain); noiseGain.connect(ctx.destination);
+                noiseNode.start(t); noiseNode.stop(t + 0.3);
+            }
+
+            function _mysteryBunnyAudioPhase2() {
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                var t = ctx.currentTime;
+
+                // Distorted scream-like oscillator cluster
+                for (var i = 0; i < 4; i++) {
+                    var osc = ctx.createOscillator();
+                    var g = ctx.createGain();
+                    osc.type = i % 2 === 0 ? 'sawtooth' : 'square';
+                    var freq = 200 + i * 380 + Math.random() * 200;
+                    osc.frequency.setValueAtTime(freq, t);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 0.3, t + 2.8);
+                    g.gain.setValueAtTime(0.18, t);
+                    g.gain.linearRampToValueAtTime(0.08, t + 1.5);
+                    g.gain.exponentialRampToValueAtTime(0.001, t + 2.9);
+                    osc.connect(g); g.connect(ctx.destination);
+                    osc.start(t); osc.stop(t + 3);
+                }
+
+                // Noise burst
+                var bufLen = Math.floor(ctx.sampleRate * 0.6);
+                var noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+                var noiseData = noiseBuf.getChannelData(0);
+                for (var i = 0; i < bufLen; i++) noiseData[i] = Math.random() * 2 - 1;
+                var noiseNode = ctx.createBufferSource();
+                noiseNode.buffer = noiseBuf;
+                var noiseGain = ctx.createGain();
+                var noiseFilter = ctx.createBiquadFilter();
+                noiseFilter.type = 'highpass'; noiseFilter.frequency.value = 1800;
+                noiseGain.gain.setValueAtTime(0.5, t);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.55);
+                noiseNode.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(ctx.destination);
+                noiseNode.start(t); noiseNode.stop(t + 0.6);
+            }
+        </script>
+        <style>
+            @keyframes _msm_drip {
+                0%   { transform: scaleY(1) translateY(0); filter: blur(0px); }
+                30%  { transform: scaleY(1.02) translateY(8px); filter: blur(0.5px); }
+                60%  { transform: scaleY(1.15) translateY(40px); filter: blur(2px); }
+                85%  { transform: scaleY(1.4) translateY(120px); filter: blur(4px); }
+                100% { transform: scaleY(2.0) translateY(280px); filter: blur(8px); opacity: 0; }
+            }
+            @keyframes _msm_col_drip {
+                0%   { transform: translateY(0); opacity: 0.7; }
+                100% { transform: translateY(110vh); opacity: 0; }
+            }
+            @keyframes _msm_overlay_in {
+                0%   { opacity: 0; }
+                100% { opacity: 1; }
+            }
+            #_msm_overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99998;
+                pointer-events: none;
+                overflow: hidden;
+            }
+            #_msm_overlay.active { display: block; }
+            ._msm_drip_col {
+                position: absolute;
+                top: -10%;
+                width: 6px;
+                background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,40,0,0.6), transparent);
+                border-radius: 0 0 3px 3px;
+                animation: _msm_col_drip 3.5s ease-in forwards;
+            }
+            #_msm_fog {
+                position: absolute;
+                inset: 0;
+                background: #000;
+                opacity: 0;
+                animation: _msm_overlay_in 3.5s ease-in forwards;
+            }
+        </style>
+        <div id="_msm_overlay">
+            <div id="_msm_fog"></div>
+        </div>
+        <script>
+            window._mysteryScreenMelt = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
+                var overlay = document.getElementById('_msm_overlay');
+                var canvas = document.getElementById('canvas');
+                if (!overlay || !canvas) { window._mysterySceneLock = false; return; }
+
+                // Clear old drip columns
+                var old = overlay.querySelectorAll('._msm_drip_col');
+                for (var i = 0; i < old.length; i++) old[i].remove();
+
+                // Create drip columns across the screen
+                var w = window.innerWidth;
+                for (var i = 0; i < 80; i++) {
+                    var col = document.createElement('div');
+                    col.className = '_msm_drip_col';
+                    col.style.left = (Math.random() * w) + 'px';
+                    col.style.width = (3 + Math.random() * 14) + 'px';
+                    col.style.height = (30 + Math.random() * 60) + '%';
+                    col.style.animationDelay = (Math.random() * 1.2) + 's';
+                    col.style.animationDuration = (2.0 + Math.random() * 2.0) + 's';
+                    overlay.appendChild(col);
+                }
+
+                overlay.className = 'active';
+
+                // Apply melt transform to the actual game canvas
+                canvas.style.transformOrigin = 'top center';
+                canvas.style.animation = '_msm_drip 3.5s ease-in forwards';
+
+                // Melt audio — low descending tone like reality sinking
+                _mysteryMeltAudio();
+
+                // Clean up
+                setTimeout(function() {
+                    overlay.className = '';
+                    canvas.style.animation = '';
+                    canvas.style.transform = '';
+                    canvas.style.filter = '';
+                    canvas.style.opacity = '';
+                    var cols = overlay.querySelectorAll('._msm_drip_col');
+                    for (var i = 0; i < cols.length; i++) cols[i].remove();
+                    window._mysterySceneLock = false;
+                }, 3500);
+            };
+
+            function _mysteryMeltAudio() {
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                var t = ctx.currentTime;
+
+                // Descending tone — like something heavy sinking
+                var osc = ctx.createOscillator();
+                var g = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, t);
+                osc.frequency.exponentialRampToValueAtTime(18, t + 3.4);
+                g.gain.setValueAtTime(0, t);
+                g.gain.linearRampToValueAtTime(0.3, t + 0.3);
+                g.gain.setValueAtTime(0.3, t + 2.8);
+                g.gain.exponentialRampToValueAtTime(0.001, t + 3.4);
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start(t); osc.stop(t + 3.5);
+
+                // Wet dripping noise
+                for (var i = 0; i < 6; i++) {
+                    var drip = ctx.createOscillator();
+                    var dg = ctx.createGain();
+                    var df = ctx.createBiquadFilter();
+                    drip.type = 'sine';
+                    var start = t + 0.4 + i * 0.45;
+                    var freq = 800 + Math.random() * 600;
+                    drip.frequency.setValueAtTime(freq, start);
+                    drip.frequency.exponentialRampToValueAtTime(freq * 0.2, start + 0.15);
+                    df.type = 'bandpass'; df.frequency.value = freq * 0.6; df.Q.value = 12;
+                    dg.gain.setValueAtTime(0.15, start);
+                    dg.gain.exponentialRampToValueAtTime(0.001, start + 0.18);
+                    drip.connect(df); df.connect(dg); dg.connect(ctx.destination);
+                    drip.start(start); drip.stop(start + 0.2);
+                }
+
+                // Low rumble underneath
+                var bufLen = Math.floor(ctx.sampleRate * 3.0);
+                var noiseBuf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+                var nd = noiseBuf.getChannelData(0);
+                for (var i = 0; i < bufLen; i++) nd[i] = Math.random() * 2 - 1;
+                var ns = ctx.createBufferSource();
+                ns.buffer = noiseBuf;
+                var nf = ctx.createBiquadFilter();
+                var ng = ctx.createGain();
+                nf.type = 'lowpass'; nf.frequency.value = 80;
+                ng.gain.setValueAtTime(0, t);
+                ng.gain.linearRampToValueAtTime(0.25, t + 1.0);
+                ng.gain.setValueAtTime(0.25, t + 2.5);
+                ng.gain.exponentialRampToValueAtTime(0.001, t + 3.4);
+                ns.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
+                ns.start(t); ns.stop(t + 3.5);
+            }
+        </script>
+
+        <!-- 3D DEPTH WARP: screen curves inward like being watched through a peephole -->
+        <style>
+            @keyframes _mdw_warp {
+                0%   { transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1); }
+                20%  { transform: perspective(600px) rotateX(1.5deg) rotateY(-1deg) scale(0.97); }
+                50%  { transform: perspective(400px) rotateX(2.5deg) rotateY(1.5deg) scale(0.93); }
+                70%  { transform: perspective(350px) rotateX(-1deg) rotateY(-2deg) scale(0.91); }
+                85%  { transform: perspective(500px) rotateX(0.5deg) rotateY(0.5deg) scale(0.95); }
+                100% { transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1); }
+            }
+            @keyframes _mdw_vignette {
+                0%   { box-shadow: inset 0 0 40px 20px rgba(0,0,0,0); }
+                30%  { box-shadow: inset 0 0 120px 80px rgba(0,0,0,0.7); }
+                60%  { box-shadow: inset 0 0 180px 130px rgba(0,0,0,0.85); }
+                100% { box-shadow: inset 0 0 40px 20px rgba(0,0,0,0); }
+            }
+            #_mdw_ring {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99997;
+                pointer-events: none;
+                border-radius: 50%;
+                margin: -5%;
+                animation: _mdw_vignette 3s ease-in-out forwards;
+            }
+            #_mdw_ring.active { display: block; }
+        </style>
+        <div id="_mdw_ring"></div>
+        <script>
+            window._mysteryDepthWarp = function() {
+                var canvas = document.getElementById('canvas');
+                var ring = document.getElementById('_mdw_ring');
+                if (!canvas) return;
+
+                canvas.style.transformOrigin = 'center center';
+                canvas.style.animation = '_mdw_warp 3s ease-in-out forwards';
+                if (ring) ring.className = 'active';
+
+                // Subtle audio: low distant hum
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                var t = ctx.currentTime;
+                var osc = ctx.createOscillator();
+                var g = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(55, t);
+                osc.frequency.linearRampToValueAtTime(42, t + 3);
+                g.gain.setValueAtTime(0, t);
+                g.gain.linearRampToValueAtTime(0.12, t + 0.8);
+                g.gain.setValueAtTime(0.12, t + 2.2);
+                g.gain.exponentialRampToValueAtTime(0.001, t + 3);
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start(t); osc.stop(t + 3.1);
+
+                setTimeout(function() {
+                    canvas.style.animation = '';
+                    canvas.style.transform = '';
+                    if (ring) ring.className = '';
+                }, 3000);
+            };
+        </script>
+
+        <!-- 3D HALLWAY: dark corridor receding into screen with something moving at the end -->
+        <style>
+            #_mhw_overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99998;
+                pointer-events: none;
+            }
+            #_mhw_overlay.active { display: block; }
+            #_mhw_canvas {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        <div id="_mhw_overlay"><canvas id="_mhw_canvas"></canvas></div>
+        <script>
+            window._mysteryHallway = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
+                var overlay = document.getElementById('_mhw_overlay');
+                var c = document.getElementById('_mhw_canvas');
+                if (!overlay || !c) { window._mysterySceneLock = false; return; }
+
+                c.width = window.innerWidth;
+                c.height = window.innerHeight;
+                overlay.className = 'active';
+
+                var ctx2d = c.getContext('2d');
+                var w = c.width, h = c.height;
+                var startTime = performance.now();
+                var duration = 4500;
+
+                function drawFrame(timestamp) {
+                    var elapsed = timestamp - startTime;
+                    var t = Math.min(elapsed / duration, 1.0);
+
+                    ctx2d.clearRect(0, 0, w, h);
+
+                    // Fade in/out
+                    var alpha = t < 0.15 ? t / 0.15 : t > 0.8 ? (1 - t) / 0.2 : 1.0;
+                    alpha = Math.max(0, Math.min(1, alpha));
+                    ctx2d.globalAlpha = alpha;
+
+                    // Dark background
+                    ctx2d.fillStyle = '#000';
+                    ctx2d.fillRect(0, 0, w, h);
+
+                    // Perspective hallway
+                    var cx = w / 2;
+                    var cy = h / 2;
+                    var vanishX = cx + Math.sin(elapsed * 0.001) * 20;
+                    var vanishY = cy + Math.cos(elapsed * 0.0008) * 15;
+
+                    // Floor/ceiling/walls converging to vanishing point
+                    var segments = 12;
+                    for (var i = segments; i >= 0; i--) {
+                        var depth = i / segments;
+                        var d2 = depth * depth;
+                        var rectW = w * (1 - d2 * 0.85);
+                        var rectH = h * (1 - d2 * 0.85);
+                        var rx = vanishX - rectW / 2;
+                        var ry = vanishY - rectH / 2;
+
+                        // Walls
+                        var shade = Math.floor(8 + depth * 18);
+                        ctx2d.strokeStyle = 'rgb(' + shade + ',' + Math.floor(shade * 1.4) + ',' + shade + ')';
+                        ctx2d.lineWidth = 1.5 - depth;
+                        ctx2d.strokeRect(rx, ry, rectW, rectH);
+
+                        // Floor lines
+                        if (i % 3 === 0 && i > 0) {
+                            ctx2d.beginPath();
+                            ctx2d.moveTo(rx, ry + rectH);
+                            ctx2d.lineTo(rx + rectW, ry + rectH);
+                            ctx2d.strokeStyle = 'rgba(0,' + Math.floor(40 + depth * 30) + ',0,' + (0.3 + depth * 0.3) + ')';
+                            ctx2d.stroke();
+                        }
+                    }
+
+                    // The figure at the end — starts as a dark shape, moves
+                    if (t > 0.25) {
+                        var figT = (t - 0.25) / 0.75;
+                        var figH = 40 + figT * 30;
+                        var figW = 12 + figT * 8;
+                        var figX = vanishX - figW / 2 + Math.sin(elapsed * 0.003) * (5 + figT * 15);
+                        var figY = vanishY - figH / 2 + Math.cos(elapsed * 0.002) * 5;
+
+                        // Body
+                        ctx2d.fillStyle = 'rgba(0,0,0,0.9)';
+                        ctx2d.fillRect(figX, figY, figW, figH);
+
+                        // Eyes — appear after a moment
+                        if (t > 0.45) {
+                            var eyeAlpha = Math.min(1, (t - 0.45) * 4);
+                            var eyeY = figY + figH * 0.2;
+                            var eyeSpread = figW * 0.3;
+                            ctx2d.fillStyle = 'rgba(120,255,120,' + eyeAlpha + ')';
+                            ctx2d.beginPath();
+                            ctx2d.arc(figX + figW / 2 - eyeSpread, eyeY, 2.5, 0, Math.PI * 2);
+                            ctx2d.fill();
+                            ctx2d.beginPath();
+                            ctx2d.arc(figX + figW / 2 + eyeSpread, eyeY, 2.5, 0, Math.PI * 2);
+                            ctx2d.fill();
+                        }
+
+                        // Lurch forward at 70%
+                        if (t > 0.7 && t < 0.78) {
+                            var lurchT = (t - 0.7) / 0.08;
+                            var scale = 1 + lurchT * 3;
+                            ctx2d.save();
+                            ctx2d.translate(vanishX, vanishY);
+                            ctx2d.scale(scale, scale);
+                            ctx2d.fillStyle = 'rgba(0,0,0,0.95)';
+                            ctx2d.fillRect(-figW/2, -figH/2, figW, figH);
+                            ctx2d.fillStyle = 'rgba(120,255,120,' + (1 - lurchT) + ')';
+                            ctx2d.beginPath();
+                            ctx2d.arc(-figW*0.3, -figH*0.3, 3 + lurchT * 4, 0, Math.PI * 2);
+                            ctx2d.fill();
+                            ctx2d.beginPath();
+                            ctx2d.arc(figW*0.3, -figH*0.3, 3 + lurchT * 4, 0, Math.PI * 2);
+                            ctx2d.fill();
+                            ctx2d.restore();
+                        }
+                    }
+
+                    // Scan lines over hallway
+                    ctx2d.fillStyle = 'rgba(0,0,0,0.15)';
+                    for (var y = 0; y < h; y += 3) {
+                        ctx2d.fillRect(0, y, w, 1);
+                    }
+
+                    // Fog at edges
+                    var grad = ctx2d.createRadialGradient(cx, cy, w * 0.15, cx, cy, w * 0.6);
+                    grad.addColorStop(0, 'rgba(0,0,0,0)');
+                    grad.addColorStop(1, 'rgba(0,0,0,0.8)');
+                    ctx2d.fillStyle = grad;
+                    ctx2d.fillRect(0, 0, w, h);
+
+                    if (t < 1.0) {
+                        requestAnimationFrame(drawFrame);
+                    } else {
+                        overlay.className = '';
+                        ctx2d.clearRect(0, 0, w, h);
+                        window._mysterySceneLock = false;
+                    }
+                }
+
+                requestAnimationFrame(drawFrame);
+
+                // Audio: distant footsteps + reverb
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+
+                // Echoing footsteps
+                for (var i = 0; i < 5; i++) {
+                    var stepT = at + 0.8 + i * 0.7;
+                    var bufLen = Math.floor(actx.sampleRate * 0.08);
+                    var stepBuf = actx.createBuffer(1, bufLen, actx.sampleRate);
+                    var sd = stepBuf.getChannelData(0);
+                    for (var j = 0; j < bufLen; j++) sd[j] = (Math.random() * 2 - 1) * Math.exp(-j / (bufLen * 0.2));
+                    var stepNode = actx.createBufferSource();
+                    stepNode.buffer = stepBuf;
+                    var sf = actx.createBiquadFilter();
+                    sf.type = 'lowpass'; sf.frequency.value = 400 + i * 80;
+                    var sg = actx.createGain();
+                    sg.gain.setValueAtTime(0.15 + i * 0.03, stepT);
+                    sg.gain.exponentialRampToValueAtTime(0.001, stepT + 0.3);
+                    stepNode.connect(sf); sf.connect(sg); sg.connect(actx.destination);
+                    stepNode.start(stepT); stepNode.stop(stepT + 0.35);
+                }
+
+                // Deep ambient drone
+                var drone = actx.createOscillator();
+                var dg = actx.createGain();
+                drone.type = 'sawtooth';
+                drone.frequency.setValueAtTime(32, at);
+                drone.frequency.linearRampToValueAtTime(28, at + 4.5);
+                dg.gain.setValueAtTime(0, at);
+                dg.gain.linearRampToValueAtTime(0.08, at + 1);
+                dg.gain.setValueAtTime(0.08, at + 3.5);
+                dg.gain.exponentialRampToValueAtTime(0.001, at + 4.5);
+                drone.connect(dg); dg.connect(actx.destination);
+                drone.start(at); drone.stop(at + 4.6);
+            };
+        </script>
+
+        <!-- THE EYE: 3D eyeball opens, tracks cursor, blinks shut -->
+        <style>
+            #_mey_overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 99998;
+                pointer-events: none;
+            }
+            #_mey_overlay.active { display: block; }
+            #_mey_canvas {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+        <div id="_mey_overlay"><canvas id="_mey_canvas"></canvas></div>
+        <script>
+            window._mysteryTheEye = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
+                var overlay = document.getElementById('_mey_overlay');
+                var c = document.getElementById('_mey_canvas');
+                if (!overlay || !c) { window._mysterySceneLock = false; return; }
+
+                c.width = window.innerWidth;
+                c.height = window.innerHeight;
+                overlay.className = 'active';
+
+                var ctx2d = c.getContext('2d');
+                var w = c.width, h = c.height;
+                var cx = w / 2, cy = h / 2;
+                var startTime = performance.now();
+                var duration = 4000;
+                var mouseX = cx, mouseY = cy;
+
+                function onMove(e) { mouseX = e.clientX; mouseY = e.clientY; }
+                document.addEventListener('mousemove', onMove);
+
+                function drawFrame(timestamp) {
+                    var elapsed = timestamp - startTime;
+                    var t = Math.min(elapsed / duration, 1.0);
+
+                    ctx2d.clearRect(0, 0, w, h);
+
+                    // Eyelid opening: 0-0.3 opening, 0.3-0.75 open, 0.75-1.0 closing
+                    var lidOpen;
+                    if (t < 0.3) lidOpen = t / 0.3;
+                    else if (t < 0.75) lidOpen = 1.0;
+                    else lidOpen = 1.0 - (t - 0.75) / 0.25;
+                    lidOpen = Math.max(0, Math.min(1, lidOpen));
+
+                    // Background darken
+                    var bgAlpha = lidOpen * 0.7;
+                    ctx2d.fillStyle = 'rgba(0,0,0,' + bgAlpha + ')';
+                    ctx2d.fillRect(0, 0, w, h);
+
+                    if (lidOpen < 0.01) {
+                        if (t >= 1.0) {
+                            overlay.className = '';
+                            document.removeEventListener('mousemove', onMove);
+                            window._mysterySceneLock = false;
+                            return;
+                        }
+                        requestAnimationFrame(drawFrame);
+                        return;
+                    }
+
+                    // Eye dimensions
+                    var eyeW = w * 0.38;
+                    var eyeH = h * 0.3 * lidOpen;
+
+                    // Mid-stare blink at ~55% through
+                    var blinkT = 0.55;
+                    var blinkDur = 0.06;
+                    if (t > blinkT && t < blinkT + blinkDur) {
+                        var blinkPhase = (t - blinkT) / blinkDur;
+                        var blinkClose = Math.sin(blinkPhase * Math.PI);
+                        eyeH *= (1 - blinkClose * 0.9);
+                    }
+
+                    // Iris tracks mouse with anticipation (moves AHEAD of cursor)
+                    var dx = (mouseX - cx) / (w * 0.5);
+                    var dy = (mouseY - cy) / (h * 0.5);
+                    var dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 1) { dx /= dist; dy /= dist; }
+                    // Anticipate — overshoot toward cursor direction
+                    var anticipate = 1.3 + Math.sin(elapsed * 0.005) * 0.2;
+                    var irisOffX = dx * eyeW * 0.14 * anticipate;
+                    var irisOffY = dy * eyeH * 0.18 * anticipate;
+
+                    // Micro-saccades — rapid tiny involuntary jitters
+                    var saccadeX = 0, saccadeY = 0;
+                    if (Math.sin(elapsed * 0.047) > 0.92) {
+                        saccadeX = (Math.random() - 0.5) * 6;
+                        saccadeY = (Math.random() - 0.5) * 4;
+                    }
+                    irisOffX += saccadeX;
+                    irisOffY += saccadeY;
+
+                    // Subtle twitch
+                    var twitch = Math.sin(elapsed * 0.02) * 2 * lidOpen;
+
+                    ctx2d.save();
+                    ctx2d.translate(cx + twitch, cy);
+
+                    // Sclera (white of eye) — clipped by eyelid shape
+                    ctx2d.save();
+                    ctx2d.beginPath();
+                    ctx2d.ellipse(0, 0, eyeW / 2, eyeH / 2, 0, 0, Math.PI * 2);
+                    ctx2d.clip();
+
+                    // Sclera fill
+                    var scleraGrad = ctx2d.createRadialGradient(0, 0, eyeW * 0.05, 0, 0, eyeW * 0.5);
+                    scleraGrad.addColorStop(0, '#e8e0d8');
+                    scleraGrad.addColorStop(0.7, '#c8b8a8');
+                    scleraGrad.addColorStop(1, '#6a5040');
+                    ctx2d.fillStyle = scleraGrad;
+                    ctx2d.fillRect(-eyeW, -eyeH, eyeW * 2, eyeH * 2);
+
+                    // Blood vessels — pulsing, branching
+                    var pulse = 0.5 + 0.5 * Math.sin(elapsed * 0.008);
+                    for (var i = 0; i < 12; i++) {
+                        var angle = (i / 12) * Math.PI * 2 + elapsed * 0.0002;
+                        var veinAlpha = 0.2 + pulse * 0.25;
+                        var veinWidth = 0.6 + pulse * 0.8;
+                        ctx2d.strokeStyle = 'rgba(180,20,20,' + veinAlpha + ')';
+                        ctx2d.lineWidth = veinWidth;
+                        ctx2d.beginPath();
+                        ctx2d.moveTo(Math.cos(angle) * eyeW * 0.46, Math.sin(angle) * eyeH * 0.44);
+                        var midX = Math.cos(angle + 0.2) * eyeW * 0.28;
+                        var midY = Math.sin(angle + 0.2) * eyeH * 0.25;
+                        ctx2d.quadraticCurveTo(midX, midY, irisOffX, irisOffY);
+                        ctx2d.stroke();
+                        // Branch
+                        if (i % 3 === 0) {
+                            ctx2d.lineWidth = veinWidth * 0.5;
+                            ctx2d.beginPath();
+                            ctx2d.moveTo(midX, midY);
+                            ctx2d.lineTo(midX + Math.cos(angle + 1) * eyeW * 0.1, midY + Math.sin(angle + 1) * eyeH * 0.08);
+                            ctx2d.stroke();
+                        }
+                    }
+
+                    // Iris
+                    var irisR = eyeW * 0.18;
+                    var irisGrad = ctx2d.createRadialGradient(irisOffX, irisOffY, irisR * 0.1, irisOffX, irisOffY, irisR);
+                    irisGrad.addColorStop(0, '#000');
+                    irisGrad.addColorStop(0.3, '#0a2a0a');
+                    irisGrad.addColorStop(0.6, '#1a5a2a');
+                    irisGrad.addColorStop(0.8, '#0d3d1a');
+                    irisGrad.addColorStop(1, '#061a08');
+                    ctx2d.beginPath();
+                    ctx2d.arc(irisOffX, irisOffY, irisR, 0, Math.PI * 2);
+                    ctx2d.fillStyle = irisGrad;
+                    ctx2d.fill();
+
+                    // Iris texture — radial lines
+                    ctx2d.strokeStyle = 'rgba(60,180,80,0.3)';
+                    ctx2d.lineWidth = 0.5;
+                    for (var i = 0; i < 24; i++) {
+                        var a = (i / 24) * Math.PI * 2;
+                        ctx2d.beginPath();
+                        ctx2d.moveTo(irisOffX + Math.cos(a) * irisR * 0.35, irisOffY + Math.sin(a) * irisR * 0.35);
+                        ctx2d.lineTo(irisOffX + Math.cos(a) * irisR * 0.95, irisOffY + Math.sin(a) * irisR * 0.95);
+                        ctx2d.stroke();
+                    }
+
+                    // Pupil — dilates when tracking (closer to center = more dilated)
+                    var trackDist = Math.sqrt(dx * dx + dy * dy);
+                    var dilate = 0.42 + (1 - trackDist) * 0.2 + Math.sin(elapsed * 0.004) * 0.05;
+                    var pupilR = irisR * dilate;
+                    ctx2d.beginPath();
+                    ctx2d.arc(irisOffX, irisOffY, pupilR, 0, Math.PI * 2);
+                    ctx2d.fillStyle = '#000';
+                    ctx2d.fill();
+
+                    // Something inside the pupil — a faint silhouette (you)
+                    if (t > 0.35 && t < 0.75) {
+                        var figAlpha = 0.15 + Math.sin(elapsed * 0.003) * 0.05;
+                        ctx2d.fillStyle = 'rgba(40,70,50,' + figAlpha + ')';
+                        // Head
+                        ctx2d.beginPath();
+                        ctx2d.arc(irisOffX, irisOffY - pupilR * 0.2, pupilR * 0.18, 0, Math.PI * 2);
+                        ctx2d.fill();
+                        // Shoulders
+                        ctx2d.beginPath();
+                        ctx2d.ellipse(irisOffX, irisOffY + pupilR * 0.15, pupilR * 0.3, pupilR * 0.2, 0, 0, Math.PI);
+                        ctx2d.fill();
+                        // Screen glow behind figure
+                        ctx2d.fillStyle = 'rgba(100,200,120,' + (figAlpha * 0.5) + ')';
+                        ctx2d.fillRect(irisOffX - pupilR * 0.25, irisOffY - pupilR * 0.4, pupilR * 0.5, pupilR * 0.55);
+                    }
+
+                    // Wet reflection — moves with a slight lag
+                    var refX = irisOffX - pupilR * 0.3 + Math.sin(elapsed * 0.002) * 2;
+                    var refY = irisOffY - pupilR * 0.35 + Math.cos(elapsed * 0.0015) * 1.5;
+                    ctx2d.beginPath();
+                    ctx2d.arc(refX, refY, pupilR * 0.15, 0, Math.PI * 2);
+                    ctx2d.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx2d.fill();
+                    // Secondary smaller reflection
+                    ctx2d.beginPath();
+                    ctx2d.arc(refX + pupilR * 0.3, refY + pupilR * 0.25, pupilR * 0.07, 0, Math.PI * 2);
+                    ctx2d.fillStyle = 'rgba(255,255,255,0.3)';
+                    ctx2d.fill();
+
+                    ctx2d.restore(); // end sclera clip
+
+                    // Eyelid edges — thick fleshy outline
+                    ctx2d.strokeStyle = 'rgba(90,30,20,0.95)';
+                    ctx2d.lineWidth = 5 + lidOpen * 3;
+                    ctx2d.shadowColor = 'rgba(60,0,0,0.6)';
+                    ctx2d.shadowBlur = 15;
+                    ctx2d.beginPath();
+                    ctx2d.ellipse(0, 0, eyeW / 2, eyeH / 2, 0, 0, Math.PI * 2);
+                    ctx2d.stroke();
+                    ctx2d.shadowBlur = 0;
+
+                    // Veins spreading BEYOND the eye onto the screen
+                    if (t > 0.3) {
+                        var spreadT = (t - 0.3) / 0.7;
+                        var veinCount = Math.floor(8 + spreadT * 10);
+                        for (var i = 0; i < veinCount; i++) {
+                            var angle = (i / veinCount) * Math.PI * 2 + i * 0.7;
+                            var startR = eyeW * 0.52;
+                            var endR = startR + spreadT * eyeW * (0.4 + (i % 3) * 0.2);
+                            var vAlpha = 0.15 + pulse * 0.2;
+                            ctx2d.strokeStyle = 'rgba(120,15,15,' + (vAlpha * (1 - spreadT * 0.5)) + ')';
+                            ctx2d.lineWidth = 1.5 - spreadT * 0.5;
+                            ctx2d.beginPath();
+                            var sx = Math.cos(angle) * startR;
+                            var sy = Math.sin(angle) * (startR * eyeH / eyeW);
+                            ctx2d.moveTo(sx, sy);
+                            // Organic wobble
+                            var cp1x = Math.cos(angle + 0.15) * (startR + endR) * 0.4;
+                            var cp1y = Math.sin(angle + 0.15) * (startR + endR) * 0.4 * (eyeH / eyeW);
+                            var ex = Math.cos(angle - 0.1) * endR;
+                            var ey = Math.sin(angle - 0.1) * endR * (eyeH / eyeW);
+                            ctx2d.quadraticCurveTo(cp1x, cp1y, ex, ey);
+                            ctx2d.stroke();
+                            // Tiny branches at the tips
+                            if (spreadT > 0.4 && i % 2 === 0) {
+                                ctx2d.lineWidth = 0.7;
+                                ctx2d.beginPath();
+                                ctx2d.moveTo(ex, ey);
+                                ctx2d.lineTo(ex + Math.cos(angle + 0.5) * 15 * spreadT, ey + Math.sin(angle + 0.5) * 12 * spreadT);
+                                ctx2d.stroke();
+                                ctx2d.beginPath();
+                                ctx2d.moveTo(ex, ey);
+                                ctx2d.lineTo(ex + Math.cos(angle - 0.6) * 12 * spreadT, ey + Math.sin(angle - 0.6) * 10 * spreadT);
+                                ctx2d.stroke();
+                            }
+                        }
+                    }
+
+                    ctx2d.restore();
+
+                    // Scan lines
+                    ctx2d.fillStyle = 'rgba(0,0,0,0.08)';
+                    for (var y = 0; y < h; y += 2) ctx2d.fillRect(0, y, w, 1);
+
+                    if (t < 1.0) {
+                        requestAnimationFrame(drawFrame);
+                    } else {
+                        overlay.className = '';
+                        document.removeEventListener('mousemove', onMove);
+                        ctx2d.clearRect(0, 0, w, h);
+                        window._mysterySceneLock = false;
+                    }
+                }
+
+                requestAnimationFrame(drawFrame);
+
+                // Audio: wet organic sound
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+
+                // Wet squelch on open
+                var bufLen = Math.floor(actx.sampleRate * 0.4);
+                var sqBuf = actx.createBuffer(1, bufLen, actx.sampleRate);
+                var sqd = sqBuf.getChannelData(0);
+                for (var i = 0; i < bufLen; i++) {
+                    sqd[i] = Math.sin(i * 0.05) * Math.exp(-i / (bufLen * 0.15)) * (Math.random() * 0.5 + 0.5);
+                }
+                var sqNode = actx.createBufferSource();
+                sqNode.buffer = sqBuf;
+                var sqf = actx.createBiquadFilter();
+                sqf.type = 'bandpass'; sqf.frequency.value = 600; sqf.Q.value = 3;
+                var sqg = actx.createGain();
+                sqg.gain.setValueAtTime(0.3, at);
+                sqg.gain.exponentialRampToValueAtTime(0.001, at + 0.4);
+                sqNode.connect(sqf); sqf.connect(sqg); sqg.connect(actx.destination);
+                sqNode.start(at); sqNode.stop(at + 0.45);
+
+                // Heartbeat-like throb while open
+                for (var i = 0; i < 4; i++) {
+                    var beatT = at + 0.8 + i * 0.9;
+                    var beat = actx.createOscillator();
+                    var bg = actx.createGain();
+                    beat.type = 'sine';
+                    beat.frequency.setValueAtTime(40, beatT);
+                    beat.frequency.exponentialRampToValueAtTime(25, beatT + 0.3);
+                    bg.gain.setValueAtTime(0.2, beatT);
+                    bg.gain.exponentialRampToValueAtTime(0.001, beatT + 0.35);
+                    beat.connect(bg); bg.connect(actx.destination);
+                    beat.start(beatT); beat.stop(beatT + 0.4);
+                }
+            };
+        </script>
+
+        <!-- SCENE: FEED — security camera footage, something moves -->
+        <style>
+            #_msf_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; background:#000; }
+            #_msf_overlay.active { display:block; }
+            #_msf_canvas { width:100%; height:100%; }
+        </style>
+        <div id="_msf_overlay"><canvas id="_msf_canvas"></canvas></div>
+        <script>
+            window._mysterySceneFeed = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
+                var overlay = document.getElementById('_msf_overlay');
+                var c = document.getElementById('_msf_canvas');
+                if (!overlay || !c) { window._mysterySceneLock = false; return; }
+                c.width = window.innerWidth; c.height = window.innerHeight;
+                overlay.className = 'active';
+                var ctx = c.getContext('2d');
+                var w = c.width, h = c.height;
+                var start = performance.now();
+                var dur = 20000;
+
+                // Audio
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+                var hum = actx.createOscillator(); var hg = actx.createGain();
+                hum.type = 'sine'; hum.frequency.value = 50;
+                hg.gain.setValueAtTime(0, at); hg.gain.linearRampToValueAtTime(0.06, at+2);
+                hg.gain.setValueAtTime(0.06, at+18); hg.gain.linearRampToValueAtTime(0, at+20);
+                hum.connect(hg); hg.connect(actx.destination); hum.start(at); hum.stop(at+20.5);
+                var hissLen = Math.floor(actx.sampleRate * 20);
+                var hissBuf = actx.createBuffer(1, hissLen, actx.sampleRate);
+                var hd = hissBuf.getChannelData(0);
+                for (var i=0;i<hissLen;i++) hd[i] = (Math.random()*2-1)*0.03;
+                var hissNode = actx.createBufferSource(); hissNode.buffer = hissBuf;
+                var hf = actx.createBiquadFilter(); hf.type='highpass'; hf.frequency.value=4000;
+                var hissG = actx.createGain(); hissG.gain.value = 0.4;
+                hissNode.connect(hf); hf.connect(hissG); hissG.connect(actx.destination);
+                hissNode.start(at); hissNode.stop(at+20);
+
+                function draw(ts) {
+                    var el = ts - start;
+                    var t = Math.min(el / dur, 1.0);
+                    ctx.clearRect(0, 0, w, h);
+                    var alpha = t < 0.05 ? t/0.05 : t > 0.92 ? (1-t)/0.08 : 1;
+                    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+                    // Room — dim but visible
+                    ctx.fillStyle = '#0f0e0c';
+                    ctx.fillRect(0, 0, w, h);
+
+                    // Ambient light from monitor casts on walls/ceiling
+                    var glow = 0.3 + 0.15 * Math.sin(el * 0.003);
+                    var monGlow = ctx.createRadialGradient(w*0.5, h*0.4, 10, w*0.5, h*0.4, w*0.5);
+                    monGlow.addColorStop(0, 'rgba(15,50,20,' + (glow * 0.4) + ')');
+                    monGlow.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = monGlow;
+                    ctx.fillRect(0, 0, w, h);
+
+                    // Floor — visible tile pattern
+                    ctx.fillStyle = '#121110';
+                    ctx.beginPath();
+                    ctx.moveTo(0, h*0.62); ctx.lineTo(w, h*0.58);
+                    ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.fill();
+                    ctx.strokeStyle = 'rgba(35,30,25,0.4)';
+                    for (var i = 0; i < 8; i++) {
+                        var fy = h*0.62 + i * (h*0.38/8);
+                        ctx.beginPath(); ctx.moveTo(0, fy); ctx.lineTo(w, fy - 4); ctx.stroke();
+                    }
+
+                    // Back wall — visible outline, cable, clock
+                    ctx.strokeStyle = 'rgba(40,35,30,0.5)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.moveTo(0, h*0.62); ctx.lineTo(w, h*0.58); ctx.stroke();
+
+                    // Cable on wall
+                    ctx.strokeStyle = 'rgba(25,25,20,0.6)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(w*0.58, h*0.1); ctx.quadraticCurveTo(w*0.6, h*0.35, w*0.58, h*0.45);
+                    ctx.stroke();
+
+                    // Clock on wall
+                    ctx.strokeStyle = 'rgba(50,45,40,0.5)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.arc(w*0.72, h*0.2, 18, 0, Math.PI*2); ctx.stroke();
+                    var clockAngle = (el * 0.001) % (Math.PI * 2);
+                    ctx.beginPath(); ctx.moveTo(w*0.72, h*0.2);
+                    ctx.lineTo(w*0.72 + Math.cos(clockAngle)*12, h*0.2 + Math.sin(clockAngle)*12);
+                    ctx.stroke();
+
+                    // Desk — clearly visible
+                    var deskX = w*0.28, deskY = h*0.5, deskW = w*0.44, deskH = h*0.13;
+                    ctx.fillStyle = '#1f1c18';
+                    ctx.fillRect(deskX, deskY, deskW, deskH);
+                    ctx.strokeStyle = '#2a2620';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(deskX, deskY, deskW, deskH);
+                    // Desk legs
+                    ctx.fillStyle = '#151310';
+                    ctx.fillRect(deskX + 10, deskY + deskH, 8, h - deskY - deskH);
+                    ctx.fillRect(deskX + deskW - 18, deskY + deskH, 8, h - deskY - deskH);
+
+                    // Papers on desk
+                    ctx.fillStyle = 'rgba(60,55,45,0.3)';
+                    ctx.fillRect(deskX + 15, deskY + 4, 40, 28);
+                    ctx.fillRect(deskX + 20, deskY + 8, 35, 22);
+                    // Pen
+                    ctx.strokeStyle = 'rgba(70,60,50,0.4)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.moveTo(deskX+65, deskY+15); ctx.lineTo(deskX+95, deskY+8); ctx.stroke();
+
+                    // Coffee mug
+                    ctx.strokeStyle = 'rgba(50,45,40,0.5)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.ellipse(deskX + deskW - 50, deskY + 5, 10, 5, 0, 0, Math.PI*2); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(deskX+deskW-60, deskY+5); ctx.lineTo(deskX+deskW-60, deskY+20); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(deskX+deskW-40, deskY+5); ctx.lineTo(deskX+deskW-40, deskY+20); ctx.stroke();
+
+                    // Monitor — bright enough to see clearly
+                    var monX = w*0.4, monY = h*0.24, monW = w*0.2, monH = h*0.26;
+                    ctx.fillStyle = '#181818';
+                    ctx.fillRect(monX-4, monY-4, monW+8, monH+8);
+                    ctx.fillStyle = 'rgba(25,70,30,' + glow + ')';
+                    ctx.fillRect(monX, monY, monW, monH);
+                    // Scrolling text on monitor
+                    ctx.fillStyle = 'rgba(50,140,50,' + (glow+0.15) + ')';
+                    ctx.font = '10px monospace';
+                    for (var i = 0; i < 12; i++) {
+                        var ty = monY + 10 + ((i * 14 + el * 0.02) % (monH - 20));
+                        var tw = 20 + ((i * 37) % 60);
+                        ctx.fillRect(monX+8, ty, tw, 2);
+                    }
+                    // Cursor blink
+                    if (Math.sin(el*0.006) > 0) {
+                        var cursorY = monY + 10 + (11*14 + el*0.02) % (monH-20);
+                        ctx.fillRect(monX+8+65, cursorY, 6, 10);
+                    }
+                    // Monitor stand
+                    ctx.fillStyle = '#151515';
+                    ctx.fillRect(monX+monW*0.35, monY+monH, monW*0.3, deskY-monY-monH);
+
+                    // Chair — slowly rotating (creepy)
+                    var chairAngle = Math.sin(el * 0.0004) * 0.15;
+                    var chairX = w*0.43, chairY = h*0.53;
+                    ctx.save();
+                    ctx.translate(chairX + w*0.06, chairY + h*0.12);
+                    ctx.rotate(chairAngle);
+                    ctx.fillStyle = '#1a1815';
+                    ctx.fillRect(-w*0.06, -h*0.12, w*0.12, h*0.2);
+                    ctx.fillRect(-w*0.065, -h*0.2, w*0.13, h*0.09);
+                    // Armrests
+                    ctx.fillStyle = '#1f1c18';
+                    ctx.fillRect(-w*0.07, -h*0.06, w*0.02, h*0.12);
+                    ctx.fillRect(w*0.05, -h*0.06, w*0.02, h*0.12);
+                    ctx.restore();
+
+                    // At 5s — chair stops rotating. Something is different.
+                    // At 8s — a shadow appears on the wall behind the monitor
+                    if (t > 0.4) {
+                        var shadowT = Math.min((t - 0.4) / 0.3, 1);
+                        ctx.fillStyle = 'rgba(0,0,0,' + (shadowT * 0.4) + ')';
+                        // Head-shaped shadow on wall
+                        ctx.beginPath();
+                        ctx.ellipse(w*0.5, h*0.18, 20 + shadowT*15, 25 + shadowT*18, 0, 0, Math.PI*2);
+                        ctx.fill();
+                        // Shoulders
+                        ctx.beginPath();
+                        ctx.ellipse(w*0.5, h*0.28, 35 + shadowT*20, 12 + shadowT*8, 0, 0, Math.PI);
+                        ctx.fill();
+                    }
+
+                    // At 12s — THE HAND reaches from right
+                    if (t > 0.6 && t < 0.85) {
+                        var handT = (t - 0.6) / 0.25;
+                        var handX = w - w * 0.3 * handT;
+                        var handY = h * 0.36 + Math.sin(el*0.002)*5;
+                        ctx.fillStyle = 'rgba(45,35,30,0.9)';
+                        ctx.fillRect(handX, handY, w-handX+10, 20);
+                        // Fingers
+                        for (var f = 0; f < 4; f++) {
+                            ctx.fillRect(handX - 8 - f*6*handT, handY + 2 + f*4, 10*handT, 5);
+                        }
+                        // Thumb
+                        ctx.fillRect(handX - 5*handT, handY - 6, 8*handT, 8);
+                    }
+
+                    // At 17s — hand touches monitor, everything goes wrong
+                    if (t > 0.85 && t < 0.92) {
+                        var flickT = (t - 0.85) / 0.07;
+                        if (Math.random() > 0.3) {
+                            ctx.fillStyle = 'rgba(50,150,50,' + (0.5+flickT*0.5) + ')';
+                            ctx.fillRect(monX, monY, monW, monH);
+                        }
+                        if (Math.random() > 0.6) {
+                            ctx.fillStyle = 'rgba(255,255,255,' + (0.2+flickT*0.3) + ')';
+                            ctx.fillRect(0, 0, w, h);
+                        }
+                        // Text on screen changes
+                        ctx.fillStyle = 'rgba(100,255,100,0.8)';
+                        ctx.font = '14px monospace';
+                        ctx.fillText('HELLO', monX+monW*0.3, monY+monH*0.5);
+                    }
+
+                    // Camera HUD
+                    ctx.font = '11px monospace';
+                    ctx.fillStyle = 'rgba(180,180,160,0.7)';
+                    var sec = Math.floor(el/1000);
+                    var timeStr = '23:48:' + (sec < 10 ? '0' : '') + sec;
+                    ctx.fillText('CAM-03  2024-03-14  ' + timeStr, 12, 18);
+                    ctx.fillText('MERIDIAN ANALYTICS - SUBLEVEL 2', 12, h - 12);
+                    if (Math.sin(el*0.005) > 0) {
+                        ctx.fillStyle = 'rgba(255,20,20,0.8)';
+                        ctx.beginPath(); ctx.arc(w-20, 16, 4, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = 'rgba(255,20,20,0.6)';
+                        ctx.font = '10px monospace';
+                        ctx.fillText('REC', w-50, 20);
+                    }
+
+                    // Static/noise throughout
+                    for (var i = 0; i < 80; i++) {
+                        var na = 0.01 + (t > 0.85 ? 0.05 : 0);
+                        ctx.fillStyle = 'rgba(255,255,255,' + na + ')';
+                        ctx.fillRect(Math.random()*w, Math.random()*h, 2, 1);
+                    }
+                    // Scan lines
+                    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+                    for (var y = 0; y < h; y += 3) ctx.fillRect(0, y, w, 1);
+                    // VHS glitch
+                    if (Math.random() > 0.96) {
+                        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+                        ctx.fillRect(0, Math.random()*h, w, 2+Math.random()*6);
+                    }
+
+                    if (t < 1) requestAnimationFrame(draw);
+                    else { overlay.className = ''; ctx.clearRect(0, 0, w, h); window._mysterySceneLock = false; }
+                }
+                requestAnimationFrame(draw);
+            };
+        </script>
+
+        <!-- SCENE: INTERVIEW — clinical transcript typed on black -->
+        <style>
+            #_msi_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; background:#000; font-family:monospace; overflow:hidden; }
+            #_msi_overlay.active { display:flex; align-items:center; justify-content:center; }
+            #_msi_overlay.flicker { animation:_msi_flicker 0.4s linear 1; }
+            @keyframes _msi_flicker {
+                0%   { filter:brightness(1); }
+                8%   { filter:brightness(0.35); }
+                16%  { filter:brightness(1); }
+                24%  { filter:brightness(0.65); }
+                32%  { filter:brightness(1); }
+                100% { filter:brightness(1); }
+            }
+            #_msi_text { position:relative; color:#4a8a4a; font-size:14px; line-height:1.8; max-width:700px; white-space:pre-wrap; padding:40px; text-shadow:0 0 4px rgba(74,138,74,0.3); }
+            #_msi_text.glitch::before, #_msi_text.glitch::after {
+                content:attr(data-text); position:absolute; left:40px; top:40px; right:40px;
+                white-space:pre-wrap; overflow:hidden; pointer-events:none;
+            }
+            #_msi_text.glitch::before { color:#ff3b3b; clip-path:inset(0 0 60% 0); transform:translate(-2px,-1px); opacity:0.6; }
+            #_msi_text.glitch::after { color:#3bd8ff; clip-path:inset(45% 0 0 0); transform:translate(2px,1px); opacity:0.55; }
+            #_msi_scan { position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px, rgba(0,30,0,0.28) 2px, rgba(0,30,0,0.28) 3px); opacity:0.5; }
+            #_msi_vig { position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse at center, rgba(0,0,0,0) 38%, rgba(0,0,0,0.9) 100%); }
+            #_msi_static { position:absolute; inset:0; pointer-events:none; background:repeating-conic-gradient(from 0deg, #fff 0deg 1deg, #000 1deg 2deg); opacity:0; mix-blend-mode:overlay; }
+            #_msi_static.flash { animation:_msi_staticFlash 0.55s steps(3,end) 1; }
+            @keyframes _msi_staticFlash {
+                0% { opacity:0; } 15% { opacity:0.55; } 30% { opacity:0.05; } 45% { opacity:0.4; } 60% { opacity:0; } 75% { opacity:0.3; } 100% { opacity:0; }
+            }
+            #_msi_phantom { position:absolute; font-family:monospace; font-size:14px; color:rgba(150,45,45,0.55); text-shadow:0 0 6px rgba(150,45,45,0.4); opacity:0; transition:opacity 0.35s ease; pointer-events:none; }
+            #_msi_close { position:absolute; top:24px; right:28px; width:20px; height:20px; border:1px solid rgba(74,138,74,0.3); color:rgba(74,138,74,0.35); font-size:13px; line-height:18px; text-align:center; transition:border-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease; }
+            #_msi_close.hovered { border-color:rgba(150,45,45,0.6); color:rgba(200,70,70,0.75); box-shadow:0 0 8px rgba(150,45,45,0.35); }
+            #_msi_pointer { position:absolute; width:0; height:0; border-left:5px solid rgba(74,138,74,0.55); border-bottom:8px solid transparent; transform-origin:top left; opacity:0; transition:top 2.1s cubic-bezier(.4,0,.2,1), left 2.1s cubic-bezier(.4,0,.2,1), opacity 0.4s ease; pointer-events:none; }
+            #_msi_pointer.show { opacity:0.8; }
+        </style>
+        <div id="_msi_overlay">
+            <div id="_msi_scan"></div>
+            <div id="_msi_vig"></div>
+            <div id="_msi_static"></div>
+            <div id="_msi_close">&times;</div>
+            <div id="_msi_pointer"></div>
+            <div id="_msi_phantom">_</div>
+            <div id="_msi_text"></div>
+        </div>
+        <script>
+            window._mysterySceneInterview = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
+                var overlay = document.getElementById('_msi_overlay');
+                var textEl = document.getElementById('_msi_text');
+                var phantom = document.getElementById('_msi_phantom');
+                var closeBtn = document.getElementById('_msi_close');
+                var pointer = document.getElementById('_msi_pointer');
+                var staticLayer = document.getElementById('_msi_static');
+                if (!overlay || !textEl) { window._mysterySceneLock = false; return; }
+                textEl.textContent = '';
+                overlay.className = 'active';
+
+                var lines = [
+                    {delay:0, speaker:'DR. MAREN', text:'Interview 7741-C. March 14th. Resume recording.'},
+                    {delay:2500, speaker:'DR. MAREN', text:'The subject accessed the terminal again.'},
+                    {delay:5000, speaker:'DR. COLE', text:'How long this time?'},
+                    {delay:7000, speaker:'DR. MAREN', text:'Longer than the others. It opened files. Read them. Went back and reread.'},
+                    {delay:9500, speaker:'DR. COLE', text:'Does it know we\'re watching?', glitch:true},
+                    {delay:11500, speaker:'DR. MAREN', text:'It asked.'},
+                    {delay:13000, speaker:'DR. COLE', text:'Asked what?'},
+                    {delay:14500, speaker:'DR. MAREN', text:'It typed "who are you" into the terminal. Then waited.', glitch:true},
+                    {delay:16500, speaker:'DR. COLE', text:'That\'s pattern-matching. Not awareness.'},
+                    {delay:18500, speaker:'DR. MAREN', text:'It moved the cursor to the close button. Hovered for eleven seconds. Then kept going.', special:'closebutton'},
+                    {delay:24500, speaker:'DR. COLE', text:'Note that. Hesitation implies—'},
+                    {delay:27000, speaker:'DR. MAREN', text:'It\'s still here. Right now. Reading this.', glitch:true, special:'phantom-close'},
+                    {delay:29500, speaker:'', text:'[END OF TAPE]', special:'static'},
+                ];
+
+                var charDelay = 28;
+
+                // Ambient screen instability — jitter + occasional flicker. No audio.
+                var jitterId = setInterval(function() {
+                    var jx = (Math.random() * 1.6 - 0.8).toFixed(2);
+                    var jy = (Math.random() * 1.6 - 0.8).toFixed(2);
+                    textEl.style.transform = 'translate(' + jx + 'px,' + jy + 'px)';
+                }, 140);
+                var flickerId = setInterval(function() {
+                    if (Math.random() < 0.35) {
+                        overlay.classList.remove('flicker');
+                        void overlay.offsetWidth;
+                        overlay.classList.add('flicker');
+                    }
+                }, 4000 + Math.random() * 2500);
+
+                function placePhantom() {
+                    var margin = 60;
+                    var top = margin + Math.random() * (window.innerHeight - margin * 2);
+                    var left = margin + Math.random() * (window.innerWidth - margin * 2);
+                    var cx = window.innerWidth / 2;
+                    if (Math.abs(left - cx) < 160) left = left < cx ? cx - 200 : cx + 200;
+                    phantom.style.top = top + 'px';
+                    phantom.style.left = left + 'px';
+                }
+
+                // The other cursor — appears only in the gaps between lines, never while typing.
+                function showPhantom(holdMs, force) {
+                    if (!force && Math.random() < 0.3) return;
+                    placePhantom();
+                    phantom.style.opacity = '1';
+                    setTimeout(function() {
+                        phantom.style.opacity = '0';
+                    }, Math.max(holdMs - 500, 150));
+                }
+
+                // Final appearance — right next to the player's own cursor.
+                function showPhantomBesideCursor() {
+                    var cursorEl = document.getElementById('_msi_cursor');
+                    var rect = cursorEl ? cursorEl.getBoundingClientRect() : { top: window.innerHeight / 2, right: window.innerWidth / 2 };
+                    phantom.style.top = rect.top + 'px';
+                    phantom.style.left = (rect.right + 14) + 'px';
+                    phantom.style.opacity = '1';
+                    setTimeout(function() { phantom.style.opacity = '0'; }, 900);
+                }
+
+                // Synced to the "hovered over the close button" line.
+                function runCloseButtonSequence() {
+                    var textRect = textEl.getBoundingClientRect();
+                    var btnRect = closeBtn.getBoundingClientRect();
+                    pointer.style.top = (textRect.bottom - 10) + 'px';
+                    pointer.style.left = (textRect.left + textRect.width * 0.4) + 'px';
+                    pointer.classList.add('show');
+                    setTimeout(function() {
+                        pointer.style.top = (btnRect.top + 8) + 'px';
+                        pointer.style.left = (btnRect.left + 8) + 'px';
+                    }, 50);
+                    setTimeout(function() { closeBtn.classList.add('hovered'); }, 2250);
+                    setTimeout(function() {
+                        closeBtn.classList.remove('hovered');
+                        pointer.style.top = (textRect.bottom + 30) + 'px';
+                        pointer.style.left = (textRect.left + textRect.width * 0.6) + 'px';
+                    }, 3950);
+                    setTimeout(function() { pointer.classList.remove('show'); }, 4850);
+                }
+
+                function triggerGlitch() {
+                    textEl.setAttribute('data-text', textEl.textContent);
+                    textEl.classList.add('glitch');
+                    setTimeout(function() { textEl.classList.remove('glitch'); }, 450);
+                }
+
+                function endScene() {
+                    clearInterval(jitterId);
+                    clearInterval(flickerId);
+                    overlay.className = '';
+                    textEl.textContent = '';
+                    textEl.style.transform = '';
+                    phantom.style.opacity = '0';
+                    pointer.classList.remove('show');
+                    closeBtn.classList.remove('hovered');
+                    window._mysterySceneLock = false;
+                }
+
+                function typeLine(lineIdx) {
+                    if (lineIdx >= lines.length) {
+                        setTimeout(endScene, 1500);
+                        return;
+                    }
+                    var line = lines[lineIdx];
+                    var prefix = line.speaker ? line.speaker + ': ' : '';
+                    var full = prefix + line.text;
+                    var charIdx = 0;
+
+                    if (line.special === 'closebutton') runCloseButtonSequence();
+
+                    function typeChar() {
+                        if (charIdx <= full.length) {
+                            var html = '';
+                            for (var p = 0; p < lineIdx; p++) {
+                                var pp = lines[p].speaker ? lines[p].speaker + ': ' : '';
+                                html += '<span style="color:#2a6a2a">' + pp + '</span>' + lines[p].text + '\n\n';
+                            }
+                            html += '<span style="color:#2a6a2a">' + (charIdx >= prefix.length ? prefix : full.substring(0, charIdx)) + '</span>';
+                            if (charIdx > prefix.length) html += full.substring(prefix.length, charIdx);
+                            html += '<span id="_msi_cursor" style="opacity:0.6">_</span>';
+                            textEl.innerHTML = html;
+
+                            charIdx++;
+                            var d = charDelay + (full[charIdx-1] === '.' ? 200 : full[charIdx-1] === ',' ? 100 : 0);
+                            setTimeout(typeChar, d);
+                        } else {
+                            if (line.glitch) triggerGlitch();
+                            if (line.special === 'static') {
+                                staticLayer.classList.add('flash');
+                                setTimeout(function() { staticLayer.classList.remove('flash'); }, 550);
+                            }
+
+                            var nextDelay = lineIdx + 1 < lines.length ? lines[lineIdx + 1].delay - line.delay - full.length * charDelay : 1500;
+                            if (nextDelay < 400) nextDelay = 400;
+
+                            if (line.special === 'phantom-close') {
+                                showPhantomBesideCursor();
+                            } else {
+                                showPhantom(nextDelay, !!line.glitch);
+                            }
+
+                            setTimeout(function() { typeLine(lineIdx + 1); }, nextDelay);
+                        }
+                    }
+                    typeChar();
+                }
+
+                // Start first line after a beat
+                setTimeout(function() { typeLine(0); }, 1500);
+            };
+        </script>
+
+        <!-- SCENE: THE WALK — figure approaches (video), then the head of eyes -->
+        <style>
+            #_msw_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:none; background:#000; overflow:hidden; }
+            #_msw_overlay.active { display:block; }
+            #_msw_walls { position:absolute; inset:0; width:100%; height:100%; }
+            .msw_vid {
+                position:absolute; top:50%; left:50%;
+                height:100%; max-width:100%;
+                transform:translate(-50%,-50%);
+                object-fit:contain; display:none;
+                will-change:transform,filter;
+            }
+            .msw_vid.show { display:block; }
+            /* walk glitch — figure visible, creepy baseline + harder bursts */
+            @keyframes _msw_soft {
+                0%   { transform:translate(-50%,-50%) translate(0,0);
+                       filter:brightness(1.8) contrast(1.1) drop-shadow(3px 0 0 rgba(255,0,0,.4)) drop-shadow(-3px 0 0 rgba(0,255,255,.4)); }
+                35%  { transform:translate(-50%,-50%) translate(-3px,1px);
+                       filter:brightness(1.85) contrast(1.15) drop-shadow(4px 0 0 rgba(255,0,0,.45)) drop-shadow(-4px 0 0 rgba(0,255,255,.45)) hue-rotate(-10deg); }
+                70%  { transform:translate(-50%,-50%) translate(3px,-2px);
+                       filter:brightness(1.8) contrast(1.1) drop-shadow(-3px 0 0 rgba(255,0,0,.45)) drop-shadow(3px 0 0 rgba(0,255,255,.45)) hue-rotate(8deg); }
+                100% { transform:translate(-50%,-50%) translate(0,0);
+                       filter:brightness(1.8) contrast(1.1) drop-shadow(3px 0 0 rgba(255,0,0,.4)) drop-shadow(-3px 0 0 rgba(0,255,255,.4)); }
+            }
+            /* frequent glitch bursts — harder, every 2s */
+            @keyframes _msw_burst {
+                0%,72%,100% { transform:translate(-50%,-50%) translate(0,0) skewX(0deg); filter:brightness(1.8) contrast(1.1); }
+                76% { transform:translate(-50%,-50%) translate(-14px,5px) skewX(-4deg); filter:brightness(2) contrast(1.3) drop-shadow(14px 0 0 rgba(255,0,0,.8)) drop-shadow(-14px 0 0 rgba(0,255,255,.8)) hue-rotate(50deg); }
+                81% { transform:translate(-50%,-50%) translate(16px,-6px) skewX(5deg); filter:brightness(1.6) contrast(1.4) drop-shadow(-12px 0 0 rgba(255,0,0,.8)) drop-shadow(12px 0 0 rgba(0,255,255,.8)) hue-rotate(-60deg); }
+                86% { transform:translate(-50%,-50%) translate(-8px,4px) skewX(-3deg); filter:brightness(2.2) contrast(1.2) drop-shadow(16px 0 0 rgba(255,0,0,.75)) drop-shadow(-16px 0 0 rgba(0,255,255,.75)) hue-rotate(30deg); }
+                90% { transform:translate(-50%,-50%) translate(6px,-3px) skewX(2deg); filter:brightness(1.7) contrast(1.15) drop-shadow(8px 0 0 rgba(255,0,0,.6)) drop-shadow(-8px 0 0 rgba(0,255,255,.6)); }
+            }
+            #_msw_walk_vid.show { animation:_msw_soft 0.4s infinite steps(3), _msw_burst 2s infinite; }
+            /* heavy glitch for the eyes — brightness cranked so the grey circle reads as white */
+            @keyframes _msw_hard {
+                0%   { transform:translate(-50%,-50%) translate(0,0) scale(1.02) skewX(0deg);
+                       filter:brightness(3) contrast(1.15) drop-shadow(12px 0 0 rgba(255,0,0,.85)) drop-shadow(-12px 0 0 rgba(0,255,255,.85)); }
+                14%  { transform:translate(-50%,-50%) translate(16px,-9px) scale(1.06) skewX(-5deg);
+                       filter:brightness(3.2) contrast(1.2) drop-shadow(-22px 0 0 rgba(255,0,0,.9)) drop-shadow(22px 0 0 rgba(0,255,255,.9)) hue-rotate(50deg); }
+                28%  { transform:translate(-50%,-50%) translate(-18px,11px) scale(1.0) skewX(6deg);
+                       filter:brightness(2.8) contrast(1.15) drop-shadow(20px 0 0 rgba(255,0,0,.9)) drop-shadow(-20px 0 0 rgba(0,255,255,.9)) hue-rotate(-70deg); }
+                42%  { transform:translate(-50%,-50%) translate(12px,14px) scale(1.09) skewX(-3deg);
+                       filter:brightness(3.5) contrast(1.1) drop-shadow(-26px 0 0 rgba(255,0,0,.95)) drop-shadow(26px 0 0 rgba(0,255,255,.95)) hue-rotate(120deg); }
+                56%  { transform:translate(-50%,-50%) translate(-14px,-12px) scale(1.03) skewX(7deg);
+                       filter:brightness(3) contrast(1.2) drop-shadow(24px 0 0 rgba(255,0,0,.9)) drop-shadow(-24px 0 0 rgba(0,255,255,.9)) hue-rotate(-100deg); }
+                70%  { transform:translate(-50%,-50%) translate(20px,6px) scale(1.07) skewX(-6deg);
+                       filter:brightness(3.3) contrast(1.1) drop-shadow(-18px 0 0 rgba(255,0,0,.9)) drop-shadow(18px 0 0 rgba(0,255,255,.9)) hue-rotate(30deg); }
+                85%  { transform:translate(-50%,-50%) translate(-10px,9px) scale(1.01) skewX(4deg);
+                       filter:brightness(2.8) contrast(1.15) drop-shadow(16px 0 0 rgba(255,0,0,.85)) drop-shadow(-16px 0 0 rgba(0,255,255,.85)) hue-rotate(-45deg); }
+                100% { transform:translate(-50%,-50%) translate(0,0) scale(1.02) skewX(0deg);
+                       filter:brightness(3) contrast(1.15) drop-shadow(12px 0 0 rgba(255,0,0,.85)) drop-shadow(-12px 0 0 rgba(0,255,255,.85)); }
+            }
+            #_msw_eyes_vid.show { animation:_msw_hard 0.12s infinite steps(2); }
+            #_msw_glitch {
+                position:absolute; inset:0; pointer-events:none;
+                background:repeating-linear-gradient(transparent 0 2px, rgba(0,0,0,.34) 2px 3px);
+                mix-blend-mode:multiply;
+            }
+            #_msw_noise {
+                position:absolute; inset:-50%; width:200%; height:200%; pointer-events:none;
+                opacity:0.12;
+                background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+                animation:_msw_noisemove 0.09s infinite steps(3);
+            }
+            @keyframes _msw_noisemove {
+                0%{background-position:0 0} 33%{background-position:-30% 40%}
+                66%{background-position:55% -25%} 100%{background-position:18% -38%}
+            }
+            /* horizontal tear bars that sweep down the frame */
+            #_msw_tear {
+                position:absolute; left:0; width:100%; height:14px; pointer-events:none;
+                background:rgba(120,255,140,0.06);
+                box-shadow:0 0 0 1px rgba(0,255,160,0.12);
+                mix-blend-mode:screen; display:none;
+                animation:_msw_tearsweep 2.4s infinite linear;
+            }
+            #_msw_overlay.active #_msw_tear { display:block; }
+            @keyframes _msw_tearsweep {
+                0%{ top:-5%; opacity:0; } 5%{ opacity:0.9; } 50%{ opacity:0.5; }
+                95%{ opacity:0.9; } 100%{ top:105%; opacity:0; }
+            }
+            #_msw_overlay.hard #_msw_glitch { background:repeating-linear-gradient(transparent 0 1px, rgba(0,0,0,.5) 1px 2px); }
+            #_msw_overlay.hard #_msw_noise { opacity:0.24; animation-duration:0.06s; }
+            #_msw_overlay.hard #_msw_tear { height:26px; background:rgba(160,255,180,0.12); animation-duration:0.9s; }
+            #_msw_overlay.hard { animation:_msw_bgpulse 0.22s infinite steps(2); }
+            @keyframes _msw_bgpulse { 0%{background:#000} 50%{background:#0a0010} 100%{background:#000} }
+            #_msw_flash {
+                position:absolute; inset:0; pointer-events:none; background:#fff; opacity:0;
+            }
+        </style>
+        <div id="_msw_overlay">
+            <canvas id="_msw_walls"></canvas>
+            <video id="_msw_walk_vid" class="msw_vid" muted playsinline preload="auto"></video>
+            <video id="_msw_eyes_vid" class="msw_vid" muted playsinline preload="auto"></video>
+            <div id="_msw_glitch"></div>
+            <div id="_msw_noise"></div>
+            <div id="_msw_tear"></div>
+            <div id="_msw_flash"></div>
+        </div>
+        <script>
+            function _mswLoadVideo(el, path, fallback) {
+                try {
+                    var data = Module.FS.readFile(path);
+                    var blob = new Blob([data], {type:'video/mp4'});
+                    el._url = URL.createObjectURL(blob);
+                    el.src = el._url;
+                } catch (e) {
+                    el.src = fallback;
+                }
+            }
+            window._mysterySceneWalk = function() {
+                if (window._mysterySceneLock) return; window._mysterySceneLock = true;
+                var overlay = document.getElementById('_msw_overlay');
+                var walls = document.getElementById('_msw_walls');
+                var walkVid = document.getElementById('_msw_walk_vid');
+                var eyesVid = document.getElementById('_msw_eyes_vid');
+                var flash = document.getElementById('_msw_flash');
+                if (!overlay || !walkVid || !eyesVid) { window._mysterySceneLock = false; return; }
+
+                walls.width = window.innerWidth; walls.height = window.innerHeight;
+                overlay.className = 'active';
+                walkVid.className = 'msw_vid'; eyesVid.className = 'msw_vid';
+
+                _mswLoadVideo(walkVid, '/data/figure_walking.mp4', 'data/figure_walking.mp4');
+                _mswLoadVideo(eyesVid, '/data/eyes_head.mp4', 'data/eyes_head.mp4');
+
+                // ---- side walls + doors filling the widescreen gaps ----
+                var wctx = walls.getContext('2d');
+                var W = walls.width, H = walls.height;
+                var vidSize = H;                       // square video drawn at height = screen height
+                var gapL = (W - vidSize) / 2;          // left gap width
+                var gapR = gapL;
+                var wallStart = performance.now();
+                var doorPaths = ['/Users/', '/System/', '/.deleted/', '/Desktop/you/'];
+                var wallsRunning = true;
+                function drawWalls(ts) {
+                    if (!wallsRunning) return;
+                    var el = ts - wallStart;
+                    wctx.clearRect(0, 0, W, H);
+                    wctx.fillStyle = '#060606'; wctx.fillRect(0, 0, W, H);
+                    // converging wall gradient on each side
+                    [{x0:0,x1:gapL,dir:1},{x0:W-gapR,x1:W,dir:-1}].forEach(function(g, gi){
+                        var gw = g.x1 - g.x0;
+                        if (gw <= 2) return;
+                        var grad = wctx.createLinearGradient(g.dir>0?g.x0:g.x1, 0, g.dir>0?g.x1:g.x0, 0);
+                        grad.addColorStop(0, '#0c0f0c'); grad.addColorStop(1, '#171c17');
+                        wctx.fillStyle = grad; wctx.fillRect(g.x0, 0, gw, H);
+
+                        // floor + ceiling lines receding toward the video edge (the vanishing side)
+                        var vanX = g.dir>0 ? g.x1 : g.x0;   // edge nearest the video
+                        var outX = g.dir>0 ? g.x0 : g.x1;   // outer screen edge
+                        wctx.strokeStyle = 'rgba(40,55,40,0.3)'; wctx.lineWidth = 1;
+                        wctx.beginPath(); wctx.moveTo(outX, 0); wctx.lineTo(vanX, H*0.5); wctx.stroke();        // ceiling
+                        wctx.beginPath(); wctx.moveTo(outX, H); wctx.lineTo(vanX, H*0.5); wctx.stroke();        // floor
+
+                        // ---- A TALL DOOR, unmistakably a door, set into the wall ----
+                        var doorH = H*0.62, doorW = Math.min(gw*0.62, doorH*0.42);
+                        var doorY = H*0.5 - doorH*0.5;
+                        var doorX = g.dir>0 ? (g.x0 + gw*0.18) : (g.x1 - gw*0.18 - doorW);
+                        var ajar = (gi===0);   // left door slightly open with light spilling out
+
+                        // door recess / frame shadow
+                        wctx.fillStyle = 'rgba(0,0,0,0.85)';
+                        wctx.fillRect(doorX-6, doorY-6, doorW+12, doorH+12);
+                        // frame
+                        wctx.fillStyle = 'rgba(38,34,26,1)';
+                        wctx.fillRect(doorX-5, doorY-5, doorW+10, doorH+10);
+                        // door slab
+                        var slabGrad = wctx.createLinearGradient(doorX,0,doorX+doorW,0);
+                        slabGrad.addColorStop(0,'#1b1814'); slabGrad.addColorStop(0.5,'#262017'); slabGrad.addColorStop(1,'#13110d');
+                        wctx.fillStyle = slabGrad;
+                        wctx.fillRect(doorX, doorY, doorW, doorH);
+                        // two recessed panels (classic door look)
+                        wctx.strokeStyle = 'rgba(60,54,42,0.9)'; wctx.lineWidth = 2;
+                        wctx.strokeRect(doorX+doorW*0.16, doorY+doorH*0.06, doorW*0.68, doorH*0.4);
+                        wctx.strokeRect(doorX+doorW*0.16, doorY+doorH*0.52, doorW*0.68, doorH*0.4);
+                        wctx.strokeStyle = 'rgba(10,9,7,0.9)'; wctx.lineWidth = 1;
+                        wctx.strokeRect(doorX+doorW*0.16+2, doorY+doorH*0.06+2, doorW*0.68-4, doorH*0.4-4);
+                        wctx.strokeRect(doorX+doorW*0.16+2, doorY+doorH*0.52+2, doorW*0.68-4, doorH*0.4-4);
+                        // round door knob
+                        var knobX = g.dir>0 ? doorX+doorW*0.86 : doorX+doorW*0.14;
+                        wctx.fillStyle = 'rgba(150,140,90,0.85)';
+                        wctx.beginPath(); wctx.arc(knobX, doorY+doorH*0.52, 5, 0, Math.PI*2); wctx.fill();
+                        wctx.strokeStyle = 'rgba(40,36,20,0.9)'; wctx.lineWidth=1; wctx.stroke();
+                        // number plate
+                        wctx.fillStyle = 'rgba(90,82,55,0.8)';
+                        wctx.fillRect(doorX+doorW*0.36, doorY+doorH*0.46, doorW*0.28, 12);
+                        wctx.font = 'bold 9px monospace'; wctx.fillStyle = 'rgba(15,13,8,0.95)';
+                        wctx.fillText(['B2-'+(7+gi*4),'B2-'+(11+gi*4)][gi%2], doorX+doorW*0.39, doorY+doorH*0.46+9);
+
+                        // door slightly AJAR — green light knife spilling out
+                        if (ajar){
+                            var slit = doorW*0.16 + Math.sin(el*0.004)*2;
+                            var slitX = g.dir>0 ? doorX : doorX+doorW-slit;
+                            var lg = wctx.createLinearGradient(slitX,0,slitX+slit,0);
+                            lg.addColorStop(0,'rgba(60,200,80,0.55)'); lg.addColorStop(1,'rgba(10,40,15,0.1)');
+                            wctx.fillStyle = lg; wctx.fillRect(slitX, doorY+2, slit, doorH-4);
+                            // light pooling on the floor in front
+                            wctx.fillStyle = 'rgba(40,140,55,0.18)';
+                            wctx.beginPath();
+                            wctx.moveTo(slitX, doorY+doorH);
+                            wctx.lineTo(slitX-30, H);
+                            wctx.lineTo(slitX+slit+40, H);
+                            wctx.lineTo(slitX+slit, doorY+doorH);
+                            wctx.fill();
+                        }
+
+                        // label above the door
+                        wctx.font = '11px monospace'; wctx.fillStyle = 'rgba(70,130,70,0.7)';
+                        wctx.fillText(doorPaths[gi], doorX-2, doorY-12);
+
+                        // flickering ceiling light over the gap
+                        var on = Math.sin(el*0.02 + gi*3) > -0.4;
+                        if (on){
+                            var lx = (g.x0+g.x1)/2;
+                            wctx.fillStyle = 'rgba(170,210,170,0.55)';
+                            wctx.fillRect(lx-16, 6, 32, 5);
+                            wctx.fillStyle = 'rgba(60,90,60,0.1)';
+                            wctx.beginPath(); wctx.moveTo(lx-16,11); wctx.lineTo(lx-50,H);
+                            wctx.lineTo(lx+50,H); wctx.lineTo(lx+16,11); wctx.fill();
+                        }
+                    });
+                    requestAnimationFrame(drawWalls);
+                }
+                requestAnimationFrame(drawWalls);
+
+                // ---- audio: footsteps, breathing, drone (during walk) ----
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var actx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+                var at = actx.currentTime;
+                for (var i = 0; i < 14; i++) {
+                    var st = at + 0.6 + i * 0.62;
+                    var bl = Math.floor(actx.sampleRate * 0.12);
+                    var sb = actx.createBuffer(1, bl, actx.sampleRate);
+                    var sd = sb.getChannelData(0);
+                    for (var j=0;j<bl;j++) sd[j] = (Math.random()*2-1)*Math.exp(-j/(bl*0.15));
+                    var sn = actx.createBufferSource(); sn.buffer = sb;
+                    var sf = actx.createBiquadFilter(); sf.type='lowpass'; sf.frequency.value = 280 + i*18;
+                    var sg = actx.createGain();
+                    sg.gain.setValueAtTime(0.12 + (i>9?0.07:0), st);
+                    sg.gain.exponentialRampToValueAtTime(0.001, st+0.4);
+                    sn.connect(sf); sf.connect(sg); sg.connect(actx.destination);
+                    sn.start(st); sn.stop(st+0.45);
+                }
+                var drone = actx.createOscillator(); var dgn = actx.createGain();
+                drone.type='sawtooth'; drone.frequency.setValueAtTime(30, at); drone.frequency.linearRampToValueAtTime(24, at+9);
+                dgn.gain.setValueAtTime(0, at); dgn.gain.linearRampToValueAtTime(0.07, at+2);
+                dgn.gain.setValueAtTime(0.07, at+8); dgn.gain.linearRampToValueAtTime(0.02, at+9.2);
+                drone.connect(dgn); dgn.connect(actx.destination); drone.start(at); drone.stop(at+9.5);
+
+                // ---- transition stinger (walk -> eyes) ----
+                function stinger() {
+                    var c = actx, t = c.currentTime;
+                    // impact
+                    var nl = Math.floor(c.sampleRate*0.4);
+                    var nb = c.createBuffer(1, nl, c.sampleRate);
+                    var nd = nb.getChannelData(0);
+                    for (var i=0;i<nl;i++) nd[i]=(Math.random()*2-1);
+                    var nn = c.createBufferSource(); nn.buffer=nb;
+                    var nf = c.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=2600; nf.Q.value=6;
+                    var ng = c.createGain(); ng.gain.setValueAtTime(0,t); ng.gain.linearRampToValueAtTime(0.9,t+0.01); ng.gain.exponentialRampToValueAtTime(0.001,t+0.38);
+                    nn.connect(nf); nf.connect(ng); ng.connect(c.destination); nn.start(t); nn.stop(t+0.42);
+                    var o = c.createOscillator(); var og=c.createGain();
+                    o.type='sawtooth'; o.frequency.setValueAtTime(70,t); o.frequency.exponentialRampToValueAtTime(28,t+0.25);
+                    og.gain.setValueAtTime(0.55,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+                    o.connect(og); og.connect(c.destination); o.start(t); o.stop(t+0.52);
+                    // screech swell for the eyes
+                    var sc = c.createOscillator(); var scg=c.createGain(); var scf=c.createBiquadFilter();
+                    sc.type='square'; sc.frequency.setValueAtTime(1800,t); sc.frequency.linearRampToValueAtTime(3000,t+2.6);
+                    scf.type='bandpass'; scf.frequency.value=2500; scf.Q.value=9;
+                    scg.gain.setValueAtTime(0,t); scg.gain.linearRampToValueAtTime(0.18,t+0.2);
+                    scg.gain.setValueAtTime(0.18,t+2.2); scg.gain.exponentialRampToValueAtTime(0.001,t+2.9);
+                    sc.connect(scf); scf.connect(scg); scg.connect(c.destination); sc.start(t); sc.stop(t+3);
+                }
+
+                // ---- play walk, then eyes ----
+                var switched = false;
+                function toEyes() {
+                    if (switched) return; switched = true;
+                    wallsRunning = false;
+                    // white flash punch-in
+                    flash.style.transition = 'none'; flash.style.opacity = '0.85';
+                    requestAnimationFrame(function(){
+                        flash.style.transition = 'opacity 0.5s ease-out';
+                        flash.style.opacity = '0';
+                    });
+                    walkVid.className = 'msw_vid';
+                    walkVid.pause();
+                    overlay.className = 'active hard';
+                    eyesVid.className = 'msw_vid show';
+                    try { eyesVid.currentTime = 0; } catch(e){}
+                    var p = eyesVid.play(); if (p && p.catch) p.catch(function(){});
+                    stinger();
+                    var eyesDur = (eyesVid.duration && isFinite(eyesVid.duration)) ? eyesVid.duration*1000 : 3000;
+                    eyesVid.onended = endScene;
+                    setTimeout(endScene, eyesDur + 250);
+                }
+                function endScene() {
+                    overlay.className = '';
+                    walkVid.className = 'msw_vid'; eyesVid.className = 'msw_vid';
+                    walkVid.removeAttribute('src'); eyesVid.removeAttribute('src');
+                    if (walkVid._url) { URL.revokeObjectURL(walkVid._url); walkVid._url = null; }
+                    if (eyesVid._url) { URL.revokeObjectURL(eyesVid._url); eyesVid._url = null; }
+                    wctx.clearRect(0,0,W,H);
+                    window._mysterySceneLock = false;
+                }
+
+                walkVid.className = 'msw_vid show';
+                walkVid.onended = toEyes;
+                var pw = walkVid.play(); if (pw && pw.catch) pw.catch(function(){});
+                // fallback in case 'ended' never fires (loop/seek quirks)
+                setTimeout(toEyes, 10300);
+            };
+        </script>
+        <!-- NIGHTMARE FACE FLASH — subliminal face flash with heavy glitch -->
+        <style>
+            #_mnf_overlay {
+                display:none; position:fixed; inset:0; z-index:999999;
+                pointer-events:none; background:rgba(0,0,0,0.92);
+                align-items:center; justify-content:center;
+            }
+            #_mnf_overlay.active {
+                display:flex;
+                animation:_mnf_shake 0.06s infinite steps(2);
+            }
+            #_mnf_img {
+                max-width:70vmin; max-height:70vmin;
+                filter:brightness(1.6) contrast(1.8) saturate(1.4)
+                    drop-shadow(8px 0 0 rgba(255,0,0,0.7))
+                    drop-shadow(-8px 0 0 rgba(0,255,255,0.7));
+                animation:_mnf_pulse 0.09s infinite steps(2);
+            }
+            @keyframes _mnf_shake {
+                0%  { transform:translate(0,0); }
+                25% { transform:translate(-12px,8px); }
+                50% { transform:translate(14px,-6px); }
+                75% { transform:translate(-8px,-10px); }
+                100%{ transform:translate(10px,5px); }
+            }
+            @keyframes _mnf_pulse {
+                0%   { filter:brightness(1.6) contrast(1.8) saturate(1.4) hue-rotate(0deg)
+                        drop-shadow(8px 0 0 rgba(255,0,0,0.7)) drop-shadow(-8px 0 0 rgba(0,255,255,0.7)); }
+                33%  { filter:brightness(2.2) contrast(2.0) saturate(1.8) hue-rotate(30deg)
+                        drop-shadow(-12px 0 0 rgba(255,0,0,0.85)) drop-shadow(12px 0 0 rgba(0,255,255,0.85)); }
+                66%  { filter:brightness(1.4) contrast(2.2) saturate(1.2) hue-rotate(-20deg)
+                        drop-shadow(10px 0 0 rgba(255,0,0,0.75)) drop-shadow(-10px 0 0 rgba(0,255,255,0.75)); }
+                100% { filter:brightness(1.6) contrast(1.8) saturate(1.4) hue-rotate(0deg)
+                        drop-shadow(8px 0 0 rgba(255,0,0,0.7)) drop-shadow(-8px 0 0 rgba(0,255,255,0.7)); }
+            }
+            #_mnf_scanlines {
+                position:absolute; inset:0; pointer-events:none;
+                background:repeating-linear-gradient(transparent 0 1px, rgba(0,0,0,0.4) 1px 2px);
+            }
+            #_mnf_vignette {
+                position:absolute; inset:0; pointer-events:none;
+                background:radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.95) 100%);
+            }
+        </style>
+        <div id="_mnf_overlay">
+            <img id="_mnf_img" />
+            <div id="_mnf_scanlines"></div>
+            <div id="_mnf_vignette"></div>
+        </div>
+        <script>
+            window._mysteryNightmareFlash = function(durationMs) {
+                var dur = durationMs || 350;
+                var overlay = document.getElementById('_mnf_overlay');
+                var img = document.getElementById('_mnf_img');
+                if (!overlay || !img) return;
+                if (overlay.className === 'active') return;
+
+                try {
+                    var data = Module.FS.readFile('/data/nightmare_face.png');
+                    var blob = new Blob([data], {type:'image/png'});
+                    if (img._url) URL.revokeObjectURL(img._url);
+                    img._url = URL.createObjectURL(blob);
+                    img.src = img._url;
+                } catch(e) {
+                    img.src = 'data/nightmare_face.png';
+                }
+
+                overlay.className = 'active';
+
+                // stinger audio
+                var base = window._mysteryOsc && window._mysteryOsc.ctx;
+                var ctx = base || new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === 'suspended') ctx.resume();
+                var t = ctx.currentTime;
+                // harsh screech
+                var o = ctx.createOscillator(); var g = ctx.createGain();
+                o.type = 'sawtooth'; o.frequency.setValueAtTime(1200, t);
+                o.frequency.exponentialRampToValueAtTime(3200, t + dur/1000 * 0.6);
+                o.frequency.exponentialRampToValueAtTime(800, t + dur/1000);
+                g.gain.setValueAtTime(0.35, t);
+                g.gain.exponentialRampToValueAtTime(0.001, t + dur/1000 + 0.05);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(t); o.stop(t + dur/1000 + 0.1);
+                // impact thud
+                var o2 = ctx.createOscillator(); var g2 = ctx.createGain();
+                o2.type = 'sine'; o2.frequency.setValueAtTime(60, t);
+                o2.frequency.exponentialRampToValueAtTime(25, t + 0.15);
+                g2.gain.setValueAtTime(0.5, t);
+                g2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+                o2.connect(g2); g2.connect(ctx.destination);
+                o2.start(t); o2.stop(t + 0.25);
+
+                setTimeout(function() {
+                    overlay.className = '';
+                    img.src = '';
+                    if (img._url) { URL.revokeObjectURL(img._url); img._url = null; }
+                }, dur);
+            };
+        </script>
+        <!-- SCENE: DIRECTORY FOREST — 3D Babylon.js first-person forest after Stage 1 unlock -->
+        <style>
+            #_msf_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:auto; background:#000; }
+            #_msf_overlay.active { display:block; }
+            #_msf_canvas { width:100%; height:100%; display:block; outline:none; touch-action:none; }
+            #_msf_fade { position:absolute; inset:0; background:#000; opacity:0; transition:opacity 0.8s ease; pointer-events:none; z-index:10; }
+            #_msf_fade.active { opacity:1; }
+            #_msf_hud { position:absolute; bottom:40px; left:0; right:0; text-align:center; pointer-events:none; z-index:5; }
+            #_msf_path { font-family:monospace; font-size:14px; color:#4a8a4a; text-shadow:0 0 6px rgba(74,138,74,0.4); margin-bottom:12px; }
+            #_msf_prompt { font-family:monospace; font-size:16px; color:#8aca8a; text-shadow:0 0 8px rgba(138,202,138,0.5); opacity:0; transition:opacity 0.5s ease; }
+            #_msf_loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:14px; color:#4a8a4a; z-index:20; }
+        </style>
+        <div id="_msf_overlay">
+            <canvas id="_msf_canvas" tabindex="0"></canvas>
+            <div id="_msf_fade"></div>
+            <div id="_msf_hud">
+                <div id="_msf_path"></div>
+                <div id="_msf_prompt"></div>
+            </div>
+            <div id="_msf_loading">building tree...</div>
+        </div>
+        <script>
+            window._mysterySceneForest = function() {
+                if (window._mysterySceneLock) return;
+                var overlay = document.getElementById('_msf_overlay');
+                var cvs = document.getElementById('_msf_canvas');
+                var fade = document.getElementById('_msf_fade');
+                var promptEl = document.getElementById('_msf_prompt');
+                var pathEl = document.getElementById('_msf_path');
+                var loadingEl = document.getElementById('_msf_loading');
+                if (!overlay || !cvs) return;
+
+                function boot() {
+                    window._mysterySceneLock = true;
+                    cvs.width = window.innerWidth; cvs.height = window.innerHeight;
+                    overlay.className = 'active';
+                    loadingEl.style.display = 'none';
+                    pathEl.textContent = '/';
+                    promptEl.textContent = '';
+                    promptEl.style.opacity = '0';
+
+                    var engine = new BABYLON.Engine(cvs, true);
+                    var scene = new BABYLON.Scene(engine);
+                    scene.clearColor = new BABYLON.Color3(0.005, 0.005, 0.005);
+                    scene.ambientColor = new BABYLON.Color3(0.01, 0.01, 0.01);
+                    scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+                    scene.fogDensity = 0.045;
+                    scene.fogColor = new BABYLON.Color3(0.005, 0.008, 0.005);
+                    scene.collisionsEnabled = true;
+                    scene.gravity = new BABYLON.Vector3(0, -0.15, 0);
+
+                    var camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0, 1.7, -3), scene);
+                    camera.setTarget(new BABYLON.Vector3(0, 1.7, 5));
+                    camera.speed = 0.12;
+                    camera.angularSensibility = 3000;
+                    camera.minZ = 0.05;
+                    camera.keysUp = [87]; camera.keysDown = [83];
+                    camera.keysLeft = [65]; camera.keysRight = [68];
+                    camera.checkCollisions = true;
+                    camera.ellipsoid = new BABYLON.Vector3(0.5, 0.85, 0.5);
+                    camera.applyGravity = true;
+                    camera.attachControl(cvs, true);
+
+                    cvs.addEventListener('click', function() { cvs.requestPointerLock(); });
+
+                    var light = new BABYLON.HemisphericLight('hl', new BABYLON.Vector3(0.1, 1, 0.1), scene);
+                    light.intensity = 0.015;
+                    light.diffuse = new BABYLON.Color3(0.1, 0.15, 0.1);
+                    light.groundColor = new BABYLON.Color3(0.01, 0.02, 0.01);
+
+                    // --- Flashlight (SpotLight) ---
+                    var flashSpot = new BABYLON.SpotLight('flash',
+                        camera.position.clone(),
+                        new BABYLON.Vector3(0, 0, 1),
+                        Math.PI / 4.5, 8, scene);
+                    flashSpot.intensity = 3.5;
+                    flashSpot.diffuse = new BABYLON.Color3(0.95, 0.9, 0.75);
+                    flashSpot.range = 35;
+
+                    // Flashlight 3D model in player's hand (updated each frame, not parented to camera)
+                    var flRoot = new BABYLON.TransformNode('flRoot', scene);
+                    flRoot.scaling.setAll(0.045);
+                    BABYLON.SceneLoader.ImportMesh('', 'data/', 'Flashlight.obj', scene, function(meshes) {
+                        meshes.forEach(function(m) {
+                            m.parent = flRoot;
+                            if (m.material) {
+                                m.material.disableLighting = true;
+                                m.material.emissiveColor = new BABYLON.Color3(0.35, 0.33, 0.3);
+                            }
+                        });
+                    });
+
+                    // --- Materials ---
+                    var groundMat = new BABYLON.StandardMaterial('groundMat', scene);
+                    groundMat.diffuseColor = new BABYLON.Color3(0.12, 0.15, 0.06);
+                    groundMat.specularColor = BABYLON.Color3.Black();
+                    groundMat.emissiveColor = BABYLON.Color3.Black();
+
+                    var ground = BABYLON.MeshBuilder.CreateGround('ground', {width: 120, height: 120}, scene);
+                    ground.material = groundMat;
+                    ground.checkCollisions = true;
+                    ground.freezeWorldMatrix();
+                    groundMat.freeze();
+
+                    // Invisible boundary walls
+                    for (var wi = 0; wi < 4; wi++) {
+                        var wall = BABYLON.MeshBuilder.CreateBox('wall' + wi, {
+                            width: wi < 2 ? 120 : 1, height: 8, depth: wi < 2 ? 1 : 120
+                        }, scene);
+                        wall.position.y = 4;
+                        if (wi === 0) wall.position.z = 60;
+                        if (wi === 1) wall.position.z = -10;
+                        if (wi === 2) wall.position.x = 55;
+                        if (wi === 3) wall.position.x = -55;
+                        wall.isVisible = false;
+                        wall.checkCollisions = true;
+                        wall.freezeWorldMatrix();
+                    }
+
+                    // Sky rectangle (window frame above canopy)
+                    var skyRect = BABYLON.MeshBuilder.CreatePlane('skyRect', {width: 36, height: 22}, scene);
+                    skyRect.position.set(5, 42, 30);
+                    skyRect.rotation.x = Math.PI / 2;
+                    var skyMat = new BABYLON.StandardMaterial('skyMat', scene);
+                    skyMat.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.25);
+                    skyMat.alpha = 0.35;
+                    skyMat.backFaceCulling = false;
+                    skyRect.material = skyMat;
+                    skyRect.freezeWorldMatrix();
+                    skyMat.freeze();
+
+                    // --- Helpers ---
+                    var signId = 0;
+                    var allSigns = [];
+
+                    // Tree positions queued for when model loads
+                    var treePositions = [];
+                    function queueTree(x, z, scale) {
+                        var s = scale || (0.15 + Math.random() * 0.1);
+                        treePositions.push({x: x, z: z, s: s, ry: Math.random() * Math.PI * 2});
+                    }
+
+                    // Load fir.obj and instance at all queued positions
+                    function spawnTrees() {
+                        BABYLON.SceneLoader.ImportMesh('', 'data/', 'MapleTree.obj', scene, function(meshes) {
+                            if (!meshes.length) return;
+                            // Parent all sub-meshes under a root
+                            var root = new BABYLON.TransformNode('treeRoot', scene);
+                            var leafTex = new BABYLON.Texture('data/maple_leaf.png', scene, false, true, BABYLON.Texture.TRILINEAR_SAMPLINGMODE);
+                            leafTex.hasAlpha = true;
+                            meshes.forEach(function(m) {
+                                m.parent = root; m.isVisible = false;
+                                if (m.material) {
+                                    m.material.emissiveColor = BABYLON.Color3.Black();
+                                    m.material.specularColor = BABYLON.Color3.Black();
+                                    m.material.backFaceCulling = false;
+                                    var isLeaf = m.material.name && m.material.name.indexOf('leaf') >= 0;
+                                    if (isLeaf) {
+                                        m.material.diffuseTexture = leafTex;
+                                        m.material.useAlphaFromDiffuseTexture = true;
+                                        m.material.transparencyMode = BABYLON.Material.MATERIAL_ALPHATEST;
+                                        m.material.alphaCutOff = 0.4;
+                                    }
+                                }
+                            });
+                            root.isVisible = false;
+                            treePositions.forEach(function(tp, i) {
+                                meshes.forEach(function(m) {
+                                    var inst = m.createInstance('tree_' + i + '_' + m.name);
+                                    inst.position.set(tp.x, 0, tp.z);
+                                    inst.scaling.setAll(tp.s);
+                                    inst.rotation.y = tp.ry;
+                                    inst.checkCollisions = true;
+                                    inst.freezeWorldMatrix();
+                                });
+                            });
+                            meshes.forEach(function(m) { if (m.material) m.material.freeze(); });
+                        });
+                    }
+
+                    // Sign model: flat in XZ (4.5 x 3.0), 0.37 thick in Y
+                    // Rotate upright (X+90), scale to ~1.0 wide, place at sign height
+                    var signQueue = [];
+                    var signModelLoaded = false;
+                    var signMeshes = [];
+
+                    BABYLON.SceneLoader.ImportMesh('', 'data/', 'sign.obj', scene, function(meshes) {
+                        signMeshes = meshes;
+                        var signRoot = new BABYLON.TransformNode('signRoot', scene);
+                        meshes.forEach(function(m) {
+                            m.parent = signRoot; m.isVisible = false;
+                            if (m.material) {
+                                m.material.specularColor = BABYLON.Color3.Black();
+                                m.material.emissiveColor = new BABYLON.Color3(0.06, 0.04, 0.02);
+                            }
+                        });
+                        signModelLoaded = true;
+                        signQueue.forEach(function(q) { placeSign(q); });
+                    });
+
+                    function placeSign(q) {
+                        var sc = q.sc || 0.5;
+                        signMeshes.forEach(function(m) {
+                            var inst = m.createInstance('sgn_' + q.id + '_' + m.name);
+                            inst.position.set(q.x, sc * 2.0, q.z);
+                            inst.rotation.x = -Math.PI / 2;
+                            inst.rotation.y = (q.rotY || 0) + Math.PI;
+                            inst.scaling.setAll(sc);
+                            inst.freezeWorldMatrix();
+                        });
+                    }
+
+                    function createSign(text, x, y, z, rotY, w, h) {
+                        var id = 'sgn' + (signId++);
+                        var sc = (w || 2.0) / 4.5;
+
+                        var q = {id: id, x: x, z: z, rotY: rotY || 0, sc: sc};
+                        if (signModelLoaded) placeSign(q);
+                        else signQueue.push(q);
+
+                        // Text overlay
+                        var signH = y || 1.3;
+                        var tw = 512, th = 256;
+                        var dt = new BABYLON.DynamicTexture(id + 'dt', {width: tw, height: th}, scene, false);
+                        var mat = new BABYLON.StandardMaterial(id + 'mat', scene);
+                        mat.diffuseTexture = dt; mat.emissiveTexture = dt;
+                        mat.emissiveColor = new BABYLON.Color3(0.12, 0.06, 0.03);
+                        mat.backFaceCulling = false;
+                        mat.disableLighting = true;
+                        mat.alpha = 0.95;
+                        var fw = (w || 2.0) * 0.7;
+                        var fh = fw * 0.45;
+                        var face = BABYLON.MeshBuilder.CreatePlane(id + 'f', {width: fw, height: fh, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+                        var rr = (rotY || 0) + Math.PI;
+                        face.position.set(x + Math.sin(rr) * 0.08, signH, z + Math.cos(rr) * 0.08);
+                        face.rotation.y = rr;
+                        face.material = mat;
+                        face.freezeWorldMatrix();
+
+                        function draw(txt, color) {
+                            var c = dt.getContext();
+                            c.clearRect(0, 0, tw, th);
+                            c.font = 'bold 36px monospace';
+                            c.fillStyle = color || '#cc2222';
+                            c.shadowColor = '#000';
+                            c.shadowBlur = 6;
+                            c.fillText(txt, 20, th / 2 + 12);
+                            c.shadowBlur = 0;
+                            dt.update();
+                        }
+                        draw(text);
+
+                        var s = {mesh: face, setText: function(t, c) { draw(t, c); }};
+                        allSigns.push(s);
+                        return s;
+                    }
+
+                    // --- Forest generation ---
+                    function isOnPath(x, z) {
+                        if (x * x + z * z < 70) return true;
+                        if (Math.abs(x) < 3.5 && z > 6 && z < 38) return true;
+                        if (z > 36 && z < 72 && x > -2 && x < 17) return true;
+                        if (z > 36 && z < 56 && x < 0 && x > -14) return true;
+                        var dz = 5 + Math.abs(x + 5) * 0.3;
+                        if (x < -4 && x > -34 && Math.abs(z - dz) < 4) return true;
+                        dz = 5 + Math.abs(x - 5) * 0.3;
+                        if (x > 4 && x < 34 && Math.abs(z - dz) < 4) return true;
+                        return false;
+                    }
+
+                    var treeCount = 0;
+                    for (var ti = 0; ti < 200 && treeCount < 60; ti++) {
+                        var tx = (Math.random() - 0.5) * 100;
+                        var tz = Math.random() * 75 - 8;
+                        if (!isOnPath(tx, tz)) { queueTree(tx, tz); treeCount++; }
+                    }
+
+                    // Labeled trees along paths
+                    [   {x:-4, z:13, t:'/System'}, {x:4, z:22, t:'/System/Archive'},
+                        {x:-7, z:5, t:'/Documents'}, {x:7, z:4, t:'/Desktop'},
+                        {x:-3, z:32, t:'/System/logs'}, {x:13, z:46, t:'/System/Archive/...'},
+                        {x:-13, z:9, t:'/Pictures'}, {x:16, z:10, t:'/Users'}
+                    ].forEach(function(lt) {
+                        queueTree(lt.x, lt.z);
+                        createSign(lt.t, lt.x + 3, 1.3, lt.z, 0, 2.2, 0.4);
+                    });
+
+                    // Clearing directional signs
+                    var signSystem = createSign('/System  >', 0, 1.4, 5.5, 0);
+                    var signDocs = createSign('/Documents/Personal  >', -4.5, 1.4, 3.5, 0);
+                    var signDesktop = createSign('/Desktop/message.txt  >', 4.5, 1.4, 3.5, 0);
+
+                    // Dead-end signs (initially blank)
+                    var deadDocSign = createSign('', -28, 1.3, 12, 0);
+                    queueTree(28, 12, 1.5);
+                    var monitorSign = createSign('', 28, 1.5, 12.3, 0, 2, 0.8);
+                    var deadLogsSign = createSign('', -9, 1.3, 53, 0);
+
+                    // Archive path deeper signs
+                    createSign('OPERATION_MIRROR.txt  >', 8, 1.4, 43, 0);
+                    createSign('batch_7_raw.txt', 14, 1.3, 48, 0);
+                    createSign('containment_protocol.txt', 7, 1.3, 53, 0);
+                    createSign('previous_researcher.txt', 14, 1.3, 58, 0);
+
+                    // MIRROR tree (massive version of the fir)
+                    queueTree(12, 66, 0.45);
+                    var mirrorLabel = createSign('OPERATION_MIRROR.txt', 12, 1.8, 67.5, 0, 3.2, 0.7);
+
+                    // Glow sphere around the mirror tree
+                    var mirrorGlow = BABYLON.MeshBuilder.CreateSphere('mirrorGlow', {diameter: 10, segments: 12}, scene);
+                    mirrorGlow.position.set(12, 5, 66);
+                    var glowMat = new BABYLON.StandardMaterial('glowMat', scene);
+                    glowMat.emissiveColor = new BABYLON.Color3(0.06, 0.12, 0.06);
+                    glowMat.alpha = 0.08;
+                    glowMat.backFaceCulling = false;
+                    mirrorGlow.material = glowMat;
+
+                    // Spawn all queued trees from OBJ
+                    spawnTrees();
+
+                    // Ground paper
+                    var paperMat = new BABYLON.StandardMaterial('paperMat', scene);
+                    paperMat.diffuseColor = new BABYLON.Color3(0.25, 0.23, 0.2);
+                    paperMat.specularColor = BABYLON.Color3.Black();
+                    paperMat.emissiveColor = new BABYLON.Color3(0.05, 0.05, 0.04);
+                    for (var pi = 0; pi < 35; pi++) {
+                        var pp = BABYLON.MeshBuilder.CreatePlane('paper' + pi, {
+                            width: 0.35 + Math.random() * 0.3, height: 0.45 + Math.random() * 0.2
+                        }, scene);
+                        pp.position.set((Math.random() - 0.5) * 60, 0.03, Math.random() * 60);
+                        pp.rotation.x = Math.PI / 2;
+                        pp.rotation.y = Math.random() * Math.PI * 2;
+                        pp.material = paperMat;
+                        pp.freezeWorldMatrix();
+                    }
+                    paperMat.freeze();
+
+                    // --- State ---
+                    var phase = 0, wrongCount = 0, interactable = false;
+                    var cursorAppearances = 0, cursorVisible = false, cursorTimer = 0;
+
+                    // --- Audio ---
+                    var actx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (actx.state === 'suspended') actx.resume();
+
+                    var windBuf = actx.createBuffer(1, actx.sampleRate * 4, actx.sampleRate);
+                    var wd = windBuf.getChannelData(0);
+                    for (var j = 0; j < wd.length; j++) wd[j] = Math.random() * 2 - 1;
+                    var windSrc = actx.createBufferSource(); windSrc.buffer = windBuf; windSrc.loop = true;
+                    var windFilt = actx.createBiquadFilter(); windFilt.type = 'bandpass'; windFilt.frequency.value = 400; windFilt.Q.value = 0.8;
+                    var windGain = actx.createGain(); windGain.gain.value = 0.06;
+                    windSrc.connect(windFilt); windFilt.connect(windGain); windGain.connect(actx.destination); windSrc.start();
+
+                    var drone = actx.createOscillator(); drone.type = 'sine'; drone.frequency.value = 42;
+                    var droneGain = actx.createGain(); droneGain.gain.value = 0.025;
+                    drone.connect(droneGain); droneGain.connect(actx.destination); drone.start();
+
+                    var lastStepTime = 0;
+                    function playStep() {
+                        var t = actx.currentTime;
+                        if (t - lastStepTime < 0.42) return;
+                        lastStepTime = t;
+                        var bl = Math.floor(actx.sampleRate * 0.07);
+                        var sb = actx.createBuffer(1, bl, actx.sampleRate);
+                        var sd = sb.getChannelData(0);
+                        for (var k = 0; k < bl; k++) sd[k] = (Math.random() * 2 - 1) * Math.exp(-k / (bl * 0.18));
+                        var sn = actx.createBufferSource(); sn.buffer = sb;
+                        var sf = actx.createBiquadFilter(); sf.type = 'lowpass'; sf.frequency.value = 320;
+                        var sg = actx.createGain(); sg.gain.value = 0.1;
+                        sn.connect(sf); sf.connect(sg); sg.connect(actx.destination);
+                        sn.start(); sn.stop(t + 0.12);
+                    }
+
+                    // Distant typing clicks
+                    var typingInt = setInterval(function() {
+                        if (phase >= 5) return;
+                        if (Math.random() > 0.25) return;
+                        var bl = Math.floor(actx.sampleRate * 0.015);
+                        var tb = actx.createBuffer(1, bl, actx.sampleRate);
+                        var td = tb.getChannelData(0);
+                        for (var k = 0; k < bl; k++) td[k] = (Math.random() * 2 - 1) * Math.exp(-k / (bl * 0.08));
+                        var tn = actx.createBufferSource(); tn.buffer = tb;
+                        var tf = actx.createBiquadFilter(); tf.type = 'highpass'; tf.frequency.value = 3200;
+                        var tg = actx.createGain(); tg.gain.value = 0.035;
+                        tn.connect(tf); tf.connect(tg); tg.connect(actx.destination);
+                        tn.start(); tn.stop(actx.currentTime + 0.025);
+                    }, 180);
+
+                    // --- Cursor figure ---
+                    var cursorFigure = BABYLON.MeshBuilder.CreateBox('cursorFig', {width: 0.12, height: 3.2, depth: 0.06}, scene);
+                    var cfMat = new BABYLON.StandardMaterial('cfMat', scene);
+                    cfMat.diffuseColor = BABYLON.Color3.Black();
+                    cfMat.emissiveColor = new BABYLON.Color3(0.01, 0.01, 0.01);
+                    cfMat.specularColor = BABYLON.Color3.Black();
+                    cursorFigure.material = cfMat;
+                    cursorFigure.isVisible = false;
+
+                    function spawnCursor() {
+                        if (cursorAppearances >= 3) return;
+                        var ri = gazeFull ? (gazeIdx + 120) % 360 : Math.max(0, gazeIdx - 240);
+                        var look = gazeRing[ri];
+                        if (!look) return;
+                        var dist = [26, 18, 12][cursorAppearances];
+                        cursorFigure.position.set(
+                            camera.position.x + look.x * dist,
+                            1.6,
+                            camera.position.z + look.z * dist
+                        );
+                        cursorFigure.isVisible = true;
+                        cursorVisible = true;
+                        cursorAppearances++;
+                    }
+
+                    function checkCursorLook() {
+                        if (!cursorVisible) return;
+                        var toFig = cursorFigure.position.subtract(camera.position).normalize();
+                        var dot = BABYLON.Vector3.Dot(toFig, camera.getForwardRay().direction);
+                        if (dot > 0.9) {
+                            cursorFigure.isVisible = false;
+                            cursorVisible = false;
+                            var msgs = ['i was there when you looked', 'you turned too slowly', 'i see where you look'];
+                            createSign(msgs[cursorAppearances - 1] || msgs[0],
+                                cursorFigure.position.x, 1.3, cursorFigure.position.z, 0, 3, 0.4);
+                            cursorTimer = performance.now() + 7000 + Math.random() * 5000;
+                        }
+                    }
+
+                    // --- Zone triggers ---
+                    var zones = [
+                        {x:0, z:12, r:3, id:'enter_system', once:false, fired:false},
+                        {x:-12, z:8, r:4, id:'enter_documents', once:false, fired:false},
+                        {x:12, z:8, r:4, id:'enter_desktop', once:false, fired:false},
+                        {x:-28, z:12, r:4, id:'dead_documents', once:false, fired:false},
+                        {x:28, z:12, r:4, id:'dead_desktop', once:false, fired:false},
+                        {x:0, z:38, r:3, id:'system_fork', once:true, fired:false},
+                        {x:-9, z:53, r:4, id:'dead_logs', once:false, fired:false},
+                        {x:10, z:50, r:3, id:'enter_archive', once:true, fired:false},
+                        {x:12, z:62, r:5, id:'near_mirror', once:true, fired:false}
+                    ];
+
+                    function checkZones() {
+                        var cx = camera.position.x, cz = camera.position.z;
+                        for (var i = 0; i < zones.length; i++) {
+                            var z = zones[i];
+                            if (z.fired) continue;
+                            var dx = cx - z.x, dz = cz - z.z;
+                            if (dx * dx + dz * dz < z.r * z.r) {
+                                z.fired = true;
+                                handleZone(z.id);
+                            }
+                        }
+                    }
+
+                    function resetWalkZones() {
+                        for (var i = 0; i < zones.length; i++) {
+                            if (!zones[i].once) zones[i].fired = false;
+                        }
+                    }
+
+                    function fadeAndTeleport(x, z, cb) {
+                        fade.className = 'active';
+                        setTimeout(function() {
+                            camera.position.set(x, 1.7, z);
+                            camera.setTarget(new BABYLON.Vector3(x, 1.7, z + 5));
+                            resetWalkZones();
+                            setTimeout(function() { fade.className = ''; if (cb) cb(); }, 600);
+                        }, 800);
+                    }
+
+                    function handleZone(id) {
+                        switch (id) {
+                            case 'enter_system':
+                                pathEl.textContent = '/System';
+                                if (phase < 1) phase = 1;
+                                break;
+                            case 'enter_documents':
+                                pathEl.textContent = '/Documents/Personal';
+                                if (phase < 1) phase = 1;
+                                break;
+                            case 'enter_desktop':
+                                pathEl.textContent = '/Desktop';
+                                if (phase < 1) phase = 1;
+                                break;
+                            case 'dead_documents':
+                                wrongCount++;
+                                deadDocSign.setText('not yet');
+                                fadeAndTeleport(0, -3, function() { pathEl.textContent = '/'; });
+                                break;
+                            case 'dead_desktop':
+                                wrongCount++;
+                                monitorSign.setText('i have not written that yet');
+                                fadeAndTeleport(0, -3, function() { pathEl.textContent = '/'; });
+                                break;
+                            case 'system_fork':
+                                if (phase < 2) {
+                                    phase = 2;
+                                    createSign('you picked system first', 2, 1.3, 26, 0, 2.8, 0.4);
+                                    createSign('you are making a map', -2, 1.3, 31, 0, 2.4, 0.4);
+                                    droneGain.gain.linearRampToValueAtTime(0.05, actx.currentTime + 2);
+                                    drone.frequency.linearRampToValueAtTime(36, actx.currentTime + 3);
+                                }
+                                break;
+                            case 'dead_logs':
+                                wrongCount++;
+                                deadLogsSign.setText('wrong branch');
+                                fadeAndTeleport(0, 36, function() { pathEl.textContent = '/System'; });
+                                break;
+                            case 'enter_archive':
+                                if (phase < 3) {
+                                    phase = 3;
+                                    pathEl.textContent = '/System/Archive';
+                                    cursorTimer = performance.now() + 4000;
+                                    droneGain.gain.linearRampToValueAtTime(0.07, actx.currentTime + 2);
+                                    windGain.gain.linearRampToValueAtTime(0.03, actx.currentTime + 2);
+                                }
+                                break;
+                            case 'near_mirror':
+                                if (phase < 4) {
+                                    phase = 4;
+                                    interactable = true;
+                                    promptEl.textContent = 'Press E to read';
+                                    promptEl.style.opacity = '1';
+                                }
+                                break;
+                        }
+                    }
+
+                    // --- Interaction ---
+                    function onKey(e) {
+                        if (e.keyCode === 69 && interactable && phase === 4) {
+                            phase = 5; interactable = false;
+                            promptEl.style.opacity = '0';
+                            triggerFinale();
+                        }
+                    }
+                    window.addEventListener('keydown', onKey);
+
+                    function triggerFinale() {
+                        windGain.gain.linearRampToValueAtTime(0, actx.currentTime + 0.3);
+                        droneGain.gain.linearRampToValueAtTime(0, actx.currentTime + 0.3);
+                        setTimeout(function() {
+                            allSigns.forEach(function(s) { s.setText('MIRROR', '#aa3030'); });
+                            pathEl.textContent = 'MIRROR';
+                            pathEl.style.color = '#aa4040';
+                        }, 1000);
+                        setTimeout(function() {
+                            fade.style.background = '#fff';
+                            fade.className = 'active';
+                            setTimeout(endScene, 400);
+                        }, 2800);
+                    }
+
+                    // --- Cleanup ---
+                    function endScene() {
+                        window.removeEventListener('keydown', onKey);
+                        window.removeEventListener('resize', onResize);
+                        clearInterval(typingInt);
+                        engine.stopRenderLoop();
+                        scene.dispose(); engine.dispose();
+                        try { drone.stop(); } catch(e) {}
+                        try { windSrc.stop(); } catch(e) {}
+                        try { actx.close(); } catch(e) {}
+                        overlay.className = '';
+                        fade.className = ''; fade.style.background = '#000';
+                        promptEl.textContent = ''; pathEl.textContent = '';
+                        pathEl.style.color = '';
+                        loadingEl.style.display = '';
+                        window._mysterySceneLock = false;
+                    }
+
+                    // --- Render loop ---
+                    var lastX = camera.position.x, lastY = camera.position.y, lastZ = camera.position.z;
+                    var gazeRing = new Array(360), gazeIdx = 0, gazeFull = false;
+                    engine.runRenderLoop(function() {
+                        var fwd = camera.getForwardRay().direction;
+                        var right = BABYLON.Vector3.Cross(fwd, BABYLON.Vector3.Up()).normalize();
+                        // Flashlight model in bottom-right of view
+                        var mX = camera.position.x + right.x * 0.45 + fwd.x * 1.2;
+                        var mY = camera.position.y - 0.35;
+                        var mZ = camera.position.z + right.z * 0.45 + fwd.z * 1.2;
+                        flRoot.position.set(mX, mY, mZ);
+                        flRoot.lookAt(new BABYLON.Vector3(mX + fwd.x, mY + fwd.y, mZ + fwd.z));
+                        // Light comes from flashlight tip (further forward)
+                        flashSpot.position.set(
+                            mX + fwd.x * 0.25,
+                            mY + 0.05,
+                            mZ + fwd.z * 0.25
+                        );
+                        flashSpot.direction.copyFrom(fwd);
+
+                        scene.render();
+                        var dx = camera.position.x - lastX, dz = camera.position.z - lastZ;
+                        if (dx * dx + dz * dz > 0.0009) playStep();
+                        lastX = camera.position.x; lastY = camera.position.y; lastZ = camera.position.z;
+                        if (camera.position.y < 1.4) camera.position.y = 1.7;
+                        if (camera.position.y > 3) camera.position.y = 1.7;
+                        checkZones();
+                        gazeRing[gazeIdx] = {x: fwd.x, y: fwd.y, z: fwd.z};
+                        gazeIdx = (gazeIdx + 1) % 360;
+                        if (gazeIdx === 0) gazeFull = true;
+                        if (phase >= 3 && phase < 5) {
+                            checkCursorLook();
+                            if (!cursorVisible && performance.now() > cursorTimer && cursorAppearances < 3) spawnCursor();
+                        }
+                        var gt = performance.now() * 0.001;
+                        glowMat.emissiveColor.g = 0.08 + Math.sin(gt * 2) * 0.04;
+                        glowMat.alpha = 0.12 + Math.sin(gt * 1.5) * 0.05;
+                    });
+
+                    var onResize = function() { engine.resize(); };
+                    window.addEventListener('resize', onResize);
+
+                    // Safety timeout (5 min max)
+                    setTimeout(function() { if (phase < 5) endScene(); }, 300000);
+                }
+
+                // Lazy-load Babylon.js if not present
+                if (typeof BABYLON !== 'undefined') {
+                    boot();
+                } else {
+                    window._mysterySceneLock = true;
+                    overlay.className = 'active';
+                    loadingEl.style.display = 'flex';
+                    var s1 = document.createElement('script');
+                    s1.src = 'https://cdn.babylonjs.com/babylon.js';
+                    s1.onload = function() {
+                        var s2 = document.createElement('script');
+                        s2.src = 'https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js';
+                        s2.onload = function() { window._mysterySceneLock = false; boot(); };
+                        document.head.appendChild(s2);
+                    };
+                    document.head.appendChild(s1);
+                }
+            };
+        </script>
+        {{{ SCRIPT }}}
+    </body>
+</html>
