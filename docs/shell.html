@@ -2110,16 +2110,6 @@
                     light.groundColor = new BABYLON.Color3(0.08, 0.12, 0.06);
 
                     // --- Materials ---
-                    var treeMat = new BABYLON.StandardMaterial('treeMat', scene);
-                    treeMat.diffuseColor = new BABYLON.Color3(0.4, 0.3, 0.18);
-                    treeMat.specularColor = BABYLON.Color3.Black();
-                    treeMat.emissiveColor = new BABYLON.Color3(0.18, 0.13, 0.08);
-
-                    var branchMat = new BABYLON.StandardMaterial('branchMat', scene);
-                    branchMat.diffuseColor = new BABYLON.Color3(0.32, 0.24, 0.14);
-                    branchMat.specularColor = BABYLON.Color3.Black();
-                    branchMat.emissiveColor = new BABYLON.Color3(0.12, 0.09, 0.05);
-
                     var groundMat = new BABYLON.StandardMaterial('groundMat', scene);
                     groundMat.diffuseColor = new BABYLON.Color3(0.15, 0.2, 0.08);
                     groundMat.specularColor = BABYLON.Color3.Black();
@@ -2157,29 +2147,38 @@
                     var signId = 0;
                     var allSigns = [];
 
-                    function createTree(x, z, h, r) {
-                        h = h || (5 + Math.random() * 5);
-                        r = r || (0.3 + Math.random() * 0.2);
-                        var trunk = BABYLON.MeshBuilder.CreateCylinder('t' + signId++, {
-                            height: h, diameterTop: r * 0.5, diameterBottom: r * 2, tessellation: 6
-                        }, scene);
-                        trunk.position.set(x, h / 2, z);
-                        trunk.material = treeMat;
-                        trunk.checkCollisions = true;
-                        var side = Math.random() * Math.PI * 2;
-                        var nbr = 2 + Math.floor(Math.random() * 3);
-                        for (var i = 0; i < nbr; i++) {
-                            var by = h * 0.3 + (i / nbr) * h * 0.5;
-                            var blen = 0.8 + Math.random() * 1.2;
-                            var br = BABYLON.MeshBuilder.CreateCylinder('br' + signId++, {
-                                height: blen, diameter: 0.12, tessellation: 4
-                            }, scene);
-                            br.material = branchMat;
-                            br.rotation.z = Math.PI / 2;
-                            br.rotation.y = side + (Math.random() - 0.5) * 0.3;
-                            br.position.set(x + Math.cos(side) * blen / 2, by, z + Math.sin(side) * blen / 2);
-                        }
-                        return trunk;
+                    // Tree positions queued for when model loads
+                    var treePositions = [];
+                    function queueTree(x, z, scale) {
+                        treePositions.push({x: x, z: z, s: scale || (1.2 + Math.random() * 0.8), ry: Math.random() * Math.PI * 2});
+                    }
+
+                    // Load fir.obj and instance at all queued positions
+                    function spawnTrees() {
+                        BABYLON.SceneLoader.ImportMesh('', 'data/', 'fir.obj', scene, function(meshes) {
+                            if (!meshes.length) return;
+                            // Parent all sub-meshes under a root
+                            var root = new BABYLON.TransformNode('treeRoot', scene);
+                            meshes.forEach(function(m) {
+                                m.parent = root; m.isVisible = false;
+                                // Darken materials for horror
+                                if (m.material) {
+                                    m.material.emissiveColor = new BABYLON.Color3(0.08, 0.06, 0.04);
+                                    m.material.specularColor = BABYLON.Color3.Black();
+                                }
+                            });
+                            root.isVisible = false;
+                            // Create instances at each position
+                            treePositions.forEach(function(tp, i) {
+                                meshes.forEach(function(m) {
+                                    var inst = m.createInstance('tree_' + i + '_' + m.name);
+                                    inst.position.set(tp.x, 0, tp.z);
+                                    inst.scaling.setAll(tp.s);
+                                    inst.rotation.y = tp.ry;
+                                    inst.checkCollisions = true;
+                                });
+                            });
+                        });
                     }
 
                     function createSign(text, x, y, z, rotY, w, h) {
@@ -2225,7 +2224,7 @@
                     for (var ti = 0; ti < 200 && treeCount < 110; ti++) {
                         var tx = (Math.random() - 0.5) * 100;
                         var tz = Math.random() * 75 - 8;
-                        if (!isOnPath(tx, tz)) { createTree(tx, tz); treeCount++; }
+                        if (!isOnPath(tx, tz)) { queueTree(tx, tz); treeCount++; }
                     }
 
                     // Labeled trees along paths
@@ -2234,7 +2233,7 @@
                         {x:-3, z:32, t:'/System/logs'}, {x:13, z:46, t:'/System/Archive/...'},
                         {x:-13, z:9, t:'/Pictures'}, {x:16, z:10, t:'/Users'}
                     ].forEach(function(lt) {
-                        createTree(lt.x, lt.z);
+                        queueTree(lt.x, lt.z);
                         createSign(lt.t, lt.x, 2.5, lt.z + 0.25, 0, 2.5, 0.4);
                     });
 
@@ -2245,7 +2244,7 @@
 
                     // Dead-end signs (initially blank)
                     var deadDocSign = createSign('', -28, 2, 12, 0);
-                    createTree(28, 12, 8, 0.2);
+                    queueTree(28, 12, 1.5);
                     var monitorSign = createSign('', 28, 2.5, 12.3, 0, 2, 1.2);
                     var deadLogsSign = createSign('', -9, 2, 53, Math.PI);
 
@@ -2255,28 +2254,21 @@
                     createSign('containment_protocol.txt', 7, 2.2, 53, 0.1);
                     createSign('previous_researcher.txt', 14, 2.2, 58, -0.3);
 
-                    // MIRROR tree (massive, glowing)
-                    var mirrorTree = BABYLON.MeshBuilder.CreateCylinder('mirrorTree', {
-                        height: 16, diameterTop: 0.4, diameterBottom: 1.4, tessellation: 8
-                    }, scene);
-                    mirrorTree.position.set(12, 8, 66);
-                    var mirrorMat = new BABYLON.StandardMaterial('mirrorMat', scene);
-                    mirrorMat.diffuseColor = new BABYLON.Color3(0.15, 0.12, 0.08);
-                    mirrorMat.emissiveColor = new BABYLON.Color3(0.04, 0.06, 0.03);
-                    mirrorMat.specularColor = BABYLON.Color3.Black();
-                    mirrorTree.material = mirrorMat;
-                    mirrorTree.checkCollisions = true;
-                    var mirrorLabel = createSign('OPERATION_MIRROR.txt', 12, 4.5, 66.9, 0, 3.2, 0.7);
+                    // MIRROR tree (massive version of the fir)
+                    queueTree(12, 66, 3.0);
+                    var mirrorLabel = createSign('OPERATION_MIRROR.txt', 12, 6, 67.5, 0, 3.2, 0.7);
 
-                    var mirrorGlow = BABYLON.MeshBuilder.CreateCylinder('mirrorGlow', {
-                        height: 17, diameterTop: 1, diameterBottom: 2.2, tessellation: 8
-                    }, scene);
-                    mirrorGlow.position.set(12, 8, 66);
+                    // Glow sphere around the mirror tree
+                    var mirrorGlow = BABYLON.MeshBuilder.CreateSphere('mirrorGlow', {diameter: 10, segments: 12}, scene);
+                    mirrorGlow.position.set(12, 5, 66);
                     var glowMat = new BABYLON.StandardMaterial('glowMat', scene);
                     glowMat.emissiveColor = new BABYLON.Color3(0.06, 0.12, 0.06);
-                    glowMat.alpha = 0.12;
+                    glowMat.alpha = 0.08;
                     glowMat.backFaceCulling = false;
                     mirrorGlow.material = glowMat;
+
+                    // Spawn all queued trees from OBJ
+                    spawnTrees();
 
                     // Ground paper
                     var paperMat = new BABYLON.StandardMaterial('paperMat', scene);
@@ -2566,7 +2558,7 @@
                     s1.src = 'https://cdn.babylonjs.com/babylon.js';
                     s1.onload = function() {
                         var s2 = document.createElement('script');
-                        s2.src = 'https://cdn.babylonjs.com/gui/babylon.gui.min.js';
+                        s2.src = 'https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js';
                         s2.onload = function() { window._mysterySceneLock = false; boot(); };
                         document.head.appendChild(s2);
                     };
