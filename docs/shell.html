@@ -2140,6 +2140,8 @@
                     var ground = BABYLON.MeshBuilder.CreateGround('ground', {width: 120, height: 120}, scene);
                     ground.material = groundMat;
                     ground.checkCollisions = true;
+                    ground.freezeWorldMatrix();
+                    groundMat.freeze();
 
                     // Invisible boundary walls
                     for (var wi = 0; wi < 4; wi++) {
@@ -2153,6 +2155,7 @@
                         if (wi === 3) wall.position.x = -55;
                         wall.isVisible = false;
                         wall.checkCollisions = true;
+                        wall.freezeWorldMatrix();
                     }
 
                     // Sky rectangle (window frame above canopy)
@@ -2164,6 +2167,8 @@
                     skyMat.alpha = 0.35;
                     skyMat.backFaceCulling = false;
                     skyRect.material = skyMat;
+                    skyRect.freezeWorldMatrix();
+                    skyMat.freeze();
 
                     // --- Helpers ---
                     var signId = 0;
@@ -2190,7 +2195,6 @@
                                 }
                             });
                             root.isVisible = false;
-                            // Create instances at each position
                             treePositions.forEach(function(tp, i) {
                                 meshes.forEach(function(m) {
                                     var inst = m.createInstance('tree_' + i + '_' + m.name);
@@ -2198,8 +2202,10 @@
                                     inst.scaling.setAll(tp.s);
                                     inst.rotation.y = tp.ry;
                                     inst.checkCollisions = true;
+                                    inst.freezeWorldMatrix();
                                 });
                             });
+                            meshes.forEach(function(m) { if (m.material) m.material.freeze(); });
                         });
                     }
 
@@ -2211,6 +2217,8 @@
                     sharedPlankMat.diffuseColor = new BABYLON.Color3(0.4, 0.25, 0.12);
                     sharedPlankMat.emissiveColor = new BABYLON.Color3(0.1, 0.06, 0.03);
                     sharedPlankMat.specularColor = BABYLON.Color3.Black();
+                    sharedPostMat.freeze();
+                    sharedPlankMat.freeze();
 
                     function createSign(text, x, y, z, rotY, w, h) {
                         var id = 'sgn' + (signId++);
@@ -2222,12 +2230,14 @@
                         var post = BABYLON.MeshBuilder.CreateCylinder(id + 'post', {diameter: 0.18, height: postH, tessellation: 8}, scene);
                         post.position.set(x, postH * 0.5, z);
                         post.material = sharedPostMat;
+                        post.freezeWorldMatrix();
 
                         // Wooden plank
                         var plank = BABYLON.MeshBuilder.CreateBox(id + 'b', {width: w, height: h, depth: 0.06}, scene);
                         plank.position.set(x, signH, z);
                         plank.rotation.y = rotY || 0;
                         plank.material = sharedPlankMat;
+                        plank.freezeWorldMatrix();
 
                         // Text face — offset slightly in front of plank
                         var face = BABYLON.MeshBuilder.CreatePlane(id, {width: w * 0.92, height: h * 0.8}, scene);
@@ -2244,6 +2254,7 @@
                         mat.backFaceCulling = false;
                         mat.disableLighting = true;
                         face.material = mat;
+                        face.freezeWorldMatrix();
 
                         function draw(txt, color) {
                             var c = dt.getContext();
@@ -2343,12 +2354,13 @@
                         pp.rotation.x = Math.PI / 2;
                         pp.rotation.y = Math.random() * Math.PI * 2;
                         pp.material = paperMat;
+                        pp.freezeWorldMatrix();
                     }
+                    paperMat.freeze();
 
                     // --- State ---
                     var phase = 0, wrongCount = 0, interactable = false;
                     var cursorAppearances = 0, cursorVisible = false, cursorTimer = 0;
-                    var gazeHistory = [];
 
                     // --- Audio ---
                     var actx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2408,14 +2420,14 @@
 
                     function spawnCursor() {
                         if (cursorAppearances >= 3) return;
-                        var idx = Math.max(0, gazeHistory.length - 240);
-                        var look = gazeHistory[idx];
+                        var ri = gazeFull ? (gazeIdx + 120) % 360 : Math.max(0, gazeIdx - 240);
+                        var look = gazeRing[ri];
                         if (!look) return;
                         var dist = [26, 18, 12][cursorAppearances];
                         cursorFigure.position.set(
-                            camera.position.x + look.dir.x * dist,
+                            camera.position.x + look.x * dist,
                             1.6,
-                            camera.position.z + look.dir.z * dist
+                            camera.position.z + look.z * dist
                         );
                         cursorFigure.isVisible = true;
                         cursorVisible = true;
@@ -2580,9 +2592,9 @@
                     }
 
                     // --- Render loop ---
-                    var lastPos = camera.position.clone();
+                    var lastX = camera.position.x, lastY = camera.position.y, lastZ = camera.position.z;
+                    var gazeRing = new Array(360), gazeIdx = 0, gazeFull = false;
                     engine.runRenderLoop(function() {
-                        // Update flashlight model + spotlight to hand position
                         var fwd = camera.getForwardRay().direction;
                         var right = BABYLON.Vector3.Cross(fwd, BABYLON.Vector3.Up()).normalize();
                         var handX = camera.position.x + right.x * 0.4 + fwd.x * 0.35;
@@ -2594,14 +2606,15 @@
                         flRoot.rotation.y = Math.atan2(fwd.x, fwd.z);
 
                         scene.render();
-                        var moved = BABYLON.Vector3.Distance(camera.position, lastPos);
-                        if (moved > 0.03) playStep();
-                        lastPos = camera.position.clone();
+                        var dx = camera.position.x - lastX, dz = camera.position.z - lastZ;
+                        if (dx * dx + dz * dz > 0.0009) playStep();
+                        lastX = camera.position.x; lastY = camera.position.y; lastZ = camera.position.z;
                         if (camera.position.y < 1.4) camera.position.y = 1.7;
                         if (camera.position.y > 3) camera.position.y = 1.7;
                         checkZones();
-                        gazeHistory.push({dir: camera.getForwardRay().direction.clone()});
-                        if (gazeHistory.length > 360) gazeHistory.shift();
+                        gazeRing[gazeIdx] = {x: fwd.x, y: fwd.y, z: fwd.z};
+                        gazeIdx = (gazeIdx + 1) % 360;
+                        if (gazeIdx === 0) gazeFull = true;
                         if (phase >= 3 && phase < 5) {
                             checkCursorLook();
                             if (!cursorVisible && performance.now() > cursorTimer && cursorAppearances < 3) spawnCursor();
