@@ -2118,17 +2118,15 @@
                     flashSpot.diffuse = new BABYLON.Color3(0.95, 0.9, 0.75);
                     flashSpot.range = 35;
 
-                    // Flashlight 3D model in player's hand
+                    // Flashlight 3D model in player's hand (updated each frame, not parented to camera)
+                    var flRoot = new BABYLON.TransformNode('flRoot', scene);
+                    flRoot.scaling.setAll(0.045);
                     BABYLON.SceneLoader.ImportMesh('', 'data/', 'Flashlight.obj', scene, function(meshes) {
-                        var flRoot = new BABYLON.TransformNode('flRoot', scene);
-                        flRoot.parent = camera;
-                        flRoot.position.set(0.45, -0.55, 0.3);
-                        flRoot.rotation.set(0, Math.PI, 0);
-                        flRoot.scaling.setAll(0.05);
                         meshes.forEach(function(m) {
                             m.parent = flRoot;
                             if (m.material) {
-                                m.material.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+                                m.material.disableLighting = true;
+                                m.material.emissiveColor = new BABYLON.Color3(0.35, 0.33, 0.3);
                             }
                         });
                     });
@@ -2174,7 +2172,7 @@
                     // Tree positions queued for when model loads
                     var treePositions = [];
                     function queueTree(x, z, scale) {
-                        treePositions.push({x: x, z: z, s: scale || (1.2 + Math.random() * 0.8), ry: Math.random() * Math.PI * 2});
+                        treePositions.push({x: x, z: z, s: scale || (2.5 + Math.random() * 1.5), ry: Math.random() * Math.PI * 2});
                     }
 
                     // Load fir.obj and instance at all queued positions
@@ -2296,7 +2294,7 @@
                         {x:-13, z:9, t:'/Pictures'}, {x:16, z:10, t:'/Users'}
                     ].forEach(function(lt) {
                         queueTree(lt.x, lt.z);
-                        createSign(lt.t, lt.x, 1.3, lt.z + 0.25, 0, 2.2, 0.4);
+                        createSign(lt.t, lt.x + 3, 1.3, lt.z, 0, 2.2, 0.4);
                     });
 
                     // Clearing directional signs
@@ -2317,7 +2315,7 @@
                     createSign('previous_researcher.txt', 14, 1.3, 58, 0);
 
                     // MIRROR tree (massive version of the fir)
-                    queueTree(12, 66, 3.0);
+                    queueTree(12, 66, 6.0);
                     var mirrorLabel = createSign('OPERATION_MIRROR.txt', 12, 1.8, 67.5, 0, 3.2, 0.7);
 
                     // Glow sphere around the mirror tree
@@ -2331,31 +2329,6 @@
 
                     // Spawn all queued trees from OBJ
                     spawnTrees();
-
-                    // Scatter grass patches
-                    BABYLON.SceneLoader.ImportMesh('', 'data/', 'grass.obj', scene, function(gm) {
-                        if (!gm.length) return;
-                        var grassRoot = new BABYLON.TransformNode('grassRoot', scene);
-                        gm.forEach(function(m) {
-                            m.parent = grassRoot; m.isVisible = false;
-                            if (m.material) {
-                                m.material.emissiveColor = new BABYLON.Color3(0.02, 0.04, 0.02);
-                                m.material.specularColor = BABYLON.Color3.Black();
-                            }
-                        });
-                        for (var gi = 0; gi < 25; gi++) {
-                            var gx = (Math.random() - 0.5) * 90;
-                            var gz = Math.random() * 70 - 5;
-                            gm.forEach(function(m) {
-                                var inst = m.createInstance('grass_' + gi + '_' + m.name);
-                                inst.position.set(gx, 0.02, gz);
-                                var gs = 0.018 + Math.random() * 0.008;
-                                inst.scaling.set(gs, gs, gs);
-                                inst.rotation.x = -Math.PI / 2;
-                                inst.rotation.y = Math.random() * Math.PI * 2;
-                            });
-                        }
-                    });
 
                     // Ground paper
                     var paperMat = new BABYLON.StandardMaterial('paperMat', scene);
@@ -2609,15 +2582,16 @@
                     // --- Render loop ---
                     var lastPos = camera.position.clone();
                     engine.runRenderLoop(function() {
-                        // Update flashlight to hand position (down + right from camera)
+                        // Update flashlight model + spotlight to hand position
                         var fwd = camera.getForwardRay().direction;
                         var right = BABYLON.Vector3.Cross(fwd, BABYLON.Vector3.Up()).normalize();
-                        flashSpot.position.set(
-                            camera.position.x + right.x * 0.45 + fwd.x * 0.3,
-                            camera.position.y - 0.7,
-                            camera.position.z + right.z * 0.45 + fwd.z * 0.3
-                        );
+                        var handX = camera.position.x + right.x * 0.4 + fwd.x * 0.35;
+                        var handY = camera.position.y - 0.65;
+                        var handZ = camera.position.z + right.z * 0.4 + fwd.z * 0.35;
+                        flashSpot.position.set(handX, handY, handZ);
                         flashSpot.direction.copyFrom(fwd);
+                        flRoot.position.set(handX, handY, handZ);
+                        flRoot.rotation.y = Math.atan2(fwd.x, fwd.z);
 
                         scene.render();
                         var moved = BABYLON.Vector3.Distance(camera.position, lastPos);
