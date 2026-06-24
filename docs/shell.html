@@ -2189,10 +2189,14 @@
                             var root = new BABYLON.TransformNode('treeRoot', scene);
                             meshes.forEach(function(m) {
                                 m.parent = root; m.isVisible = false;
-                                // Darken materials for horror
                                 if (m.material) {
                                     m.material.emissiveColor = BABYLON.Color3.Black();
                                     m.material.specularColor = BABYLON.Color3.Black();
+                                    m.material.backFaceCulling = false;
+                                    if (m.material.diffuseTexture && m.material.name.indexOf('leaf') >= 0) {
+                                        m.material.diffuseTexture.hasAlpha = true;
+                                        m.material.useAlphaFromDiffuseTexture = true;
+                                    }
                                 }
                             });
                             root.isVisible = false;
@@ -2604,6 +2608,7 @@
                         var mZ = camera.position.z + right.z * 0.45 + fwd.z * 1.8;
                         flRoot.position.set(mX, mY, mZ);
                         flRoot.rotation.y = Math.atan2(fwd.x, fwd.z);
+                        flRoot.rotation.x = -Math.asin(fwd.y);
                         // Light comes from flashlight tip (further forward)
                         flashSpot.position.set(
                             mX + fwd.x * 0.25,

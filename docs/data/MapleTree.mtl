@@ -26,3 +26,4 @@ Ks 0.02 0.02 0.02
 d 1.0
 illum 2
 map_Kd maple_leaf.png
+map_d maple_leaf_Mask.png
