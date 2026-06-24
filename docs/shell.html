@@ -2177,7 +2177,8 @@
                     // Tree positions queued for when model loads
                     var treePositions = [];
                     function queueTree(x, z, scale) {
-                        treePositions.push({x: x, z: z, s: scale || (2.5 + Math.random() * 1.5), ry: Math.random() * Math.PI * 2});
+                        var s = scale || (1.0 + Math.random() * 0.6);
+                        treePositions.push({x: x, z: z, sx: s, sy: s * (2.5 + Math.random() * 1.0), sz: s, ry: Math.random() * Math.PI * 2});
                     }
 
                     // Load fir.obj and instance at all queued positions
@@ -2199,7 +2200,7 @@
                                 meshes.forEach(function(m) {
                                     var inst = m.createInstance('tree_' + i + '_' + m.name);
                                     inst.position.set(tp.x, 0, tp.z);
-                                    inst.scaling.setAll(tp.s);
+                                    inst.scaling.set(tp.sx, tp.sy, tp.sz);
                                     inst.rotation.y = tp.ry;
                                     inst.checkCollisions = true;
                                     inst.freezeWorldMatrix();
@@ -2326,7 +2327,7 @@
                     createSign('previous_researcher.txt', 14, 1.3, 58, 0);
 
                     // MIRROR tree (massive version of the fir)
-                    queueTree(12, 66, 6.0);
+                    queueTree(12, 66, 2.5);
                     var mirrorLabel = createSign('OPERATION_MIRROR.txt', 12, 1.8, 67.5, 0, 3.2, 0.7);
 
                     // Glow sphere around the mirror tree
@@ -2597,13 +2598,19 @@
                     engine.runRenderLoop(function() {
                         var fwd = camera.getForwardRay().direction;
                         var right = BABYLON.Vector3.Cross(fwd, BABYLON.Vector3.Up()).normalize();
-                        var handX = camera.position.x + right.x * 0.4 + fwd.x * 0.35;
-                        var handY = camera.position.y - 0.65;
-                        var handZ = camera.position.z + right.z * 0.4 + fwd.z * 0.35;
-                        flashSpot.position.set(handX, handY, handZ);
-                        flashSpot.direction.copyFrom(fwd);
-                        flRoot.position.set(handX, handY, handZ);
+                        // Flashlight model in bottom-right of view
+                        var mX = camera.position.x + right.x * 0.55 + fwd.x * 0.5;
+                        var mY = camera.position.y - 0.45;
+                        var mZ = camera.position.z + right.z * 0.55 + fwd.z * 0.5;
+                        flRoot.position.set(mX, mY, mZ);
                         flRoot.rotation.y = Math.atan2(fwd.x, fwd.z);
+                        // Light comes from flashlight tip (further forward)
+                        flashSpot.position.set(
+                            mX + fwd.x * 0.25,
+                            mY + 0.05,
+                            mZ + fwd.z * 0.25
+                        );
+                        flashSpot.direction.copyFrom(fwd);
 
                         scene.render();
                         var dx = camera.position.x - lastX, dz = camera.position.z - lastZ;
