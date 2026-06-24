@@ -2218,71 +2218,78 @@
                         });
                     }
 
-                    var sharedPostMat = new BABYLON.StandardMaterial('postMat', scene);
-                    sharedPostMat.diffuseColor = new BABYLON.Color3(0.35, 0.2, 0.1);
-                    sharedPostMat.emissiveColor = new BABYLON.Color3(0.08, 0.05, 0.02);
-                    sharedPostMat.specularColor = BABYLON.Color3.Black();
-                    var sharedPlankMat = new BABYLON.StandardMaterial('plankMat', scene);
-                    sharedPlankMat.diffuseColor = new BABYLON.Color3(0.4, 0.25, 0.12);
-                    sharedPlankMat.emissiveColor = new BABYLON.Color3(0.1, 0.06, 0.03);
-                    sharedPlankMat.specularColor = BABYLON.Color3.Black();
-                    sharedPostMat.freeze();
-                    sharedPlankMat.freeze();
+                    // Sign model: flat in XZ (4.5 x 3.0), 0.37 thick in Y
+                    // Rotate upright (X+90), scale to ~1.0 wide, place at sign height
+                    var signQueue = [];
+                    var signModelLoaded = false;
+                    var signMeshes = [];
+
+                    BABYLON.SceneLoader.ImportMesh('', 'data/', 'sign.obj', scene, function(meshes) {
+                        signMeshes = meshes;
+                        var signRoot = new BABYLON.TransformNode('signRoot', scene);
+                        meshes.forEach(function(m) {
+                            m.parent = signRoot; m.isVisible = false;
+                            if (m.material) {
+                                m.material.specularColor = BABYLON.Color3.Black();
+                                m.material.emissiveColor = new BABYLON.Color3(0.06, 0.04, 0.02);
+                            }
+                        });
+                        signModelLoaded = true;
+                        signQueue.forEach(function(q) { placeSign(q); });
+                    });
+
+                    function placeSign(q) {
+                        signMeshes.forEach(function(m) {
+                            var inst = m.createInstance('sgn_' + q.id + '_' + m.name);
+                            inst.position.set(q.x, 0, q.z);
+                            inst.rotation.x = Math.PI / 2;
+                            inst.rotation.y = q.rotY || 0;
+                            inst.scaling.setAll(q.sc || 0.5);
+                            inst.freezeWorldMatrix();
+                        });
+                    }
 
                     function createSign(text, x, y, z, rotY, w, h) {
                         var id = 'sgn' + (signId++);
-                        w = w || 2.0; h = h || 0.5;
+                        var sc = (w || 2.0) / 4.5;
+
+                        var q = {id: id, x: x, z: z, rotY: rotY || 0, sc: sc};
+                        if (signModelLoaded) placeSign(q);
+                        else signQueue.push(q);
+
+                        // Text overlay
                         var signH = y || 1.3;
-
-                        // Wooden post from ground up to sign
-                        var postH = signH + h * 0.5;
-                        var post = BABYLON.MeshBuilder.CreateCylinder(id + 'post', {diameter: 0.18, height: postH, tessellation: 8}, scene);
-                        post.position.set(x, postH * 0.5, z);
-                        post.material = sharedPostMat;
-                        post.freezeWorldMatrix();
-
-                        // Wooden plank
-                        var plank = BABYLON.MeshBuilder.CreateBox(id + 'b', {width: w, height: h, depth: 0.06}, scene);
-                        plank.position.set(x, signH, z);
-                        plank.rotation.y = rotY || 0;
-                        plank.material = sharedPlankMat;
-                        plank.freezeWorldMatrix();
-
-                        // Text face — offset slightly in front of plank
-                        var face = BABYLON.MeshBuilder.CreatePlane(id, {width: w * 0.92, height: h * 0.8}, scene);
-                        face.position.set(x, signH, z);
-                        face.rotation.y = rotY || 0;
-                        var rr = rotY || 0;
-                        face.position.x -= Math.sin(rr) * 0.035;
-                        face.position.z -= Math.cos(rr) * 0.035;
-                        var tw = 512, th = 128;
+                        var tw = 512, th = 256;
                         var dt = new BABYLON.DynamicTexture(id + 'dt', {width: tw, height: th}, scene, false);
                         var mat = new BABYLON.StandardMaterial(id + 'mat', scene);
                         mat.diffuseTexture = dt; mat.emissiveTexture = dt;
-                        mat.emissiveColor = new BABYLON.Color3(0.15, 0.08, 0.04);
+                        mat.emissiveColor = new BABYLON.Color3(0.12, 0.06, 0.03);
                         mat.backFaceCulling = false;
                         mat.disableLighting = true;
+                        mat.alpha = 0.95;
+                        var fw = (w || 2.0) * 0.7;
+                        var fh = fw * 0.45;
+                        var face = BABYLON.MeshBuilder.CreatePlane(id + 'f', {width: fw, height: fh}, scene);
+                        var rr = rotY || 0;
+                        face.position.set(x - Math.sin(rr) * 0.08, signH, z - Math.cos(rr) * 0.08);
+                        face.rotation.y = rr;
                         face.material = mat;
                         face.freezeWorldMatrix();
 
                         function draw(txt, color) {
                             var c = dt.getContext();
-                            c.fillStyle = '#3d2810'; c.fillRect(0, 0, tw, th);
-                            for (var gi = 0; gi < 8; gi++) {
-                                c.fillStyle = 'rgba(60,35,12,' + (0.2 + Math.random() * 0.15) + ')';
-                                c.fillRect(0, Math.random() * th, tw, 2 + Math.random() * 4);
-                            }
-                            c.font = 'bold 30px monospace';
+                            c.clearRect(0, 0, tw, th);
+                            c.font = 'bold 36px monospace';
                             c.fillStyle = color || '#cc2222';
                             c.shadowColor = '#000';
-                            c.shadowBlur = 4;
-                            c.fillText(txt, 16, 80);
+                            c.shadowBlur = 6;
+                            c.fillText(txt, 20, th / 2 + 12);
                             c.shadowBlur = 0;
                             dt.update();
                         }
                         draw(text);
 
-                        var s = {mesh: plank, setText: function(t, c) { draw(t, c); }};
+                        var s = {mesh: face, setText: function(t, c) { draw(t, c); }};
                         allSigns.push(s);
                         return s;
                     }
