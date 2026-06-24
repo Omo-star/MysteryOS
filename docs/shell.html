@@ -2105,25 +2105,25 @@
                     cvs.addEventListener('click', function() { cvs.requestPointerLock(); });
 
                     var light = new BABYLON.HemisphericLight('hl', new BABYLON.Vector3(0.1, 1, 0.1), scene);
-                    light.intensity = 0.65;
+                    light.intensity = 1.2;
                     light.diffuse = new BABYLON.Color3(0.5, 0.85, 0.5);
                     light.groundColor = new BABYLON.Color3(0.08, 0.12, 0.06);
 
                     // --- Materials ---
                     var treeMat = new BABYLON.StandardMaterial('treeMat', scene);
-                    treeMat.diffuseColor = new BABYLON.Color3(0.3, 0.22, 0.14);
+                    treeMat.diffuseColor = new BABYLON.Color3(0.4, 0.3, 0.18);
                     treeMat.specularColor = BABYLON.Color3.Black();
-                    treeMat.emissiveColor = new BABYLON.Color3(0.06, 0.045, 0.03);
+                    treeMat.emissiveColor = new BABYLON.Color3(0.18, 0.13, 0.08);
 
                     var branchMat = new BABYLON.StandardMaterial('branchMat', scene);
-                    branchMat.diffuseColor = new BABYLON.Color3(0.22, 0.16, 0.1);
+                    branchMat.diffuseColor = new BABYLON.Color3(0.32, 0.24, 0.14);
                     branchMat.specularColor = BABYLON.Color3.Black();
-                    branchMat.emissiveColor = new BABYLON.Color3(0.04, 0.03, 0.02);
+                    branchMat.emissiveColor = new BABYLON.Color3(0.12, 0.09, 0.05);
 
                     var groundMat = new BABYLON.StandardMaterial('groundMat', scene);
-                    groundMat.diffuseColor = new BABYLON.Color3(0.1, 0.13, 0.06);
+                    groundMat.diffuseColor = new BABYLON.Color3(0.15, 0.2, 0.08);
                     groundMat.specularColor = BABYLON.Color3.Black();
-                    groundMat.emissiveColor = new BABYLON.Color3(0.02, 0.03, 0.015);
+                    groundMat.emissiveColor = new BABYLON.Color3(0.06, 0.08, 0.03);
 
                     var ground = BABYLON.MeshBuilder.CreateGround('ground', {width: 120, height: 120}, scene);
                     ground.material = groundMat;
@@ -2159,7 +2159,7 @@
 
                     function createTree(x, z, h, r) {
                         h = h || (5 + Math.random() * 5);
-                        r = r || (0.1 + Math.random() * 0.08);
+                        r = r || (0.3 + Math.random() * 0.2);
                         var trunk = BABYLON.MeshBuilder.CreateCylinder('t' + signId++, {
                             height: h, diameterTop: r * 0.5, diameterBottom: r * 2, tessellation: 6
                         }, scene);
@@ -2172,7 +2172,7 @@
                             var by = h * 0.3 + (i / nbr) * h * 0.5;
                             var blen = 0.8 + Math.random() * 1.2;
                             var br = BABYLON.MeshBuilder.CreateCylinder('br' + signId++, {
-                                height: blen, diameter: 0.04, tessellation: 4
+                                height: blen, diameter: 0.12, tessellation: 4
                             }, scene);
                             br.material = branchMat;
                             br.rotation.z = Math.PI / 2;
