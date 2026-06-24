@@ -2187,17 +2187,21 @@
                             if (!meshes.length) return;
                             // Parent all sub-meshes under a root
                             var root = new BABYLON.TransformNode('treeRoot', scene);
+                            var leafTex = new BABYLON.Texture('data/maple_leaf.png', scene, false, true, BABYLON.Texture.TRILINEAR_SAMPLINGMODE);
+                            leafTex.hasAlpha = true;
                             meshes.forEach(function(m) {
                                 m.parent = root; m.isVisible = false;
                                 if (m.material) {
                                     m.material.emissiveColor = BABYLON.Color3.Black();
                                     m.material.specularColor = BABYLON.Color3.Black();
                                     m.material.backFaceCulling = false;
-                                    if (m.material.diffuseTexture) {
-                                        m.material.diffuseTexture.hasAlpha = true;
+                                    var isLeaf = m.material.name && m.material.name.indexOf('leaf') >= 0;
+                                    if (isLeaf) {
+                                        m.material.diffuseTexture = leafTex;
+                                        m.material.useAlphaFromDiffuseTexture = true;
+                                        m.material.transparencyMode = BABYLON.Material.MATERIAL_ALPHATEST;
+                                        m.material.alphaCutOff = 0.4;
                                     }
-                                    m.material.transparencyMode = BABYLON.Material.MATERIAL_ALPHATEST;
-                                    m.material.alphaCutOff = 0.3;
                                 }
                             });
                             root.isVisible = false;
@@ -2236,12 +2240,13 @@
                     });
 
                     function placeSign(q) {
+                        var sc = q.sc || 0.5;
                         signMeshes.forEach(function(m) {
                             var inst = m.createInstance('sgn_' + q.id + '_' + m.name);
-                            inst.position.set(q.x, 0, q.z);
+                            inst.position.set(q.x, sc * 2.0, q.z);
                             inst.rotation.x = -Math.PI / 2;
-                            inst.rotation.y = q.rotY || 0;
-                            inst.scaling.setAll(q.sc || 0.5);
+                            inst.rotation.y = (q.rotY || 0) + Math.PI;
+                            inst.scaling.setAll(sc);
                             inst.freezeWorldMatrix();
                         });
                     }
@@ -2266,9 +2271,9 @@
                         mat.alpha = 0.95;
                         var fw = (w || 2.0) * 0.7;
                         var fh = fw * 0.45;
-                        var face = BABYLON.MeshBuilder.CreatePlane(id + 'f', {width: fw, height: fh}, scene);
-                        var rr = rotY || 0;
-                        face.position.set(x - Math.sin(rr) * 0.08, signH, z - Math.cos(rr) * 0.08);
+                        var face = BABYLON.MeshBuilder.CreatePlane(id + 'f', {width: fw, height: fh, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+                        var rr = (rotY || 0) + Math.PI;
+                        face.position.set(x + Math.sin(rr) * 0.08, signH, z + Math.cos(rr) * 0.08);
                         face.rotation.y = rr;
                         face.material = mat;
                         face.freezeWorldMatrix();
