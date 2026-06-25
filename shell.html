@@ -2510,23 +2510,7 @@
                     // Spawn all queued trees from OBJ
                     spawnTrees();
 
-                    // Ground paper — faded pages only visible under flashlight
-                    var paperMat = new BABYLON.StandardMaterial('paperMat', scene);
-                    paperMat.diffuseColor = new BABYLON.Color3(0.6, 0.58, 0.52);
-                    paperMat.specularColor = BABYLON.Color3.Black();
-                    paperMat.emissiveColor = BABYLON.Color3.Black();
-                    paperMat.alpha = 0.7;
-                    for (var pi = 0; pi < 20; pi++) {
-                        var pp = BABYLON.MeshBuilder.CreatePlane('paper' + pi, {
-                            width: 0.22 + Math.random() * 0.15, height: 0.30 + Math.random() * 0.12
-                        }, scene);
-                        pp.position.set((Math.random() - 0.5) * 50, 0.02, Math.random() * 55);
-                        pp.rotation.x = Math.PI / 2;
-                        pp.rotation.y = Math.random() * Math.PI * 2;
-                        pp.material = paperMat;
-                        pp.freezeWorldMatrix();
-                    }
-                    paperMat.freeze();
+                    // (ground paper removed — looked wrong without a paper texture)
 
                     // --- State ---
                     var phase = 0, wrongCount = 0, interactable = false;
