@@ -1953,6 +1953,116 @@
                 }, dur);
             };
         </script>
+        <!-- Tree transition animation (loading screen for forest scene) -->
+        <script>
+            function playTreeTransition(onDone) {
+                var overlay = document.createElement('div');
+                Object.assign(overlay.style, {
+                    position: 'fixed', inset: '0', zIndex: '99999',
+                    background: '#000', overflow: 'hidden',
+                    fontFamily: "'Courier New', Courier, monospace",
+                    fontSize: '14px', lineHeight: '1.65', color: '#e8e8e8',
+                    padding: '28px 32px', boxSizing: 'border-box', whiteSpace: 'pre'
+                });
+                document.body.appendChild(overlay);
+
+                var PHASE1 = [
+                    '/System/Archive', '│',
+                    '├── batch_7_raw.txt', '├── containment_protocol.txt',
+                    '├── previous_researcher.txt', '├── subject_logs/',
+                    '│   ├── day_001.log', '│   ├── day_002.log',
+                    '│   ├── day_003.log', '│   └── day_047.log',
+                    '├── redacted/', '│   ├── [CLASSIFIED].pdf',
+                    '│   ├── [CLASSIFIED].pdf', '│   └── [CLASSIFIED].pdf',
+                    '└── OPERATION_MIRROR.txt'
+                ];
+
+                var PHASE2 = [
+                    '', '── scanning for anomalies ──', '',
+                    '├── /internal', '│   ├── mirror_init.bin',
+                    '│   ├── observer_list.txt', '│   └── YOU',
+                    '│       └── currently_reading.txt',
+                    '├── /watching', '│   ├── keylog_active.bin',
+                    '│   └── you.txt', '├── /Archive/Archive',
+                    '│   ├── /Archive/Archive/Archive',
+                    '│   │   ├── /Archive/Archive/Archive/Archive',
+                    '│   │   │   └── ∞', '│   │   └── mirror_state.bin',
+                    '│   └── recursive.lock',
+                    '├── /System/Archive/System/Archive',
+                    '│   ├── /watching', '│   │   ├── you.txt',
+                    '│   │   └── still_watching.txt',
+                    '│   ├── /Archive/Archive/Archive', '│   │   └── ∞',
+                    '│   └── DO_NOT_OPEN.txt',
+                    '├──│── ├── /Archive/Archive/Archive',
+                    '│├──│   ├──├── ∞', '│├──│   └──├── ∞∞∞',
+                    '├──├──├──├── /System/Archive/System',
+                    '│   │   │   └── ∞', '├─│─├─│─├── recursive.lock',
+                    '│├┼│├┼│├┼│ DEPTH EXCEEDED', '│ │ │ │ │ │ │',
+                    '└──┤├└──┤├└── MIRROR_OVERFLOW'
+                ];
+
+                var GLYPHS = '│├└──┼╫╬║╠╣╦╧█▓░┐┘┌┼╔╗╚╝╟╢╤╧';
+                var lines = [];
+
+                function render() {
+                    overlay.textContent = lines.join('\n');
+                    overlay.scrollTop = overlay.scrollHeight;
+                }
+                function push(text) { lines.push(text); render(); }
+                function typeLines(arr, getDelay) {
+                    return new Promise(function(resolve) {
+                        var i = 0;
+                        (function next() {
+                            if (i >= arr.length) return resolve();
+                            push(arr[i++]);
+                            setTimeout(next, getDelay(i));
+                        })();
+                    });
+                }
+                function runPhase3() {
+                    return new Promise(function(resolve) {
+                        var tick = 0, TICKS = 45, COLS = 78, ROWS = 32;
+                        var id = setInterval(function() {
+                            var progress = tick / TICKS;
+                            var out = '';
+                            for (var r = 0; r < ROWS; r++) {
+                                for (var c = 0; c < COLS; c++)
+                                    out += GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+                                out += '\n';
+                            }
+                            overlay.textContent = out;
+                            var g = Math.round(232 - progress * 185);
+                            var rb = Math.round(232 * (1 - progress * 0.9));
+                            overlay.style.color = 'rgb(' + rb + ',' + g + ',' + rb + ')';
+                            if (++tick >= TICKS) { clearInterval(id); resolve(); }
+                        }, 40);
+                    });
+                }
+                function runPhase4() {
+                    return new Promise(function(resolve) {
+                        overlay.style.transition = 'filter 0.7s ease-in, opacity 0.7s ease-in';
+                        requestAnimationFrame(function() { requestAnimationFrame(function() {
+                            overlay.style.filter = 'blur(9px)';
+                            overlay.style.opacity = '0';
+                        }); });
+                        setTimeout(resolve, 750);
+                    });
+                }
+
+                Promise.resolve()
+                    .then(function() { return typeLines(PHASE1, function() { return 160; }); })
+                    .then(function() { return typeLines(PHASE2, function(i) {
+                        return i < 4 ? 140 : i < 12 ? 90 : i < 20 ? 45 : 18;
+                    }); })
+                    .then(function() { return runPhase3(); })
+                    .then(function() { return runPhase4(); })
+                    .then(function() {
+                        overlay.remove();
+                        if (typeof onDone === 'function') onDone();
+                    });
+            }
+        </script>
+
         <!-- SCENE: DIRECTORY FOREST — 3D Babylon.js first-person forest after Stage 1 unlock -->
         <style>
             #_msf_overlay { display:none; position:fixed; inset:0; z-index:99999; pointer-events:auto; background:#000; }
@@ -2006,8 +2116,9 @@
 
                     var camera = new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0, 1.7, -3), scene);
                     camera.setTarget(new BABYLON.Vector3(0, 1.7, 5));
-                    camera.speed = 0.12;
-                    camera.angularSensibility = 3000;
+                    camera.speed = 0.25;
+                    camera.angularSensibility = 4000;
+                    camera.inertia = 0.82;
                     camera.minZ = 0.05;
                     camera.keysUp = [87]; camera.keysDown = [83];
                     camera.keysLeft = [65]; camera.keysRight = [68];
@@ -2324,7 +2435,7 @@
 
                     // MIRROR tree (massive version)
                     queueTree(12, 66, 0.45);
-                    var mirrorLabel = createSign('OPERATION_MIRROR.txt', 0, 1.8, 54, 0.3, 3.2, 0.7);
+                    var mirrorLabel = createSign('OPERATION_MIRROR.txt', -2, 1.8, 50, 0.3, 3.2, 0.7);
 
                     // Glow sphere around the mirror tree
                     var mirrorGlow = BABYLON.MeshBuilder.CreateSphere('mirrorGlow', {diameter: 10, segments: 12}, scene);
@@ -2392,12 +2503,19 @@
                     }, 180);
 
                     // --- Cursor figure ---
-                    var cursorFigure = BABYLON.MeshBuilder.CreateBox('cursorFig', {width: 0.12, height: 3.2, depth: 0.06}, scene);
+                    var cursorFigure = BABYLON.MeshBuilder.CreatePlane('cursorFig', {width: 1.8, height: 1.4, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
                     var cfMat = new BABYLON.StandardMaterial('cfMat', scene);
-                    cfMat.diffuseColor = BABYLON.Color3.Black();
-                    cfMat.emissiveColor = new BABYLON.Color3(0.01, 0.01, 0.01);
-                    cfMat.specularColor = BABYLON.Color3.Black();
+                    var eyeTex = new BABYLON.Texture('data/eyefull.png', scene);
+                    eyeTex.hasAlpha = true;
+                    cfMat.diffuseTexture = eyeTex;
+                    cfMat.emissiveTexture = eyeTex;
+                    cfMat.emissiveColor = new BABYLON.Color3(0.15, 0.1, 0.1);
+                    cfMat.useAlphaFromDiffuseTexture = true;
+                    cfMat.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+                    cfMat.disableLighting = true;
+                    cfMat.backFaceCulling = false;
                     cursorFigure.material = cfMat;
+                    cursorFigure.billboardMode = BABYLON.Mesh.BILLBOARDMODE_Y;
                     cursorFigure.isVisible = false;
 
                     function spawnCursor() {
@@ -2577,15 +2695,17 @@
                     // --- Render loop ---
                     var lastX = camera.position.x, lastY = camera.position.y, lastZ = camera.position.z;
                     var gazeRing = new Array(360), gazeIdx = 0, gazeFull = false;
+                    var _tmpLook = new BABYLON.Vector3();
+                    var _tmpUp = BABYLON.Vector3.Up();
                     engine.runRenderLoop(function() {
                         var fwd = camera.getForwardRay().direction;
-                        var right = BABYLON.Vector3.Cross(fwd, BABYLON.Vector3.Up()).normalize();
-                        // Flashlight model in bottom-right of view
+                        var right = BABYLON.Vector3.Cross(fwd, _tmpUp).normalize();
                         var mX = camera.position.x + right.x * 0.45 + fwd.x * 1.2;
                         var mY = camera.position.y - 0.35;
                         var mZ = camera.position.z + right.z * 0.45 + fwd.z * 1.2;
                         flRoot.position.set(mX, mY, mZ);
-                        flRoot.lookAt(new BABYLON.Vector3(mX + fwd.x, mY + fwd.y, mZ + fwd.z));
+                        _tmpLook.set(mX + fwd.x, mY + fwd.y, mZ + fwd.z);
+                        flRoot.lookAt(_tmpLook);
                         // Light comes from flashlight tip (further forward)
                         flashSpot.position.set(
                             mX + fwd.x * 0.25,
@@ -2620,19 +2740,31 @@
                     setTimeout(function() { if (phase < 5) endScene(); }, 300000);
                 }
 
-                // Lazy-load Babylon.js if not present
-                if (typeof BABYLON !== 'undefined') {
-                    boot();
+                // Play tree transition while Babylon loads in parallel
+                window._mysterySceneLock = true;
+
+                var engineReady = typeof BABYLON !== 'undefined';
+                var transitionDone = false;
+
+                function tryStart() {
+                    if (engineReady && transitionDone) boot();
+                }
+
+                // Transition animation
+                playTreeTransition(function() {
+                    transitionDone = true;
+                    tryStart();
+                });
+
+                if (engineReady) {
+                    tryStart();
                 } else {
-                    window._mysterySceneLock = true;
-                    overlay.className = 'active';
-                    loadingEl.style.display = 'flex';
                     var s1 = document.createElement('script');
                     s1.src = 'https://cdn.babylonjs.com/babylon.js';
                     s1.onload = function() {
                         var s2 = document.createElement('script');
                         s2.src = 'https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js';
-                        s2.onload = function() { window._mysterySceneLock = false; boot(); };
+                        s2.onload = function() { engineReady = true; tryStart(); };
                         document.head.appendChild(s2);
                     };
                     document.head.appendChild(s1);
