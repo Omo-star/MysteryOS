@@ -2267,26 +2267,40 @@
                         treePositions.push({x: x, z: z, s: s, ry: Math.random() * Math.PI * 2});
                     }
 
-                    // Load fir.obj and instance at all queued positions
+                    // Load MapleTree.obj and instance at all queued positions
                     function spawnTrees() {
                         BABYLON.SceneLoader.ImportMesh('', 'data/', 'MapleTree.obj', scene, function(meshes) {
                             if (!meshes.length) return;
                             // Parent all sub-meshes under a root
                             var root = new BABYLON.TransformNode('treeRoot', scene);
+
+                            // The maple model splits foliage across two meshes ("leaves" +
+                            // "leaves.001"), but the exporter assigned one of them the bark
+                            // material -> those render as opaque gray cards. Find the real leaf
+                            // texture and apply it (with alpha) to every foliage mesh by name.
+                            var leafTex = null;
+                            meshes.forEach(function(m) {
+                                if (m.material && m.material.diffuseTexture &&
+                                    /maple_leaf/i.test(m.material.diffuseTexture.name || '')) {
+                                    leafTex = m.material.diffuseTexture;
+                                }
+                            });
+                            if (leafTex) leafTex.hasAlpha = true;
+
                             meshes.forEach(function(m) {
                                 m.parent = root; m.isVisible = false;
-                                if (m.material) {
-                                    m.material.emissiveColor = BABYLON.Color3.Black();
-                                    m.material.specularColor = BABYLON.Color3.Black();
+                                if (!m.material) return;
+                                m.material.emissiveColor = BABYLON.Color3.Black();
+                                m.material.specularColor = BABYLON.Color3.Black();
+                                var isLeaf = (m.name || '').toLowerCase().indexOf('leav') >= 0;
+                                if (isLeaf) {
+                                    if (leafTex) m.material.diffuseTexture = leafTex;
+                                    m.material.opacityTexture = null;
+                                    if (m.material.diffuseTexture) m.material.diffuseTexture.hasAlpha = true;
+                                    m.material.useAlphaFromDiffuseTexture = true;
+                                    m.material.transparencyMode = BABYLON.Material.MATERIAL_ALPHATEST;
+                                    m.material.alphaCutOff = 0.4;
                                     m.material.backFaceCulling = false;
-                                    var isLeaf = m.material.name && m.material.name.indexOf('leaf') >= 0;
-                                    if (isLeaf) {
-                                        m.material.opacityTexture = null;
-                                        m.material.diffuseTexture.hasAlpha = true;
-                                        m.material.useAlphaFromDiffuseTexture = true;
-                                        m.material.transparencyMode = BABYLON.Material.MATERIAL_ALPHATEST;
-                                        m.material.alphaCutOff = 0.45;
-                                    }
                                 }
                             });
                             root.isVisible = false;
@@ -2304,14 +2318,25 @@
                         });
                     }
 
-                    // Sign model: flat in XZ (4.5 x 3.0), 0.37 thick in Y
-                    // Rotate upright (X+90), scale to ~1.0 wide, place at sign height
+                    // Sign model "sign.obj" has two parts:
+                    //   Plane_Plane.001 (Material.002) -> the flat board (model X:2.0, Z:2.974, thin Y)
+                    //   Cube_Cube.001   (Material.003) -> a 3.5-long mounting arm we DON'T want
+                    // After rotation.x = -PI/2: model X -> world width, model Z -> world height.
+                    var SIGN_MODEL_W = 2.0;      // board width  (model X)
+                    var SIGN_MODEL_H = 2.974;    // board height (model Z span)
+                    var SIGN_MODEL_ZC = -0.5245; // board center along model Z (-> world Y once stood up)
+
                     var signQueue = [];
                     var signModelLoaded = false;
-                    var signMeshes = [];
+                    var signBoardMeshes = [];    // board only; arm excluded
+
+                    // shared dim-wood material for sign posts
+                    var postMat = new BABYLON.StandardMaterial('postMat', scene);
+                    postMat.diffuseColor = new BABYLON.Color3(0.18, 0.12, 0.07);
+                    postMat.specularColor = BABYLON.Color3.Black();
+                    postMat.emissiveColor = new BABYLON.Color3(0.02, 0.015, 0.01);
 
                     BABYLON.SceneLoader.ImportMesh('', 'data/', 'sign.obj', scene, function(meshes) {
-                        signMeshes = meshes;
                         var signRoot = new BABYLON.TransformNode('signRoot', scene);
                         meshes.forEach(function(m) {
                             m.parent = signRoot; m.isVisible = false;
@@ -2319,48 +2344,73 @@
                                 m.material.specularColor = BABYLON.Color3.Black();
                                 m.material.emissiveColor = new BABYLON.Color3(0.06, 0.04, 0.02);
                             }
+                            // keep only the flat board; drop the long mounting arm
+                            if ((m.name || '').toLowerCase().indexOf('plane') >= 0) {
+                                signBoardMeshes.push(m);
+                            }
                         });
                         signModelLoaded = true;
                         signQueue.forEach(function(q) { placeSign(q); });
                     });
 
                     function placeSign(q) {
-                        var sc = q.sc || 0.5;
-                        signMeshes.forEach(function(m) {
+                        var sx = q.w / SIGN_MODEL_W;   // model X -> world width
+                        var sz = q.h / SIGN_MODEL_H;   // model Z -> world height
+                        var sy = Math.min(sx, sz);     // thickness, keep proportional-ish
+                        // lift so the board's center sits at q.cy
+                        var yOffset = q.cy - SIGN_MODEL_ZC * sz;
+                        signBoardMeshes.forEach(function(m) {
                             var inst = m.createInstance('sgn_' + q.id + '_' + m.name);
-                            inst.position.set(q.x, sc * 2.0, q.z);
                             inst.rotation.x = -Math.PI / 2;
                             inst.rotation.y = (q.rotY || 0) + Math.PI;
-                            inst.scaling.setAll(sc);
+                            inst.scaling.set(sx, sy, sz);
+                            inst.position.set(q.x, yOffset, q.z);
                             inst.freezeWorldMatrix();
                         });
                     }
 
                     function createSign(text, x, y, z, rotY, w, h) {
                         var id = 'sgn' + (signId++);
-                        var sc = (w || 2.0) / 4.5;
+                        var boardW = w || 2.4;
+                        var boardH = boardW * 0.58;    // landscape board so paths fit
+                        var cy = y || 1.3;             // board center / text height
 
-                        var q = {id: id, x: x, z: z, rotY: rotY || 0, sc: sc};
+                        var q = {id: id, x: x, z: z, rotY: rotY || 0, w: boardW, h: boardH, cy: cy};
                         if (signModelLoaded) placeSign(q);
                         else signQueue.push(q);
 
-                        // Text overlay
-                        var signH = y || 1.3;
+                        // wooden post from the ground up to the board's bottom edge
+                        var postTop = cy - boardH * 0.5;
+                        if (postTop > 0.25) {
+                            var post = BABYLON.MeshBuilder.CreateCylinder(id + 'p',
+                                {height: postTop, diameter: 0.13}, scene);
+                            post.position.set(x, postTop * 0.5, z);
+                            post.material = postMat;
+                            post.freezeWorldMatrix();
+                        }
+
+                        // Red text drawn on a transparent plane sitting on the board face
                         var tw = 512, th = 256;
                         var dt = new BABYLON.DynamicTexture(id + 'dt', {width: tw, height: th}, scene, false);
+                        dt.hasAlpha = true;
                         var mat = new BABYLON.StandardMaterial(id + 'mat', scene);
-                        mat.diffuseTexture = dt; mat.emissiveTexture = dt;
-                        mat.emissiveColor = new BABYLON.Color3(0.12, 0.06, 0.03);
+                        mat.diffuseTexture = dt;
+                        mat.emissiveTexture = dt;
+                        mat.emissiveColor = new BABYLON.Color3(1, 1, 1);
+                        mat.useAlphaFromDiffuseTexture = true;
+                        mat.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
                         mat.backFaceCulling = false;
                         mat.disableLighting = true;
-                        mat.alpha = 0.95;
-                        var fw = (w || 2.0) * 0.7;
-                        var fh = fw * 0.45;
-                        var face = BABYLON.MeshBuilder.CreatePlane(id + 'f', {width: fw, height: fh, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+
+                        var fw = boardW * 0.86;
+                        var fh = fw * (th / tw);
+                        var face = BABYLON.MeshBuilder.CreatePlane(id + 'f',
+                            {width: fw, height: fh, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
                         var rr = (rotY || 0) + Math.PI;
-                        face.position.set(x + Math.sin(rr) * 0.08, signH, z + Math.cos(rr) * 0.08);
+                        face.position.set(x + Math.sin(rr) * 0.09, cy, z + Math.cos(rr) * 0.09);
                         face.rotation.y = rr;
                         face.material = mat;
+                        // plane is flipped by PI to face the player -> mirror UVs so text reads left-to-right
                         var uvs = face.getVerticesData(BABYLON.VertexBuffer.UVKind);
                         for (var ui = 0; ui < uvs.length; ui += 2) uvs[ui] = 1.0 - uvs[ui];
                         face.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
@@ -2369,12 +2419,22 @@
                         function draw(txt, color) {
                             var c = dt.getContext();
                             c.clearRect(0, 0, tw, th);
-                            c.font = 'bold 36px monospace';
-                            c.fillStyle = color || '#cc2222';
-                            c.shadowColor = '#000';
-                            c.shadowBlur = 6;
-                            c.fillText(txt, 20, th / 2 + 12);
-                            c.shadowBlur = 0;
+                            if (txt) {
+                                var fs = 48;
+                                c.font = 'bold ' + fs + 'px monospace';
+                                var maxW = tw - 36;
+                                while (c.measureText(txt).width > maxW && fs > 14) {
+                                    fs -= 2;
+                                    c.font = 'bold ' + fs + 'px monospace';
+                                }
+                                c.textBaseline = 'middle';
+                                c.shadowColor = '#000';
+                                c.shadowBlur = 10;
+                                c.fillStyle = color || '#e23b2e';
+                                var txtW = c.measureText(txt).width;
+                                c.fillText(txt, (tw - txtW) * 0.5, th * 0.5);
+                                c.shadowBlur = 0;
+                            }
                             dt.update();
                         }
                         draw(text);
