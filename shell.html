@@ -2273,8 +2273,6 @@
                             if (!meshes.length) return;
                             // Parent all sub-meshes under a root
                             var root = new BABYLON.TransformNode('treeRoot', scene);
-                            var leafTex = new BABYLON.Texture('data/maple_leaf.png', scene, false, true, BABYLON.Texture.TRILINEAR_SAMPLINGMODE);
-                            leafTex.hasAlpha = true;
                             meshes.forEach(function(m) {
                                 m.parent = root; m.isVisible = false;
                                 if (m.material) {
@@ -2283,10 +2281,11 @@
                                     m.material.backFaceCulling = false;
                                     var isLeaf = m.material.name && m.material.name.indexOf('leaf') >= 0;
                                     if (isLeaf) {
-                                        m.material.diffuseTexture = leafTex;
-                                        m.material.useAlphaFromDiffuseTexture = true;
                                         m.material.transparencyMode = BABYLON.Material.MATERIAL_ALPHATEST;
-                                        m.material.alphaCutOff = 0.4;
+                                        m.material.alphaCutOff = 0.45;
+                                        if (!m.material.opacityTexture) {
+                                            m.material.useAlphaFromDiffuseTexture = true;
+                                        }
                                     }
                                 }
                             });
@@ -2331,7 +2330,7 @@
                             var inst = m.createInstance('sgn_' + q.id + '_' + m.name);
                             inst.position.set(q.x, sc * 2.0, q.z);
                             inst.rotation.x = -Math.PI / 2;
-                            inst.rotation.y = (q.rotY || 0) + Math.PI;
+                            inst.rotation.y = (q.rotY || 0);
                             inst.scaling.setAll(sc);
                             inst.freezeWorldMatrix();
                         });
@@ -2362,6 +2361,9 @@
                         face.position.set(x + Math.sin(rr) * 0.08, signH, z + Math.cos(rr) * 0.08);
                         face.rotation.y = rr;
                         face.material = mat;
+                        var uvs = face.getVerticesData(BABYLON.VertexBuffer.UVKind);
+                        for (var ui = 0; ui < uvs.length; ui += 2) uvs[ui] = 1.0 - uvs[ui];
+                        face.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
                         face.freezeWorldMatrix();
 
                         function draw(txt, color) {
