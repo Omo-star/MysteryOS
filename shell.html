@@ -2525,6 +2525,36 @@
                     glowMat.backFaceCulling = false;
                     mirrorGlow.material = glowMat;
 
+                    // Floating "E" prompt near the MIRROR tree — only visible during phase 4
+                    var eDt = new BABYLON.DynamicTexture('eDt', {width: 256, height: 256}, scene, false);
+                    eDt.hasAlpha = true;
+                    var eCtx = eDt.getContext();
+                    eCtx.clearRect(0, 0, 256, 256);
+                    eCtx.font = 'bold 180px monospace';
+                    eCtx.textAlign = 'center';
+                    eCtx.textBaseline = 'middle';
+                    eCtx.shadowColor = '#ff0000';
+                    eCtx.shadowBlur = 40;
+                    eCtx.fillStyle = '#ff3333';
+                    eCtx.fillText('E', 128, 128);
+                    eCtx.shadowBlur = 0;
+                    eDt.update();
+                    var eMat = new BABYLON.StandardMaterial('eMat', scene);
+                    eMat.diffuseTexture = eDt;
+                    eMat.emissiveTexture = eDt;
+                    eMat.emissiveColor = new BABYLON.Color3(1, 0.3, 0.3);
+                    eMat.useAlphaFromDiffuseTexture = true;
+                    eMat.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+                    eMat.disableLighting = true;
+                    eMat.backFaceCulling = false;
+                    eMat.fogEnabled = false;
+                    var ePlane = BABYLON.MeshBuilder.CreatePlane('ePlane',
+                        {width: 2.5, height: 2.5, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
+                    ePlane.material = eMat;
+                    ePlane.position.set(12, 4, 62);
+                    ePlane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+                    ePlane.isVisible = false;
+
                     // Spawn all queued trees from OBJ
                     spawnTrees();
 
@@ -2601,23 +2631,24 @@
                     var skyEyeMat = new BABYLON.StandardMaterial('skyEyeMat', scene);
                     skyEyeMat.diffuseTexture = eyeTex;
                     skyEyeMat.emissiveTexture = eyeTex;
-                    skyEyeMat.emissiveColor = new BABYLON.Color3(0.08, 0.06, 0.06);
+                    skyEyeMat.emissiveColor = new BABYLON.Color3(0.7, 0.5, 0.5);
                     skyEyeMat.useAlphaFromDiffuseTexture = true;
                     skyEyeMat.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
                     skyEyeMat.disableLighting = true;
                     skyEyeMat.backFaceCulling = false;
+                    skyEyeMat.fogEnabled = false;
                     skyEyeMat.freeze();
                     var skyEyeBase = BABYLON.MeshBuilder.CreatePlane('skyEyeBase',
                         {width: 1, height: 0.75, sideOrientation: BABYLON.Mesh.DOUBLESIDE}, scene);
                     skyEyeBase.material = skyEyeMat;
                     skyEyeBase.isVisible = false;
                     for (var ei = 0; ei < 200; ei++) {
-                        var sz = 0.15 + Math.random() * 0.5;
+                        var sz = 0.6 + Math.random() * 1.5;
                         var inst = skyEyeBase.createInstance('skyEye' + ei);
                         inst.position.set(
-                            (Math.random() - 0.5) * 120,
-                            10 + Math.random() * 25,
-                            Math.random() * 90 - 10
+                            (Math.random() - 0.5) * 100,
+                            8 + Math.random() * 20,
+                            Math.random() * 80 - 5
                         );
                         inst.scaling.setAll(sz);
                         inst.rotation.x = Math.PI / 2 + (Math.random() - 0.5) * 1.2;
@@ -2753,6 +2784,7 @@
                                     promptEl.textContent = '[ Press E to read OPERATION_MIRROR.txt ]';
                                     promptEl.style.opacity = '1';
                                     promptEl.className = 'pulse';
+                                    ePlane.isVisible = true;
                                 }
                                 break;
                         }
@@ -2764,6 +2796,7 @@
                             phase = 5; interactable = false;
                             promptEl.style.opacity = '0';
                             promptEl.className = '';
+                            ePlane.isVisible = false;
                             triggerFinale();
                         }
                     }
@@ -2841,6 +2874,11 @@
                         var gt = performance.now() * 0.001;
                         glowMat.emissiveColor.g = 0.08 + Math.sin(gt * 2) * 0.04;
                         glowMat.alpha = 0.12 + Math.sin(gt * 1.5) * 0.05;
+                        if (ePlane.isVisible) {
+                            eMat.emissiveColor.r = 0.7 + Math.sin(gt * 3) * 0.3;
+                            eMat.alpha = 0.6 + Math.sin(gt * 2.5) * 0.3;
+                            ePlane.position.y = 4 + Math.sin(gt * 1.2) * 0.3;
+                        }
                     });
 
                     var onResize = function() { engine.resize(); };
