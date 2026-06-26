@@ -16,6 +16,7 @@ set(GAME_SOURCES
     src/apps/image_viewer.cpp
     src/apps/anomaly_message.cpp
     src/apps/session_monitor.cpp
+    src/apps/notification_manager.cpp
     src/main.cpp
     src/kernel/kernel.cpp
     src/kernel/vfs.cpp

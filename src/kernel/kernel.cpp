@@ -8,6 +8,7 @@
 #include "apps/password_dialog.h"
 #include "apps/anomaly_message.h"
 #include "apps/session_monitor.h"
+#include "apps/notification_manager.h"
 #include <algorithm>
 #include <cmath>
 #include <emscripten.h>
@@ -37,15 +38,15 @@ bool Kernel::init() {
         emscripten_run_script(js);
 
         if (u.stage == 1) {
-            notify("System", "Stage 1 unlocked: /System/Archive", "#5a8a5a", 0);
+            push_notification("System", "Stage 1 unlocked: /System/Archive", "#5a8a5a", 0);
         } else if (u.stage == 2) {
-            notify("Session Monitor", "New directories available. Proceed with caution.", "#8a8a4a", 1);
+            push_notification("Session Monitor", "New directories available. Proceed with caution.", "#8a8a4a", 1);
         } else if (u.stage == 3) {
-            notify("Network", "External connection established. Source: unknown.", "#aa7a3a", 3, 5000);
+            push_notification("Network", "External connection established. Source: unknown.", "#aa7a3a", 3, 5000);
         } else if (u.stage == 4) {
-            notify("PID 7741", "you are getting closer to something.", "#aa4a3a", 5, 5500);
+            push_notification("PID 7741", "you are getting closer to something.", "#aa4a3a", 5, 5500);
         } else if (u.stage == 5) {
-            notify("[REDACTED]", "there is a folder with your name in it.", "#cc2222", 7, 6000);
+            push_notification("[REDACTED]", "there is a folder with your name in it.", "#cc2222", 7, 6000);
         }
     });
     emscripten_run_script(
@@ -123,6 +124,11 @@ static void notify(const string& sender, const string& msg, const string& color,
         quoted_js_string(msg).c_str(),
         color.c_str(), glitch, duration);
     emscripten_run_script(js);
+}
+
+void Kernel::push_notification(const string& sender, const string& msg, const string& color, int glitch, int duration) {
+    notify(sender, msg, color, glitch, duration);
+    notifications_.push_back({sender, msg, color, glitch, session_time_});
 }
 
 static bool is_allowed_anomaly_path(const string& path) {
@@ -359,7 +365,7 @@ void Kernel::render_boot() {
         float t = boot_fadeout_timer_ / BOOT_FADEOUT_DURATION;
         if (t >= 1.0f) {
             booting_ = false;
-            notify("System", "Welcome back, evoss. 3 unread files on Desktop.", "#6a8a6a", 0, 6000);
+            push_notification("System", "Welcome back, evoss. 3 unread files on Desktop.", "#6a8a6a", 0, 6000);
             return;
         }
         dl->AddRectFilled({0, 0}, disp, IM_COL32(0, 0, 0, 255));
@@ -425,27 +431,27 @@ void Kernel::record_file_open(const string& path, const string& source) {
 
     // Milestone notifications — escalating tone and corruption
     if (files_opened_ == 3) {
-        notify("File Explorer", "Tip: Use the terminal for faster navigation. Type 'help' for commands.", "#6a8a6a", 0, 5000);
+        push_notification("File Explorer", "Tip: Use the terminal for faster navigation. Type 'help' for commands.", "#6a8a6a", 0, 5000);
     } else if (files_opened_ == 5) {
-        notify("Session Monitor", "File access logged.", "#8a8a5a", 0, 3500);
+        push_notification("Session Monitor", "File access logged.", "#8a8a5a", 0, 3500);
     } else if (files_opened_ == 12) {
-        notify("Session Monitor", "Unusual read pattern detected.", "#aa8a3a", 1, 4000);
+        push_notification("Session Monitor", "Unusual read pattern detected.", "#aa8a3a", 1, 4000);
     } else if (files_opened_ == 25) {
-        notify("Network", "Inbound connection from 10.0.0.???", "#aa6a3a", 2, 4500);
+        push_notification("Network", "Inbound connection from 10.0.0.???", "#aa6a3a", 2, 4500);
     } else if (files_opened_ == 45) {
-        notify("PID 7741", "you read faster than i expected.", "#aa3a3a", 4, 5000);
+        push_notification("PID 7741", "you read faster than i expected.", "#aa3a3a", 4, 5000);
     } else if (files_opened_ == 80) {
-        notify("???", "stop looking.", "#cc2222", 6, 4000);
+        push_notification("???", "stop looking.", "#cc2222", 6, 4000);
     } else if (files_opened_ == 130) {
-        notify("[no sender]", "i can see the screen from here.", "#ff3333", 8, 5000);
+        push_notification("[no sender]", "i can see the screen from here.", "#ff3333", 8, 5000);
     }
 
     // Context-specific notifications
     if (path.find("/System/logs/") == 0 && files_opened_ > 6) {
-        notify("Session Monitor", "Log file accessed. Activity recorded.", "#8a8a5a", puzzle_.stage(), 3500);
+        push_notification("Session Monitor", "Log file accessed. Activity recorded.", "#8a8a5a", puzzle_.stage(), 3500);
     }
     if (path.find("deleted") != string::npos || path.find("redacted") != string::npos) {
-        notify("File System", "This file was marked for deletion.", "#aa6a3a", puzzle_.stage() + 1, 4000);
+        push_notification("File System", "This file was marked for deletion.", "#aa6a3a", puzzle_.stage() + 1, 4000);
     }
 
     VFSNode* node = vfs_.get(path);
@@ -728,6 +734,8 @@ void Kernel::render_taskbar(){
     if (ImGui::SmallButton("File Explorer")) launch("file_explorer");
     ImGui::SameLine();
     if (ImGui::SmallButton("Terminal")) launch("terminal");
+    ImGui::SameLine();
+    if (ImGui::SmallButton("Notifications")) launch("notifications");
     ImGui::End();
 }
 
@@ -739,6 +747,7 @@ unique_ptr<App> Kernel::make_app(const string& name, const string& arg){
     if (name == "image_viewer") return make_unique<ImageViewer>(arg);
     if (name == "anomaly_message") return make_unique<AnomalyMessage>();
     if (name == "session_monitor") return make_unique<SessionMonitor>();
+    if (name == "notifications") return make_unique<NotificationManager>();
     return nullptr;
 }
 

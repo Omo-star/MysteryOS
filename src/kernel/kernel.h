@@ -31,6 +31,14 @@ struct PhantomEntry{
     bool is_dir = false;
 };
 
+struct NotifEntry{
+    string sender;
+    string msg;
+    string color;
+    int glitch = 0;
+    float time = 0.0f;
+};
+
 class Kernel{
     public:
         bool init();
@@ -52,6 +60,8 @@ class Kernel{
         void receive_anomaly_artifact(const string& reply, const string& path, const string& content);
         void receive_anomaly_artifact(int terminal_id, const string& reply, const string& path, const string& content);
         vector<string> drain_anomaly_responses(int terminal_id);
+        const vector<NotifEntry>& notifications() const {return notifications_;}
+        void push_notification(const string& sender, const string& msg, const string& color = "#5a5", int glitch = 0, int duration = 4500);
     private:
         VFS vfs_;
         PuzzleState puzzle_;
@@ -84,4 +94,5 @@ class Kernel{
         vector<AnomalyResponse> anomaly_responses_;
         bool show_error_popup_ = false;
         string error_popup_msg_;
+        vector<NotifEntry> notifications_;
 };
