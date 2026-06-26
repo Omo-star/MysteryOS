@@ -3297,57 +3297,38 @@
                         modelsLoaded++;
                     }
 
-                    // Desk + computer
-                    BABYLON.SceneLoader.ImportMesh('', 'data/', 'desk-comp.gltf', scene, function(meshes) {
-                        var root = meshes[0] || new BABYLON.TransformNode('deskRoot', scene);
-                        // desk-comp is huge (~48x86 units), scale to ~1.5m wide
-                        var sc = 0.032;
-                        meshes.forEach(function(m) {
-                            if (!m.parent || m.parent === root) m.parent = root;
+                    // Helper: load a glTF, scale/position the root node
+                    function loadModel(file, scale, pos, rotY, cb) {
+                        BABYLON.SceneLoader.ImportMesh('', 'data/', file, scene, function(meshes) {
+                            if (!meshes.length) { onModelLoaded(); return; }
+                            var root = meshes[0];
+                            root.scaling.setAll(scale);
+                            root.position.set(pos[0], pos[1], pos[2]);
+                            if (rotY) root.rotation.y = rotY;
+                            if (cb) cb(root, meshes);
+                            onModelLoaded();
+                        }, null, function(scene, msg, ex) {
+                            console.warn('Failed to load ' + file, msg);
+                            onModelLoaded();
                         });
-                        root.scaling.setAll(sc);
-                        root.position.set(0, 0, 6);
-                        root.rotation.y = Math.PI;
-                        onModelLoaded();
+                    }
+
+                    // Desk + computer (48 units wide -> 0.03 = ~1.44m wide)
+                    loadModel('desk-comp.gltf', 0.03, [0, 0, 6], Math.PI);
+
+                    // Chair (2 units bounding -> 0.5 = 1m)
+                    loadModel('chair.gltf', 0.5, [0, 0, 4.2], Math.PI);
+
+                    // Ceiling light
+                    loadModel('light.gltf', 0.35, [0, 3.45, 5], 0, function(root, meshes) {
+                        meshes.forEach(function(m) {
+                            if (m.material) m.material.emissiveColor = new BABYLON.Color3(0.8, 0.85, 0.9);
+                        });
                     });
 
-                    // Chair
-                    BABYLON.SceneLoader.ImportMesh('', 'data/', 'chair.gltf', scene, function(meshes) {
-                        var root = meshes[0] || new BABYLON.TransformNode('chairRoot', scene);
-                        meshes.forEach(function(m) {
-                            if (!m.parent || m.parent === root) m.parent = root;
-                        });
-                        root.scaling.setAll(0.65);
-                        root.position.set(0, 0, 4.5);
-                        root.rotation.y = Math.PI;
-                        onModelLoaded();
-                    });
-
-                    // Ceiling light fixture
-                    BABYLON.SceneLoader.ImportMesh('', 'data/', 'light.gltf', scene, function(meshes) {
-                        var root = meshes[0] || new BABYLON.TransformNode('lightRoot', scene);
-                        meshes.forEach(function(m) {
-                            if (!m.parent || m.parent === root) m.parent = root;
-                            if (m.material) {
-                                m.material.emissiveColor = new BABYLON.Color3(0.8, 0.85, 0.9);
-                            }
-                        });
-                        root.scaling.setAll(0.4);
-                        root.position.set(0, 3.45, 5);
-                        onModelLoaded();
-                    });
-
-                    // Skeleton figure
-                    BABYLON.SceneLoader.ImportMesh('', 'data/', 'skeleton.gltf', scene, function(meshes) {
-                        skeletonRoot = meshes[0] || new BABYLON.TransformNode('skelRoot', scene);
-                        meshes.forEach(function(m) {
-                            if (!m.parent || m.parent === skeletonRoot) m.parent = skeletonRoot;
-                        });
-                        // 183 units tall -> scale to ~1.7m
-                        skeletonRoot.scaling.setAll(0.0093);
-                        skeletonRoot.position.set(0, 0, 4.8);
-                        skeletonRoot.rotation.y = Math.PI;
-                        onModelLoaded();
+                    // Skeleton (183 units tall -> 0.0093 = ~1.7m)
+                    loadModel('skeleton.gltf', 0.0093, [0, 0, 4.5], Math.PI, function(root) {
+                        skeletonRoot = root;
                     });
 
                     // --- Audio ---

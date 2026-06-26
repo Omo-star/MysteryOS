@@ -1,7 +1,7 @@
 set -e
 mkdir -p build docs/data
 cp data/*.json docs/data/ 2>/dev/null || true
-cp data/*.mp4 data/*.gif data/*.png data/*.obj data/*.mtl data/*.jpg data/*.gltf data/*.glb data/*.bin docs/data/ 2>/dev/null || true
+cp data/*.mp4 data/*.gif data/*.png data/*.obj data/*.mtl data/*.jpg data/*.jpeg data/*.gltf data/*.glb data/*.bin docs/data/ 2>/dev/null || true
 emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j4
 cp build/mysteryos.js build/mysteryos.wasm docs/
