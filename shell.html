@@ -3333,7 +3333,7 @@
                             root.position.z += (cz - (dmin.z + dmax.z) / 2);
                             root.position.y += (0 - dmin.y);
                         }
-                        recenterDesk(-Math.PI / 2, 0.5, 7.0);
+                        recenterDesk(Math.PI / 2, 0.5, 7.0);
                     });
 
                     // Procedural office chair, grouped under a node so it can slide away.
@@ -3548,6 +3548,12 @@
                         }
                     }
 
+                    function faceGlass() {
+                        if (figureRoot) {
+                            figureRoot.rotation.y = Math.PI;
+                        }
+                    }
+
                     // --- Render loop ---
                     engine.runRenderLoop(function() {
                         var elapsed = performance.now() - sceneStart;
@@ -3574,7 +3580,10 @@
                             }, 3300);
                             // After turn (~5s total), idle facing glass
                             setTimeout(function() {
-                                if (phase === 2) playAnim('idle', true);
+                                if (phase === 2) {
+                                    faceGlass();
+                                    playAnim('idle', true);
+                                }
                             }, 5000);
                         }
 
@@ -3589,6 +3598,7 @@
                         if (phase === 2 && elapsed > PHASE_APPROACH) {
                             phase = 3;
                             textEl.textContent = '';
+                            faceGlass();
                             playAnim('walking', true);
                             // Flicker lights
                             var flickerCount = 0;
